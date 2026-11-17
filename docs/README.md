@@ -13,8 +13,8 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [architecture.md](architecture.md) | How the pieces fit together; request flows | Phase 0 outline, grows each phase |
 | [database.md](database.md) | Tables, constraints, indexes, ER diagram | Done (Phase 1) |
 | [state-machine.md](state-machine.md) | Ticket lifecycle rules and who may do what | Done (spec); code in Phase 3 |
-| [api.md](api.md) | Endpoints, error codes, pagination | Phase 3 |
-| [security.md](security.md) | Threat model, auth, RBAC, HMAC, secrets | Phases 2 and 4 |
+| [api.md](api.md) | Endpoints, error codes, pagination | Auth + agents done; tickets in Phase 3 |
+| [security.md](security.md) | Threat model, auth, RBAC, HMAC, secrets | Auth/RBAC done (Phase 2); HMAC in Phase 4 |
 | [webhook-integration-guide.md](webhook-integration-guide.md) | For partners: how to send signed tickets | Phase 4 |
 | [tradeoffs.md](tradeoffs.md) | Options, choice, gained, given up | Living |
 | [decisions/](decisions/) | Architecture Decision Records (ADRs) | Living |
@@ -23,7 +23,7 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [ai-features.md](ai-features.md) | AI helpers, safety, failure modes | Phase 6 |
 | [frontend-design-system.md](frontend-design-system.md) | Tokens, theme, motion, a11y | Phases 7 and 9 |
 | [scalability.md](scalability.md) | Today's scaling choices and the 10x/100x plan | Phases 10–11 |
-| [observability.md](observability.md) | Logs, metrics, health, dashboards | Phases 2–10 |
+| [observability.md](observability.md) | Logs, metrics, health, dashboards | Request id + JSON logs done; metrics Phase 10 |
 | [runbook.md](runbook.md) | Run locally, env vars, common failures | Phase 0 baseline |
 | [how-it-works/](how-it-works/) | One "How it works" note per phase | One per phase |
 
@@ -44,3 +44,5 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [010](decisions/ADR-010-append-only-comments.md) | Comments are an append-only audit trail |
 | [011](decisions/ADR-011-optimistic-locking.md) | Optimistic locking with `@Version` |
 | [012](decisions/ADR-012-db-unique-constraint-for-idempotency.md) | DB unique constraint guarantees webhook idempotency |
+| [013](decisions/ADR-013-jwt-and-refresh-rotation.md) | JWT via Spring resource server + rotating refresh tokens |
+| [014](decisions/ADR-014-rbac-via-permissions.md) | RBAC through permissions mapped from roles |

@@ -49,6 +49,23 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   database with the seed applied.
 - Docker must be running for `make test` (Testcontainers). CI runners have Docker.
 
+### Phase 2 additions (backend total: 177 tests)
+
+| Class | Tests | Proves |
+|---|---|---|
+| `AuthIntegrationTest` | 21 | login, cookie flags, lockout and expiry, rate limit, refresh rotation and reuse detection, logout, expired/tampered/foreign tokens, deactivation and role changes applying immediately |
+| `AgentAdminIntegrationTest` | 14 | create/validate agents, `EMAIL_TAKEN`, `LAST_ADMIN`, `CANNOT_DEACTIVATE_SELF`, `AGENT_HAS_OPEN_TICKETS`, listings |
+| `EndpointAuthorizationMatrixTest` | 22 | role × endpoint over HTTP (403s come before body validation); anonymous → 401 |
+| `RolePermissionsTest` | 22 | the §6.2 table cell by cell; roles cumulative; configurable close-own |
+| `ErrorHandlingIntegrationTest` | 7 | Problem Details shape, `traceId`, no internals, 404/405, request-id hygiene, security headers |
+| `SecurityPropertiesTest` | 7 | fail-fast on missing/short/non-base64 JWT secret; secret never printed |
+| `BootstrapAdminRunnerTest` | 5 | first admin only when none exists; never takes over an existing account (Mockito) |
+| `CommonUtilitiesTest` | 7 | email masking, token-bucket limiter |
+
+HTTP tests use `MockMvcTester` (AssertJ-style MockMvc) through the full security filter chain
+against the real database. Helpers in `IntegrationTest`: `createAgent(role)`, `bearer(role)`,
+`login(...)`, `refresh(cookie)`, `json(result, path)`, `body(result)`.
+
 ### Phase 1 suite (72 backend tests)
 
 | Class | Tests | Proves |

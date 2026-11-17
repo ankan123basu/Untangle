@@ -41,7 +41,17 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
   setters (factories and behaviour methods only), Lombok `@Getter` only. Invariants are mirrored as
   named DB constraints. Demo data: `db/seed-demo` (profile `demo`, included by `dev`; password
   `Untangle@2026`).
-- Tests touching the DB extend `support/IntegrationTest` (Testcontainers Postgres 18, shared context).
+- Tests touching the DB or HTTP extend `support/IntegrationTest` (Testcontainers Postgres 18,
+  `MockMvcTester`, shared context; helpers `bearer(role)`, `createAgent`, `json`, `body`).
+  HTTP tests commit, so they `truncateAllTables()` in `@AfterEach`.
+- Security: JWT via Spring resource server (HS256, `JWT_SECRET` required, fail-fast). Principal =
+  `AuthenticatedAgent`, loaded from DB per request (30 s cache, evicted via `AgentAccessChangedEvent`
+  after commit). Authorise with permissions (`security.rbac.Permission`, `RolePermissions`), never
+  role names: URL rules in `SecurityConfig` for admin paths + `@PreAuthorize("hasAuthority('X')")`.
+- Errors: throw `ApiException(ErrorCode.X, detail)`; `GlobalExceptionHandler` renders RFC 9457 with
+  `code` + `traceId`. Never echo rejected values; mask emails in logs (`Masking.email`).
+- Cross-feature calls go through the other feature's `application` services or events, never its
+  repositories; keep feature dependencies one-way (auth → agent, agent → ticket).
 - Two entry doors, one brain: JWT REST and HMAC webhook both call `TicketService`.
 - Success = plain DTOs (`PageResponse` for lists); errors = RFC 9457 with `code`, `traceId`, `errors[]`.
 - Business rules live server-side; the UI renders `allowedActions` from the server.

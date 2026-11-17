@@ -60,6 +60,14 @@ When the lead answers, fill in the **Lead's answer** column and link the commit 
 | UUIDv7 primary keys instead of `gen_random_uuid()` (v4) | time-ordered inserts; PG 18 native | [ADR-008](decisions/ADR-008-uuidv7-primary-keys.md) |
 | Extra DB invariants: IN_PROGRESS ⇒ assignee, RESOLVED ⇒ `resolved_at`, MANUAL ⇔ creator, comments append-only (trigger) | defence in depth beyond §8's list | [database.md](database.md) |
 | `ticket_ai_insights.ticket_id` nullable for `TRIAGE` | triage runs on the create form before the ticket exists | [database.md](database.md) |
+| JWT via Spring OAuth2 Resource Server (Nimbus, HS256), not jjwt | first-party bearer filter; nothing security-critical hand-rolled | [ADR-013](decisions/ADR-013-jwt-and-refresh-rotation.md) |
+| Locked account returns **423** (`AUTH_ACCOUNT_LOCKED`) | distinct UI state required by §12.5; revealed only after 5 wrong passwords | [security.md](security.md) |
+| Extra error codes: `AUTH_UNAUTHENTICATED`, `AUTH_ACCOUNT_DISABLED`, `AUTH_REFRESH_INVALID`, `EMAIL_TAKEN`, `CANNOT_DEACTIVATE_SELF`, `NOT_FOUND`, `METHOD_NOT_ALLOWED`, `UNSUPPORTED_MEDIA_TYPE`, `INTERNAL_ERROR` | §9's list had no code for these situations | [api.md](api.md) |
+| Admin agent list at `GET /api/v1/admin/agents`; `GET /api/v1/agents` is the minimal dropdown list | one response type per endpoint (clean generated types) | [api.md](api.md) |
+| Concurrent double-refresh → `AUTH_REFRESH_INVALID`, not "reuse" | a tab race isn't theft; only a token presented after its rotation committed revokes the family | [ADR-013](decisions/ADR-013-jwt-and-refresh-rotation.md) |
+| No `logstash-logback-encoder` | Boot 4 has native structured JSON logging | [observability.md](observability.md) |
+| MapStruct deferred to Phase 3 | Phase 2 views are 3–9 field records with `of(entity)` factories; MapStruct earns its keep with ticket DTOs | [tech-stack.md](tech-stack.md) |
+| `TicketAccessPolicy` (ownership) moved to Phase 3 | it needs the ticket endpoints and `allowedActions` it serves | [ADR-014](decisions/ADR-014-rbac-via-permissions.md) |
 
 ### D. Still open (for the lead)
 

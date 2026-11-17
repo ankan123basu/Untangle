@@ -62,6 +62,42 @@ Test classes live in `backend/src/test/java/dev/untangle/`.
 | Manual ticket without creator | rejected | `rejectsManualTicketWithoutCreator` | ✅ |
 | Demo seed violates no constraint and covers every state | loads cleanly | `DemoSeedIntegrationTest` (5 tests) | ✅ |
 
-### Auth/RBAC, Dashboard, AI
+### Auth / RBAC (Phase 2)
 
-Phases 2, 3 and 6.
+Test classes: `AuthIntegrationTest` (A), `AgentAdminIntegrationTest` (G),
+`EndpointAuthorizationMatrixTest` (M), `RolePermissionsTest` (R), `SecurityPropertiesTest` (S),
+`ErrorHandlingIntegrationTest` (E).
+
+| Case | Expected | Test | Status |
+|---|---|---|---|
+| Wrong password | 401 `AUTH_INVALID_CREDENTIALS` | A `wrongPasswordAndUnknownEmailAreIndistinguishable` | ✅ |
+| Unknown email | same body as wrong password | A (same test) | ✅ |
+| 5 failed attempts | 423 `AUTH_ACCOUNT_LOCKED`; right password still refused | A `accountLocksAfterFiveFailedAttemptsAndRejectsEvenTheRightPassword` | ✅ |
+| Lock expires | login works, lock cleared | A `loginWorksAgainOnceTheLockExpires` | ✅ |
+| Success resets failure count | counter 0 | A `successfulLoginResetsTheFailureCounter` | ✅ |
+| Login flood per email | 429 + `Retry-After` | A `loginIsRateLimitedPerEmail` | ✅ |
+| Expired access token | 401 `AUTH_TOKEN_EXPIRED` (client refreshes) | A `expiredAccessTokenIsReportedAsExpired` | ✅ |
+| Tampered / foreign-key token | 401 | A `tamperedAccessTokenIsRejected`, `tokenSignedWithAnotherKeyIsRejected` | ✅ |
+| Refresh rotates | new access token + new cookie; old marked replaced | A `refreshRotatesTheTokenAndIssuesANewAccessToken` | ✅ |
+| Refresh token reuse | 401 `AUTH_REFRESH_REUSED`, whole family revoked | A `reusingARotatedRefreshTokenRevokesTheWholeSession` | ✅ |
+| Expired / missing refresh token | 401 `AUTH_REFRESH_INVALID` | A `expiredRefreshTokenIsRejected`, `refreshWithoutCookieIsRejected` | ✅ |
+| Logout | 204, cookie cleared, refresh dead | A `logoutRevokesTheSessionAndClearsTheCookie` | ✅ |
+| Deactivated agent cannot log in | 401 `AUTH_ACCOUNT_DISABLED` | A `deactivatedAgentCannotLogIn` | ✅ |
+| **Deactivated agent with a still-valid JWT** | 401 on next request; sessions revoked | A `deactivatedAgentIsRejectedEvenWithAStillValidToken` | ✅ |
+| Role change while token valid | new permissions apply | A `roleChangesApplyWithoutReissuingTheToken` | ✅ |
+| AGENT/LEAD on admin APIs | 403 `ACCESS_DENIED` (before body validation) | M `enforcesThePermissionMatrix` (18 cases) | ✅ |
+| Anonymous on protected APIs | 401 | M `anonymousCallersAreRejected` | ✅ |
+| Full §6.2 permission table | matches cell by cell | R `matchesTheAgreedMatrix` (19 rows) | ✅ |
+| Last admin demote | 409 `LAST_ADMIN` | G `lastActiveAdminCannotBeDemoted`, `lastAdminRuleIgnoresDeactivatedAdmins` | ✅ |
+| Deactivate yourself | 409 `CANNOT_DEACTIVATE_SELF` | G `adminCannotDeactivateThemselves` | ✅ |
+| Deactivate agent with open tickets | 409 `AGENT_HAS_OPEN_TICKETS` | G `agentWithUnresolvedTicketsCannotBeDeactivated` | ✅ |
+| Duplicate email (any case) | 409 `EMAIL_TAKEN` | G `rejectsDuplicateEmailIgnoringCase` | ✅ |
+| Weak password / unknown role | 400 with field, value not echoed | G `rejectsPasswordsShorterThanTenCharacters`, `rejectsUnknownRole` | ✅ |
+| Missing / short / non-base64 JWT secret | app refuses to start | S (5 tests) | ✅ |
+| Malformed JSON | 400, no parser internals | E `malformedJsonIsA400WithoutParserInternals` | ✅ |
+| Log injection via `X-Request-Id` | id replaced | E `unsafeRequestIdsAreReplaced` | ✅ |
+| Two admins demoting each other at once | one fails with `LAST_ADMIN` (row lock) | design: `lockActiveByRole` `FOR UPDATE` | ⚠️ not yet a concurrent test (Phase 10) |
+
+### Dashboard, AI
+
+Phases 3 and 6.

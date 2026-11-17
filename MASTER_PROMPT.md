@@ -17,6 +17,10 @@
 >   Demo data lives in `db/seed-demo` under a `demo` profile (included by `dev`). Hash columns
 >   are `varchar(64)` + regex CHECK. Extra DB invariants beyond §8 are listed in `docs/database.md`.
 >   Feature packages use `api/application/domain/infrastructure` uniformly.
+> - Phase 2: JWT via Spring Security OAuth2 Resource Server (HS256; ADR-013), not jjwt. Native Boot
+>   structured logging instead of logstash-logback-encoder. Locked accounts → 423. Admin agent list at
+>   `/api/v1/admin/agents`. Extra error codes listed in docs/api.md. `TicketAccessPolicy` moves to
+>   Phase 3; MapStruct starts in Phase 3.
 
 ---
 

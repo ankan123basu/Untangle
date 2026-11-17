@@ -28,14 +28,15 @@ in the phase that first uses them.
 | PostgreSQL JDBC | managed (42.7.14) | |
 | Testcontainers (`testcontainers-postgresql`, `-junit-jupiter`) | managed (2.0.5) | |
 | ArchUnit (`archunit-junit5`) | 1.5.1 | |
-| jjwt | 0.13.0 *(Phase 2)* | ADR in Phase 2 |
+| Spring Security OAuth2 Resource Server (Nimbus JOSE) | managed (Security 7.1.2) | via `spring-boot-starter-security-oauth2-resource-server` (the old `-oauth2-resource-server` name is deprecated in Boot 4). Chosen over jjwt: ADR-013 |
 | springdoc-openapi | 3.2.0 *(Phase 3)* | 3.x line targets Boot 4 |
-| MapStruct | 1.6.3 *(Phase 3)* | latest GA (1.7 is still beta) |
+| MapStruct | 1.6.3 *(Phase 3)* | latest GA (1.7 is still beta). Phase 2 views are tiny records with `of(entity)` factories |
 | Lombok (annotation processor path) | managed (1.18.48) | |
 | ShedLock | 7.11.0 *(Phase 5)* | |
-| Bucket4j (`bucket4j_jdk17-core`) | 8.22.0 *(Phase 2/4)* | |
+| Bucket4j (`bucket4j_jdk17-core`) | 8.22.0 | login rate limits; webhook/AI later |
+| Caffeine (+ `spring-boot-starter-cache`) | managed (3.2.4) | principal cache, rate-limit buckets |
 | Resilience4j (`resilience4j-spring-boot4`) | 2.4.0 *(Phase 6)* | |
-| logstash-logback-encoder | 9.0 *(Phase 2)* | |
+| ~~logstash-logback-encoder~~ | not used | Spring Boot 4 has built-in structured JSON logging (`logging.structured.format.console: logstash`), one dependency fewer | |
 
 ### Frontend
 
