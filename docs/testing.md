@@ -37,6 +37,29 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   behaviour must match production.
 - Coverage gate: JaCoCo ≥ 80% on `service`/`domain` packages, enforced from Phase 10.
 
+### Integration test setup (Phase 1)
+
+- `support/TestcontainersConfiguration` starts `postgres:18.7-alpine3.24` (the same image as Compose)
+  and wires it in with `@ServiceConnection`. No URLs in test config.
+- `support/IntegrationTest` is the base class (`@SpringBootTest`, profile `test`). All subclasses
+  share **one** cached Spring context and **one** container, so the whole DB suite runs in seconds.
+- Transactional tests roll back automatically. Tests that need real commits (concurrency,
+  optimistic locking) call `truncateAllTables()` in `@AfterEach`.
+- `DemoSeedIntegrationTest` uses its own context (profiles `test,demo`), so it gets a fresh
+  database with the seed applied.
+- Docker must be running for `make test` (Testcontainers). CI runners have Docker.
+
+### Phase 1 suite (72 backend tests)
+
+| Class | Tests | Proves |
+|---|---|---|
+| `SchemaConstraintsIntegrationTest` | 33 | every CHECK/unique/trigger rule rejects bad data (raw SQL, bypassing Java) |
+| `RepositoryMappingIntegrationTest` | 13 | every entity round-trips (enums, JSONB, generated ticket numbers, UUIDv7); repository queries work |
+| `ConcurrencyIntegrationTest` | 2 | 20 concurrent duplicate inserts → 1 row; stale version → rejected |
+| `DemoSeedIntegrationTest` | 5 | demo data loads and covers every state |
+| `ArchitectureTest` | 15 | layering, private repositories, no Spring in domain, entities extend `BaseEntity`, no field injection |
+| `UntangleApplicationTests` | 4 | app starts against real Postgres; probes up; no stack traces |
+
 ### Phase 0 baseline
 
 | Test | Proves |
