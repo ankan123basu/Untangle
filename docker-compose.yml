@@ -3,7 +3,8 @@
 #   make up                         postgres + backend + frontend
 #   docker compose --profile redis up -d     ...plus Redis (optional cache / rate limiting)
 #
-# Later phases add profiles: `simulator` (Phase 4) and `observability` (Prometheus + Grafana).
+#   make simulate                   partner webhook scenarios (profile `simulator`)
+# Phase 10 adds the `observability` profile (Prometheus + Grafana).
 # All values come from .env (copied from .env.example by `make up` on a fresh clone).
 
 name: untangle
@@ -44,6 +45,9 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-untangle}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is empty - run `make .env` on a fresh clone, or set it in .env}
+      APP_SECRET_ENCRYPTION_KEY: ${APP_SECRET_ENCRYPTION_KEY:?APP_SECRET_ENCRYPTION_KEY is empty - run `make .env` on a fresh clone, or set it in .env}
+      WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS: ${WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS:-300}
+      DEMO_PARTNER_SECRET: ${DEMO_PARTNER_SECRET:-acme-demo-secret-change-me}
       AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
@@ -67,6 +71,20 @@ services:
         condition: service_healthy
     ports:
       - "${FRONTEND_HOST_PORT:-3000}:8080"
+
+  partner-simulator:
+    build:
+      context: ./partner-simulator
+    image: untangle/partner-simulator:local
+    profiles: ["simulator"]
+    depends_on:
+      frontend:
+        condition: service_healthy
+    environment:
+      # Talks to the API through nginx, exactly like an external partner would.
+      SIM_BASE_URL: http://frontend:8080
+      SIM_ADMIN_EMAIL: ${SIM_ADMIN_EMAIL:-admin@untangle.local}
+      SIM_ADMIN_PASSWORD: ${SIM_ADMIN_PASSWORD:-Untangle@2026}
 
   redis:
     image: redis:8.10.3-alpine

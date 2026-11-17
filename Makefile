@@ -29,12 +29,16 @@ help: ## Show this help
 # ---------------------------------------------------------------------------
 .env:
 	@cp .env.example .env
-	@sed -i.bak "s|^JWT_SECRET=$$|JWT_SECRET=$$(openssl rand -base64 48)|" .env && rm -f .env.bak
-	@echo "Created .env from .env.example with a freshly generated JWT_SECRET (never commit .env)."
+	@sed -i.bak \
+	  -e "s|^JWT_SECRET=$$|JWT_SECRET=$$(openssl rand -base64 48)|" \
+	  -e "s|^APP_SECRET_ENCRYPTION_KEY=$$|APP_SECRET_ENCRYPTION_KEY=$$(openssl rand -base64 32)|" \
+	  .env && rm -f .env.bak
+	@echo "Created .env from .env.example with freshly generated secrets (never commit .env)."
 
 .PHONY: setup
 setup: .env ## Install frontend deps and pre-fetch backend deps
 	$(NPM) ci --no-audit --no-fund
+	cd partner-simulator && npm ci --no-audit --no-fund
 	$(MVNW) -q dependency:go-offline
 
 # ---------------------------------------------------------------------------
@@ -98,6 +102,7 @@ lint: ## Check formatting and lint rules (backend + frontend)
 	$(MVNW) -q spotless:check
 	$(NPM) run -s lint
 	$(NPM) run -s format:check
+	cd partner-simulator && npx tsc --noEmit
 
 .PHONY: typecheck
 typecheck: ## TypeScript strict type check
@@ -125,8 +130,12 @@ seed: .env ## Load demo data into the Docker database (restarts backend with the
 	@echo "Demo data loaded. Log in as admin@untangle.local / Untangle@2026 (Phase 2+)."
 
 .PHONY: simulate
-simulate: ## (Phase 4) Run partner webhook scenarios
-	@echo "Partner simulator arrives in Phase 4."
+simulate: .env ## Run every partner webhook scenario against the running stack (in Docker)
+	$(COMPOSE) --profile simulator run --rm --build partner-simulator --scenario $(or $(SCENARIO),all)
+
+.PHONY: simulate-local
+simulate-local: ## Same, with local Node 26 (SCENARIO=duplicate to run one)
+	cd partner-simulator && node src/cli.ts --scenario $(or $(SCENARIO),all)
 
 .PHONY: clean
 clean: ## Remove build outputs
