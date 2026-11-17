@@ -30,3 +30,6 @@ app:
     per-ip-limit:
       capacity: 100000
       period: 1m
+  escalation:
+    # Tests call SlaBreachProcessor directly; no background scheduler racing the assertions.
+    scheduler-enabled: false

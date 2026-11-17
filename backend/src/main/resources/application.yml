@@ -134,9 +134,16 @@ app:
     max-body-bytes: 65536
     timestamp-tolerance: ${WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS:300}s
     rotation-grace: 24h
+    delivery-retention: 30d
+    retention-cron: "0 15 3 * * *"
     per-ip-limit:
       capacity: 300
       period: 1m
+  escalation:
+    # One instance runs the SLA scan each minute (ShedLock). Level n = n × SLA target since clock start.
+    scheduler-enabled: true
+    cron: "0 * * * * *"
+    max-level: 3
   bootstrap-admin:
     email: ${BOOTSTRAP_ADMIN_EMAIL:}
     password: ${BOOTSTRAP_ADMIN_PASSWORD:}
