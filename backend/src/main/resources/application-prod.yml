@@ -8,3 +8,8 @@ management:
 logging:
   level:
     root: INFO
+  structured:
+    format:
+      # One JSON object per line (Logstash format, built into Spring Boot). Includes MDC fields
+      # such as requestId, so logs can be searched by the X-Request-Id a user reports.
+      console: logstash
