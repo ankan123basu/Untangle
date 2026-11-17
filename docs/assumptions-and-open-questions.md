@@ -1,0 +1,65 @@
+# Assumptions and open questions
+
+## Simple explanation
+
+The brief didn't say everything. Where something was unclear, we **picked a sensible default,
+implemented it, and wrote it down here** so the lead can confirm or change it. Each default is
+kept configurable or isolated in one place, so changing it later is cheap.
+
+When the lead answers, fill in the **Lead's answer** column and link the commit that applied it.
+
+## Technical details
+
+### A. Product defaults from the brief (MASTER_PROMPT Section 2)
+
+| # | Question | Default we implement | Where it lives | Lead's answer |
+|---|---|---|---|---|
+| A1 | Allowed status transitions | State machine in [state-machine.md](state-machine.md) | `TicketStateMachine` | |
+| A2 | Where does a reopened ticket go? | `CLOSED → OPEN`, keeps previous assignee (see R5), `reopened_count++`, reason required | `TicketService.reopen` | |
+| A3 | Comments on CLOSED tickets? | Not allowed (closed = immutable until reopened) | closed-ticket guard | |
+| A4 | Resolution note required to resolve? | Yes, non-empty | `TicketStateMachine` | |
+| A5 | What is "unresolved"? | `OPEN` + `IN_PROGRESS` | dashboard query | |
+| A6 | Priority values | `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` | `Priority` enum + DB CHECK | |
+| A7 | Category values | `BILLING`, `TECHNICAL`, `ACCOUNT`, `REFUND`, `GENERAL`, `OTHER` | `Category` enum + DB CHECK | |
+| A8 | Duplicate webhook response | `200 OK` + existing ticket id + `"duplicate": true` | webhook controller | |
+| A9 | Event id uniqueness scope | Per partner: `UNIQUE(partner_id, external_event_id)` | DB constraint | |
+| A10 | Auth / roles | JWT; roles `ADMIN`, `LEAD`, `AGENT` | `security` package | |
+| A11 | Escalation meaning | SLA-based automatic + manual (see R4) | `escalation` package | |
+| A12 | Agent onboarding | No sign-up; ADMIN creates agents; first admin from env vars | bootstrap runner | |
+| A13 | Can agents be deleted? | Never; deactivate only | `AgentService` | |
+
+### B. Ambiguities found during Phase 0 review, and how we resolved them
+
+| # | Issue | Resolution | Phase |
+|---|---|---|---|
+| R1 | Spec lists an `ApiResponse` wrapper **and** RFC 9457 errors | Success = plain DTOs (`PageResponse` for lists); errors = RFC 9457 only. [ADR-007](decisions/ADR-007-response-and-error-format.md) | 3 |
+| R2 | Per-partner rate limit runs *after* HMAC verification, so an unsigned flood still costs CPU | Add a cheap **per-IP** limit before header checks; keep per-partner limit at step 6. 413 uses `Content-Length` **and** a bounded stream read (never buffer > 64 KB) | 4 |
+| R3 | Same event id re-sent with a **different** body | Return the existing ticket (A8); delivery log records `payload_sha256 mismatch` so admins notice | 4 |
+| R4 | "Escalated for that level" isn't defined | Level 1 at SLA due; level 2 at 2× SLA; level 3 at 3× SLA (cap configurable). Manual escalation adds +1. On reopen, `sla_due_at` is recalculated from the reopen time | 5 |
+| R5 | A2 (keep assignee) vs a since-deactivated assignee | If the previous assignee is inactive, the reopened ticket becomes unassigned | 3 |
+| R6 | "Own tickets" for AGENT edits | Own = currently **assigned** to the agent (not the creator) | 2–3 |
+| R7 | Which mutations carry `version`? | Edit, assign, transition, reopen: **required**. Comment and escalate: not required (append-only / atomic increment, nothing to lose) | 3 |
+| R8 | Deactivated agent's existing JWT | Active-flag cache TTL ≤ 30 s; evicted immediately on the instance that deactivates. Max exposure documented in security.md | 2 |
+| R9 | `Secure` refresh cookie over plain HTTP in dev | Works on `localhost` in Chrome/Firefox; same origin via nginx/Vite proxy. `AUTH_COOKIE_SECURE` env flag for Safari/plain-HTTP dev | 2 |
+| R10 | Groq receives ticket text (fintech context) | AI **off by default** (`AI_ENABLED=false`), PII redacted before sending. **Open question for the lead:** is sending redacted ticket text to a third-party LLM acceptable? | 6 |
+| R11 | Lighthouse ≥ 90 vs a 3D dashboard | R3F only on the login page. Dashboard uses a lightweight background deferred after LCP and paused when hidden | 9 |
+| R12 | Dev seed vs A12 (admin from env vars) | First admin created by a Java startup runner from env vars. Demo data is SQL under `db/seed-dev`, enabled **only** in the `dev` profile, with pre-computed BCrypt hashes | 1–2 |
+| R13 | Simulator language | Node.js + TypeScript (closest to a real external partner; built-in `crypto` HMAC). ADR in Phase 4 | 4 |
+| R14 | Comments on RESOLVED tickets? | Allowed. Only CLOSED is frozen | 3 |
+
+### C. Environment decisions (agreed with the developer in Phase 0)
+
+| Decision | Why | Record |
+|---|---|---|
+| Java package root `dev.untangle` | Personal project; no employer names in code | MASTER_PROMPT header |
+| Java 21 LTS + Spring Boot 4.1.2 | Spec says 21 and it's the installed JDK; Boot 4.1 is current stable | [ADR-002](decisions/ADR-002-java-21-spring-boot-4.md) |
+| PostgreSQL 18 (spec said 16) | Current stable; matches the developer's local install and pgAdmin. One-line change if 16 is required | [tech-stack.md](tech-stack.md) |
+| Docker Postgres on host port 5433 | Local Homebrew Postgres already owns 5432 | `.env.example` |
+| Local toolchain + Docker runtime | Faster feedback; reviewers still only need Docker for `make up` | [ADR-004](decisions/ADR-004-local-toolchain-docker-runtime.md) |
+| TypeScript 6.0.x, not 7.x | typescript-eslint supports `<6.1` | [ADR-006](decisions/ADR-006-frontend-toolchain.md) |
+
+### D. Still open (for the lead)
+
+1. R10: is sending **redacted** ticket text to Groq acceptable for a fintech support tool?
+2. A3: should leads be able to add an internal note to a CLOSED ticket without reopening it?
+3. Should the duplicate-with-different-payload case (R3) also alert an admin, not only log it?
