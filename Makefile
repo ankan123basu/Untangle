@@ -29,7 +29,8 @@ help: ## Show this help
 # ---------------------------------------------------------------------------
 .env:
 	@cp .env.example .env
-	@echo "Created .env from .env.example (local defaults)."
+	@sed -i.bak "s|^JWT_SECRET=$$|JWT_SECRET=$$(openssl rand -base64 48)|" .env && rm -f .env.bak
+	@echo "Created .env from .env.example with a freshly generated JWT_SECRET (never commit .env)."
 
 .PHONY: setup
 setup: .env ## Install frontend deps and pre-fetch backend deps

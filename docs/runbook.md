@@ -67,6 +67,32 @@ All are documented in [`.env.example`](../.env.example). Never commit `.env`.
 | `make test` fails with `Could not find a valid Docker environment` | Testcontainers needs Docker | start Docker Desktop |
 | `Validate failed: Migrations have failed validation` | an applied migration file was edited | never edit applied migrations; add `V2__...`. Locally: `make nuke` |
 
+### Signing in
+
+- With demo data: `admin@untangle.local` / `Untangle@2026` (also leads and agents, see above).
+- Without demo data: set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` (≥ 10 chars) in
+  `.env`, then `make up`. The first admin is created only if no active admin exists; it never
+  modifies existing accounts.
+- **Locked out after 5 wrong passwords?** Wait 15 minutes, or clear the lock:
+  `make db-shell`, then `UPDATE agents SET locked_until = NULL, failed_login_attempts = 0 WHERE lower(email) = lower('x@y');`
+
 ### Secret rotation
 
-Partner secret rotation (Phase 4) and JWT key rotation (Phase 2) procedures are added here in those phases.
+**JWT signing key (`JWT_SECRET`):**
+1. `openssl rand -base64 48` → put the value in `.env` (or your secret store).
+2. Restart the backend (`docker compose up -d backend`).
+3. Effect: every access token becomes invalid immediately. Refresh tokens are opaque DB rows, so
+   they keep working: browsers silently refresh and users stay signed in. To force everyone to sign
+   in again, also run `UPDATE refresh_tokens SET revoked_at = now() WHERE revoked_at IS NULL;`.
+
+Partner HMAC secret rotation arrives in Phase 4.
+
+### Auth troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Backend exits with `JWT_SECRET is not set` / `too short` | missing or weak key | `make .env` on a fresh clone, or set a ≥ 32-byte base64 value |
+| `docker compose` says `JWT_SECRET is empty` | `.env` created before Phase 2 | add `JWT_SECRET=$(openssl rand -base64 48)` to `.env` |
+| Every call returns `401 AUTH_TOKEN_EXPIRED` | access token older than 15 min | call `POST /api/v1/auth/refresh` (the SPA does this automatically) |
+| Refresh always 401 in Safari over plain HTTP | `Secure` cookie dropped | `AUTH_COOKIE_SECURE=false` (dev only) |
+| Find the logs for an error | | take `traceId` from the error body: `docker compose logs backend --no-log-prefix \| grep '<traceId>'` |
