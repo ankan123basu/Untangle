@@ -1,0 +1,48 @@
+# Base configuration shared by every profile.
+# Profile files (application-<profile>.yml) only override what differs.
+# Every value that changes between environments comes from an environment variable;
+# see the root .env.example for the full list.
+
+spring:
+  application:
+    name: untangle
+  profiles:
+    # Local development is the default; Docker Compose and CI set SPRING_PROFILES_ACTIVE explicitly.
+    default: dev
+  threads:
+    virtual:
+      # Java 21 virtual threads: each request gets a cheap thread, so blocking I/O (JDBC, HTTP
+      # to Groq) does not exhaust the Tomcat thread pool.
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+server:
+  port: ${SERVER_PORT:8080}
+  # Finish in-flight requests before the container stops.
+  shutdown: graceful
+  error:
+    # Never leak stack traces or exception messages to clients (Section 6.3).
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        # Exposes /actuator/health/liveness and /actuator/health/readiness for Docker/K8s.
+        enabled: true
+      show-details: never
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: Untangle
+    tagline: Every complaint, untangled.

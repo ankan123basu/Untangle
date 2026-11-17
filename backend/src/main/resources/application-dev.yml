@@ -1,0 +1,11 @@
+# Local development profile (`./mvnw spring-boot:run` or `make backend-run`).
+# Friendlier for debugging; never used in production.
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    dev.untangle: DEBUG

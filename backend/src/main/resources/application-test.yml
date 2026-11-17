@@ -1,0 +1,6 @@
+# Profile used by automated tests (activated with @ActiveProfiles("test")).
+
+logging:
+  level:
+    root: WARN
+    dev.untangle: INFO

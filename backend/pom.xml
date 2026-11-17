@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+      Spring Boot's parent POM manages the versions of every Spring/Hibernate/Jackson/
+      Testcontainers/JUnit dependency for us, so they are guaranteed to work together.
+      We only pin versions for libraries Boot does not manage.
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.2</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>dev.untangle</groupId>
+    <artifactId>untangle-backend</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <name>Untangle Backend</name>
+    <description>Untangle — support ticket and escalation platform (REST API)</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Fallback so surefire's @{argLine} resolves when JaCoCo is skipped -->
+        <argLine/>
+
+        <!-- Build plugin versions not managed by Spring Boot -->
+        <spotless-maven-plugin.version>3.11.0</spotless-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
+    </properties>
+
+    <dependencies>
+        <!-- HTTP layer: Spring MVC on embedded Tomcat (Boot 4 name for the old "starter-web") -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <!-- Bean Validation (Hibernate Validator) for request DTOs -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- Health checks (liveness/readiness) and, later, metrics -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- ===== Test ===== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+              @{argLine} keeps the JaCoCo agent that prepare-agent injects. EnableDynamicAgentLoading
+              allows Mockito's inline mock maker on JDK 21+ without the "dynamic agent" warning,
+              and -Xshare:off avoids the CDS warning caused by the JaCoCo agent.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Fail fast with a clear message if someone builds with the wrong Java/Maven -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-toolchain</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[21,)</version>
+                                    <message>Untangle needs JDK 21 or newer (the build targets Java 21).</message>
+                                </requireJavaVersion>
+                                <requireMavenVersion>
+                                    <version>[3.9,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Formatting: google-java-format. `make fmt` fixes, CI runs spotless:check. -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless-maven-plugin.version}</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat/>
+                        <removeUnusedImports/>
+                        <importOrder/>
+                    </java>
+                    <pom>
+                        <sortPom>
+                            <expandEmptyElements>false</expandEmptyElements>
+                            <nrOfIndentSpace>4</nrOfIndentSpace>
+                        </sortPom>
+                    </pom>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Code coverage report (thresholds are enforced from Phase 10) -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,10 @@
+# Production-like profile (used by Docker Compose). Secure defaults only.
+
+management:
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    root: INFO
