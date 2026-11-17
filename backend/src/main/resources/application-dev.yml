@@ -18,3 +18,6 @@ app:
     refresh:
       # Vite dev server is plain http://localhost:5173; Safari drops Secure cookies on plain HTTP.
       cookie-secure: ${AUTH_COOKIE_SECURE:false}
+  crypto:
+    # DEV ONLY key. Docker/prod read APP_SECRET_ENCRYPTION_KEY from .env.
+    secret-encryption-key: ${APP_SECRET_ENCRYPTION_KEY:CI++ZYKXp4d4oDQWJxDZ2kkNue1ZOnMX5mgOOUhgzoY=}

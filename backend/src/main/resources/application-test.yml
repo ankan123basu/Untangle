@@ -23,3 +23,10 @@ app:
       login-per-email:
         capacity: 10
         period: 1m
+  crypto:
+    # TEST ONLY key.
+    secret-encryption-key: 4sd44g6TiKqWnkLmvhjwtHSdJyONsUhN9CpzafQV+rw=
+  webhook:
+    per-ip-limit:
+      capacity: 100000
+      period: 1m

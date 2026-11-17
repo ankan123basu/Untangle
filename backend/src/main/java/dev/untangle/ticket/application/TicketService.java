@@ -27,6 +27,8 @@ import dev.untangle.ticket.application.TicketEvents.TicketTransitioned;
 import dev.untangle.ticket.application.TicketViews.BulkAssignResult;
 import dev.untangle.ticket.application.TicketViews.DeniedAction;
 import dev.untangle.ticket.application.TicketViews.TicketDetail;
+import dev.untangle.ticket.domain.Category;
+import dev.untangle.ticket.domain.Priority;
 import dev.untangle.ticket.domain.SlaPolicy;
 import dev.untangle.ticket.domain.Ticket;
 import dev.untangle.ticket.domain.TicketAction;
@@ -34,6 +36,7 @@ import dev.untangle.ticket.domain.TicketStateMachine;
 import dev.untangle.ticket.domain.TicketStatus;
 import dev.untangle.ticket.infrastructure.AssigneeRepository;
 import dev.untangle.ticket.infrastructure.TicketRepository;
+import dev.untangle.webhook.domain.Partner;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,12 +44,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Every change to a ticket goes through here, whether it comes from an agent (REST) or a partner
@@ -80,6 +87,8 @@ public class TicketService {
   private final SlaPolicy slaPolicy;
   private final ApplicationEventPublisher events;
   private final Clock clock;
+  private final TransactionTemplate transactions;
+  private final TransactionTemplate readOnlyTransactions;
 
   public TicketService(
       TicketRepository tickets,
@@ -89,7 +98,8 @@ public class TicketService {
       TicketMapper mapper,
       SlaPolicy slaPolicy,
       ApplicationEventPublisher events,
-      Clock clock) {
+      Clock clock,
+      PlatformTransactionManager transactionManager) {
     this.tickets = tickets;
     this.agents = agents;
     this.policy = policy;
@@ -98,6 +108,9 @@ public class TicketService {
     this.slaPolicy = slaPolicy;
     this.events = events;
     this.clock = clock;
+    this.transactions = new TransactionTemplate(transactionManager);
+    this.readOnlyTransactions = new TransactionTemplate(transactionManager);
+    this.readOnlyTransactions.setReadOnly(true);
   }
 
   // ---- Queries --------------------------------------------------------------------------------
@@ -168,6 +181,93 @@ public class TicketService {
         ticket.getTicketNumber(),
         ticket.getPriority());
     return detail(ticket, me);
+  }
+
+  // ---- Create from a partner webhook (Phase 4) -------------------------------------------------
+
+  /** A webhook ticket and whether it already existed for this (partner, event id). */
+  public record WebhookTicketResult(Ticket ticket, boolean duplicate) {}
+
+  /**
+   * Idempotent create for partner webhooks (§7.2 step 8, ADR-012).
+   *
+   * <ol>
+   *   <li>Fast path: if the event was already processed, return the existing ticket.
+   *   <li>Otherwise insert in its own transaction. If a concurrent retry inserted first, the unique
+   *       index {@code ux_tickets_partner_event} rejects us; we load and return the winner's
+   *       ticket.
+   * </ol>
+   *
+   * Step 1 is only an optimisation (fewer failed inserts); correctness comes from step 2's
+   * constraint, so 20 simultaneous retries still produce exactly one ticket.
+   *
+   * <p>Not {@code @Transactional} itself: the insert must be able to fail and roll back on its own,
+   * and the follow-up lookup needs a fresh transaction.
+   */
+  public WebhookTicketResult createFromWebhook(
+      Partner partner,
+      String eventId,
+      String subject,
+      String description,
+      String customerName,
+      String customerEmail,
+      Category category,
+      Priority priority) {
+    Optional<Ticket> existing = findWebhookTicket(partner, eventId);
+    if (existing.isPresent()) {
+      return new WebhookTicketResult(existing.get(), true);
+    }
+    try {
+      Ticket created =
+          transactions.execute(status -> {
+            Instant now = clock.instant();
+            Ticket ticket =
+                Ticket.fromWebhook(
+                    subject,
+                    description,
+                    customerName,
+                    customerEmail,
+                    category,
+                    priority,
+                    partner,
+                    eventId,
+                    now,
+                    slaPolicy.dueAt(now, priority));
+            tickets.saveAndFlush(ticket);
+            Map<String, Object> metadata = new LinkedHashMap<>();
+            metadata.put("event", "CREATED");
+            metadata.put("source", "WEBHOOK");
+            metadata.put("partner", partner.getCode());
+            metadata.put("externalEventId", eventId);
+            timeline.system(
+                ticket, null, "Ticket received from partner " + partner.getName(), metadata);
+            events.publishEvent(
+                new TicketCreated(ticket.getId(), ticket.getTicketNumber(), ticket.getSource()));
+            events.publishEvent(new TicketChanged(ticket.getId()));
+            return ticket;
+          });
+      log.info(
+          "Ticket created number={} priority={} source=WEBHOOK partner={}",
+          created.getTicketNumber(),
+          priority,
+          partner.getCode());
+      return new WebhookTicketResult(created, false);
+    } catch (DataIntegrityViolationException e) {
+      if (!String.valueOf(e.getMostSpecificCause().getMessage())
+          .contains("ux_tickets_partner_event")) {
+        throw e;
+      }
+      Ticket winner =
+          findWebhookTicket(partner, eventId)
+              .orElseThrow(() -> new IllegalStateException("Duplicate reported but not found", e));
+      return new WebhookTicketResult(winner, true);
+    }
+  }
+
+  private Optional<Ticket> findWebhookTicket(Partner partner, String eventId) {
+    return Optional.ofNullable(
+        readOnlyTransactions.execute(status ->
+            tickets.findByPartnerIdAndExternalEventId(partner.getId(), eventId).orElse(null)));
   }
 
   // ---- Edit -----------------------------------------------------------------------------------

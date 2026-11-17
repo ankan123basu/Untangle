@@ -8,3 +8,9 @@ spring:
     locations:
       - classpath:db/migration
       - classpath:db/seed-demo
+
+app:
+  webhook:
+    # Demo partner `acme-bank` gets this secret at startup (DemoPartnerSecretInitializer), so the
+    # simulator and the curl examples in docs/webhook-integration-guide.md work out of the box.
+    demo-partner-secret: ${DEMO_PARTNER_SECRET:acme-demo-secret-change-me}

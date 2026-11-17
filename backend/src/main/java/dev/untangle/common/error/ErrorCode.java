@@ -48,6 +48,8 @@ public enum ErrorCode {
 
   // ---- Integrations ----
   WEBHOOK_REJECTED(HttpStatus.UNAUTHORIZED, "Invalid webhook request"),
+  PARTNER_NOT_FOUND(HttpStatus.NOT_FOUND, "Partner not found"),
+  PARTNER_CODE_TAKEN(HttpStatus.CONFLICT, "Partner code already in use"),
   AI_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI assistance is unavailable"),
 
   // ---- Fallback ----

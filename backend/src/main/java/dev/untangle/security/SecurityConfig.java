@@ -42,7 +42,11 @@ public class SecurityConfig {
 
   /** Public endpoints. Everything not listed requires authentication. */
   private static final String[] PUBLIC_POST = {
-    "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout"
+    "/api/v1/auth/login",
+    "/api/v1/auth/refresh",
+    "/api/v1/auth/logout",
+    // Partner webhook: authenticated by HMAC signature in WebhookService, not by JWT.
+    "/api/v1/webhooks/partners/tickets"
   };
 
   private static final String[] PUBLIC_GET = {

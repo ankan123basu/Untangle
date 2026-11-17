@@ -126,6 +126,17 @@ app:
       login-per-email:
         capacity: 10
         period: 1m
+  crypto:
+    # REQUIRED. AES-256 key (base64, exactly 32 bytes) that encrypts partner HMAC secrets at rest.
+    # `make .env` generates one. Losing it makes stored partner secrets unrecoverable (rotate them).
+    secret-encryption-key: ${APP_SECRET_ENCRYPTION_KEY:}
+  webhook:
+    max-body-bytes: 65536
+    timestamp-tolerance: ${WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS:300}s
+    rotation-grace: 24h
+    per-ip-limit:
+      capacity: 300
+      period: 1m
   bootstrap-admin:
     email: ${BOOTSTRAP_ADMIN_EMAIL:}
     password: ${BOOTSTRAP_ADMIN_PASSWORD:}
