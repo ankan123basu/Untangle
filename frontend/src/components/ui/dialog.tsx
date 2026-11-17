@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -7,10 +7,10 @@ interface DialogProps {
   open: boolean;
   onClose: () => void;
   title: string;
-  description?: string;
+  description?: string | undefined;
   children: ReactNode;
-  footer?: ReactNode;
-  className?: string;
+  footer?: ReactNode | undefined;
+  className?: string | undefined;
 }
 
 /**
@@ -28,19 +28,32 @@ export function Dialog({
   className,
 }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  // Unique per dialog: pages render several dialogs, and duplicate ids would give them all the
+  // first dialog's accessible name.
+  const titleId = useId();
+  const descId = useId();
 
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
+    if (open && !dialog.open) {
+      dialog.showModal();
+      // React applies autoFocus at mount (while the dialog is still closed), and showModal() then
+      // focuses the close button. Move focus to the first field so the user can type at once.
+      dialog
+        .querySelector<HTMLElement>(
+          '[data-autofocus], input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])',
+        )
+        ?.focus();
+    }
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
   return (
     <dialog
       ref={ref}
-      aria-labelledby="dialog-title"
-      aria-describedby={description ? 'dialog-desc' : undefined}
+      aria-labelledby={titleId}
+      aria-describedby={description ? descId : undefined}
       onClose={onClose}
       onClick={(event) => {
         if (event.target === ref.current) onClose(); // backdrop click
@@ -52,11 +65,11 @@ export function Dialog({
     >
       <div className="flex items-start justify-between gap-4 border-b-2 border-line px-5 py-4">
         <div>
-          <h2 id="dialog-title" className="font-display text-xl font-bold">
+          <h2 id={titleId} className="font-display text-xl font-bold">
             {title}
           </h2>
           {description && (
-            <p id="dialog-desc" className="mt-1 text-sm text-muted">
+            <p id={descId} className="mt-1 text-sm text-muted">
               {description}
             </p>
           )}
