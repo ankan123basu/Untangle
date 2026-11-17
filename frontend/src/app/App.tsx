@@ -19,9 +19,6 @@ export function App() {
           </h1>
         </div>
         <p className="mt-4 text-lg">Every complaint, untangled.</p>
-        <p className="mt-6 inline-block rounded-md border-2 border-ink bg-brand px-2 py-1 font-mono text-sm text-on-brand">
-          UNT-000000 · foundation ready
-        </p>
       </section>
     </main>
   );
