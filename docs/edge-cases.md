@@ -22,7 +22,27 @@ Test classes live in `backend/src/test/java/dev/untangle/`.
 | Delivery logged as CREATED without its ticket | rejected | `createdDeliveryMustLinkItsTicket` | ✅ DB |
 | Malformed partner code | rejected | `rejectsMalformedPartnerCodes` | ✅ DB |
 | Previous secret without expiry | rejected | `previousSecretRequiresAnExpiry` | ✅ DB |
-| Missing headers, malformed signature, wrong secret, tampered body, whitespace change, expired/future/non-numeric timestamp, unknown/inactive partner, invalid priority (400), malformed JSON (400), oversized (413), rate limit (429), rotation grace in/out, no encryption key | see §7 | — | Phase 4 |
+| Missing headers (each of 4) | generic 401 | `WebhookIntegrationTest.rejectsMissingHeaders` | ✅ |
+| Malformed signature header | generic 401 | `rejectsMalformedSignatureHeader`, `WebhookCryptoTest.rejectsMalformedSignatureHeaders` | ✅ |
+| Wrong secret | generic 401; log: "signature mismatch" | `rejectsWrongSecret` | ✅ |
+| Tampered body | 401 | `rejectsATamperedBody` | ✅ |
+| Whitespace-only change to the body | 401 (raw bytes are signed) | `rejectsAWhitespaceOnlyChange`, `WebhookCryptoTest.anyChangeBreaksTheSignature` | ✅ |
+| Expired / future / non-numeric timestamp | 401; log says past/future/non-numeric | `rejectsExpiredFutureAndNonNumericTimestamps` | ✅ |
+| Unknown or inactive partner | 401; log distinguishes them | `rejectsUnknownAndInactivePartners` | ✅ |
+| Duplicate event id (sequential) | 201 then 200, same ticket | `duplicateEventReturns200WithTheSameTicket` | ✅ |
+| **Duplicate event id, 20 concurrent HTTP requests** | exactly 1 row; 1×201 + 19×200, one ticket id | `twentyConcurrentRetriesCreateExactlyOneTicket` + simulator `concurrent-duplicate` | ✅ |
+| Same event id, different payload (R3) | 200 + log "payload differs" | `duplicateWithADifferentPayloadIsFlaggedForAdmins` | ✅ |
+| Same event id from two partners | both 201 | `sameEventIdFromTwoPartnersCreatesTwoTickets` | ✅ |
+| Valid signature + invalid priority | 400 `errors[priority]` | `validSignatureButInvalidPriorityIs400` | ✅ |
+| Valid signature + missing fields | 400 with fields | `validSignatureButMissingFieldsIs400` | ✅ |
+| Malformed JSON | 400 | `malformedJsonIs400` | ✅ |
+| Missing subject | derived from description | `missingSubjectIsDerivedFromTheDescription` | ✅ |
+| Oversized payload (> 64 KB) | 413 before parsing; logged | `oversizedPayloadIs413BeforeAnythingElse` | ✅ |
+| Rate limit | 429 + `Retry-After` | `perPartnerRateLimitReturns429WithRetryAfter` + simulator `burst` | ✅ |
+| Old secret inside / outside the grace window | 201 / 401 | `oldSecretWorksInsideTheGraceWindowOnly` + simulator `rotation` | ✅ |
+| Server started without an encryption key | refuses to start | `WebhookCryptoTest.refusesToStartWithoutAValid256BitKey` | ✅ |
+| Secret stored encrypted, shown once | ciphertext `v1:...` only | `PartnerAdminIntegrationTest.secretIsShownOnceAndStoredOnlyEncrypted` | ✅ |
+| Ciphertext copied to another partner / tampered | decryption fails | `WebhookCryptoTest.ciphertextIsBoundToItsPartner`, `tamperingAndWrongKeysAreDetected` | ✅ |
 
 ### Lifecycle (API behaviour: Phase 3)
 

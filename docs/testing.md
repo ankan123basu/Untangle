@@ -49,6 +49,15 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   database with the seed applied.
 - Docker must be running for `make test` (Testcontainers). CI runners have Docker.
 
+### Phase 4 additions (backend total: 363 tests + 13 simulator scenarios)
+
+| Class / tool | Tests | Proves |
+|---|---|---|
+| `WebhookCryptoTest` | 19 | HMAC vs an OpenSSL reference vector; any byte/timestamp/secret change fails; strict header format; AES-GCM IV freshness, AAD binding, tamper/wrong-key detection; fail-fast key |
+| `WebhookIntegrationTest` | 19 | every §11 webhook case over HTTP, incl. 20 concurrent retries → 1 ticket, rotation grace in/out, delivery log reasons |
+| `PartnerAdminIntegrationTest` | 5 | secret shown once and stored encrypted; rotation; duplicate/malformed codes; admin-only |
+| **Partner simulator** (`make simulate`) | 13 scenarios | an independent Node implementation of the contract against the running stack, through nginx; also runs in CI |
+
 ### Phase 3 additions (backend total: 320 tests)
 
 | Class | Tests | Proves |

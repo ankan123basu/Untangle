@@ -14,8 +14,8 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [database.md](database.md) | Tables, constraints, indexes, ER diagram | Done (Phase 1) |
 | [state-machine.md](state-machine.md) | Ticket lifecycle rules and who may do what | Done (Phase 3) |
 | [api.md](api.md) | Endpoints, error codes, pagination | Auth, agents, tickets, dashboard done |
-| [security.md](security.md) | Threat model, auth, RBAC, HMAC, secrets | Auth/RBAC done (Phase 2); HMAC in Phase 4 |
-| [webhook-integration-guide.md](webhook-integration-guide.md) | For partners: how to send signed tickets | Phase 4 |
+| [security.md](security.md) | Threat model, auth, RBAC, HMAC, secrets | Done (Phases 2, 4) |
+| [webhook-integration-guide.md](webhook-integration-guide.md) | For partners: how to send signed tickets | Done (Phase 4) |
 | [tradeoffs.md](tradeoffs.md) | Options, choice, gained, given up | Living |
 | [decisions/](decisions/) | Architecture Decision Records (ADRs) | Living |
 | [edge-cases.md](edge-cases.md) | Case → expected behaviour → test name | Living (DB-level cases done) |
@@ -47,3 +47,7 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [013](decisions/ADR-013-jwt-and-refresh-rotation.md) | JWT via Spring resource server + rotating refresh tokens |
 | [014](decisions/ADR-014-rbac-via-permissions.md) | RBAC through permissions mapped from roles |
 | [015](decisions/ADR-015-allowed-actions-from-server.md) | Server-computed `allowedActions` from the enforcing policy |
+| [016](decisions/ADR-016-aes-gcm-partner-secrets.md) | Partner secrets encrypted with AES-256-GCM, not hashed |
+| [017](decisions/ADR-017-hmac-over-timestamp-and-raw-body.md) | HMAC over `timestamp.rawBody`, verified before parsing |
+| [018](decisions/ADR-018-generic-webhook-errors-and-delivery-log.md) | Generic 401s + admin delivery log; 200 for duplicates |
+| [019](decisions/ADR-019-partner-simulator-node-typescript.md) | Partner simulator in Node + TypeScript, zero runtime deps |

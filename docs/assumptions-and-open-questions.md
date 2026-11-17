@@ -76,6 +76,12 @@ When the lead answers, fill in the **Lead's answer** column and link the commit 
 | Comments stored verbatim (no server-side HTML stripping) | no data loss; the API serves JSON with `nosniff`; the UI must render as text (lint rule + Phase 8 test) | [api.md](api.md) |
 | `deniedActions[{action, reason}]` alongside `allowedActions` | lets disabled buttons explain themselves (§12.5 tooltips) | [ADR-015](decisions/ADR-015-allowed-actions-from-server.md) |
 | Extra endpoint `GET /tickets/by-number/{n}` | command palette "jump to UNT-…" (§12.5) | [api.md](api.md) |
+| Webhook: per-IP limit (300/min) before header checks, per-partner limit after HMAC (R2) | unsigned floods cost no crypto work | [security.md](security.md) |
+| Webhook body cap enforced by a filter (Content-Length + bounded read) | never buffer more than 64 KB | ADR-017 |
+| Simulator creates its own throwaway partners via the admin API | results never depend on leftovers; demo partner `acme-bank` stays for curl examples | ADR-019 |
+| Demo partner secret set at startup (`DemoPartnerSecretInitializer`, demo profile only) | the SQL seed can't encrypt with an env key | [webhook-integration-guide.md](webhook-integration-guide.md) |
+| `PARTNER_NOT_FOUND`, `PARTNER_CODE_TAKEN` error codes | partner admin | [api.md](api.md) |
+| Malformed `X-Event-Id` logged as `REJECTED_VALIDATION` (still a generic 401) | the outcome enum has no header-specific value; the reason text is precise | ADR-018 |
 
 ### D. Still open (for the lead)
 

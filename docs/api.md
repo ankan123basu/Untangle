@@ -66,7 +66,9 @@ Rejected values are never echoed.
 | `RESOLUTION_NOTE_REQUIRED` | 400 | resolving without a note |
 | `ASSIGNEE_REQUIRED` | 409 | starting work on an unassigned ticket; unassigning a non-OPEN ticket |
 | `AGENT_INACTIVE` | 409 | assigning to a deactivated agent |
-| `WEBHOOK_REJECTED`, `PAYLOAD_TOO_LARGE` | 401 / 413 | Phase 4 |
+| `WEBHOOK_REJECTED` | 401 | any webhook authentication failure (deliberately generic, ADR-018) |
+| `PAYLOAD_TOO_LARGE` | 413 | webhook body > 64 KB |
+| `PARTNER_NOT_FOUND` / `PARTNER_CODE_TAKEN` | 404 / 409 | partner admin |
 | `AI_UNAVAILABLE` | 503 | Phase 6 |
 | `INTERNAL_ERROR` | 500 | unexpected; quote `traceId` |
 
@@ -150,6 +152,23 @@ RETURN_TO_PROGRESS, CLOSE, REOPEN, COMMENT, ESCALATE`
 
 Every summary number equals the `totalElements` of the matching list query (same
 Specifications, tested).
+
+### Partner webhook
+
+`POST /api/v1/webhooks/partners/tickets`: HMAC-authenticated, no JWT. Full contract, signing
+examples and retry advice: [webhook-integration-guide.md](webhook-integration-guide.md).
+`201 {ticketId, ticketNumber, duplicate:false}` · `200 {..., duplicate:true}`.
+
+### Admin: partners and webhook logs (`/api/v1/admin`, admins only)
+
+| Method & path | Body | Response |
+|---|---|---|
+| `GET /partners` | — | `[PartnerView{id, code, name, active, rateLimitPerMinute, previousSecretValidUntil}]` (never secrets) |
+| `POST /partners` | `{code, name, rateLimitPerMinute?}` | `201 {partner, secret, notice}`, **secret shown once** |
+| `PATCH /partners/{id}` | `{name?, rateLimitPerMinute?}` | `PartnerView` |
+| `POST /partners/{id}/rotate-secret` | — | `{partner, secret, notice}`; old secret valid 24 h |
+| `PATCH /partners/{id}/active` | `{active}` | `PartnerView` |
+| `GET /webhook-deliveries?partnerId&outcome&from&to&page&size≤100` | — | `PageResponse<DeliveryView{receivedAt, partnerCode, eventId, outcome, reason, ticketId, ticketNumber, sourceIp, payloadSha256}>` newest first |
 
 ### Swagger / OpenAPI
 

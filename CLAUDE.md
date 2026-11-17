@@ -54,6 +54,11 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
   `TicketAccessPolicy.require` → entity behaviour method → `Timeline.system(...)` → event. Never add
   setters to `Ticket`; add a behaviour method. Filters = `TicketSpecifications` (reuse them for any
   count). DTO mapping via MapStruct (`TicketMapper`, unmapped targets fail the build).
+- Webhook: `WebhookBodyLimitFilter` (64 KB, caches raw bytes) → `WebhookService` pipeline (§7.2
+  order; every exit records a `webhook_deliveries` row via `DeliveryRecorder`, REQUIRES_NEW) →
+  `TicketService.createFromWebhook` (idempotent via unique index). Partner secrets only through
+  `SecretCipher` (AES-GCM, AAD = partner code). 401s stay generic. Simulator: `partner-simulator/`
+  (Node 26 runs .ts directly; `make simulate`).
 - Cross-feature calls go through the other feature's `application` services or events, never its
   repositories; keep feature dependencies one-way (auth → agent, agent → ticket).
 - Two entry doors, one brain: JWT REST and HMAC webhook both call `TicketService`.

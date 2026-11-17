@@ -85,7 +85,15 @@ All are documented in [`.env.example`](../.env.example). Never commit `.env`.
    they keep working: browsers silently refresh and users stay signed in. To force everyone to sign
    in again, also run `UPDATE refresh_tokens SET revoked_at = now() WHERE revoked_at IS NULL;`.
 
-Partner HMAC secret rotation arrives in Phase 4.
+**Partner HMAC secret:**
+1. Admin → Partners → *Rotate secret* (or `POST /api/v1/admin/partners/{id}/rotate-secret`).
+2. Hand the new secret to the partner over a secure channel; it is shown only once.
+3. The old secret keeps working for 24 h (`app.webhook.rotation-grace`). Check the delivery log
+   until the partner's requests verify with the new one.
+
+**Encryption key (`APP_SECRET_ENCRYPTION_KEY`):** there's no in-place re-encryption tool yet. If the
+key is lost or must change: set a new key, restart, then rotate every partner's secret (their old
+ciphertexts no longer decrypt, so their webhooks fail until rotated).
 
 ### Auth troubleshooting
 
@@ -95,4 +103,7 @@ Partner HMAC secret rotation arrives in Phase 4.
 | `docker compose` says `JWT_SECRET is empty` | `.env` created before Phase 2 | add `JWT_SECRET=$(openssl rand -base64 48)` to `.env` |
 | Every call returns `401 AUTH_TOKEN_EXPIRED` | access token older than 15 min | call `POST /api/v1/auth/refresh` (the SPA does this automatically) |
 | Refresh always 401 in Safari over plain HTTP | `Secure` cookie dropped | `AUTH_COOKIE_SECURE=false` (dev only) |
+| Backend exits with `APP_SECRET_ENCRYPTION_KEY is not set` | missing key | `make .env` on a fresh clone; for an older `.env` add `APP_SECRET_ENCRYPTION_KEY=$(openssl rand -base64 32)` |
+| Partner gets 401 | wrong secret, clock skew, re-serialised body, inactive partner | Admin → Webhook logs shows the exact reason per attempt |
+| `make simulate` fails at "Admin login failed" | stack not up or demo data missing | `make up`; `SPRING_PROFILES_ACTIVE` must include `demo`, or set `SIM_ADMIN_EMAIL/PASSWORD` |
 | Find the logs for an error | | take `traceId` from the error body: `docker compose logs backend --no-log-prefix \| grep '<traceId>'` |

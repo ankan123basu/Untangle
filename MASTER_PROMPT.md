@@ -24,6 +24,8 @@
 > - Phase 3: `deniedActions` returned next to `allowedActions` (ADR-015); V2 adds `sla_started_at`
 >   and severity/status rank columns; page size > 100 is rejected (400); `GET /tickets/by-number/{n}`
 >   added; reopen resets escalation level.
+> - Phase 4: per-IP webhook limit before header checks (R2); simulator creates its own partners via the
+>   admin API (13 scenarios, also in CI); demo partner `acme-bank` gets its secret at startup.
 
 ---
 
