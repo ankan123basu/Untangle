@@ -29,21 +29,29 @@
   --color-warning: var(--ut-warning);
 
   --color-prio-low: var(--ut-prio-low-fg);
+  --color-prio-low-fg: var(--ut-prio-low-fg);
   --color-prio-low-bg: var(--ut-prio-low-bg);
   --color-prio-medium: var(--ut-prio-medium-fg);
+  --color-prio-medium-fg: var(--ut-prio-medium-fg);
   --color-prio-medium-bg: var(--ut-prio-medium-bg);
   --color-prio-high: var(--ut-prio-high-fg);
+  --color-prio-high-fg: var(--ut-prio-high-fg);
   --color-prio-high-bg: var(--ut-prio-high-bg);
   --color-prio-critical: var(--ut-prio-critical-fg);
+  --color-prio-critical-fg: var(--ut-prio-critical-fg);
   --color-prio-critical-bg: var(--ut-prio-critical-bg);
 
   --color-status-open: var(--ut-status-open-fg);
+  --color-status-open-fg: var(--ut-status-open-fg);
   --color-status-open-bg: var(--ut-status-open-bg);
   --color-status-progress: var(--ut-status-progress-fg);
+  --color-status-progress-fg: var(--ut-status-progress-fg);
   --color-status-progress-bg: var(--ut-status-progress-bg);
   --color-status-resolved: var(--ut-status-resolved-fg);
+  --color-status-resolved-fg: var(--ut-status-resolved-fg);
   --color-status-resolved-bg: var(--ut-status-resolved-bg);
   --color-status-closed: var(--ut-status-closed-fg);
+  --color-status-closed-fg: var(--ut-status-closed-fg);
   --color-status-closed-bg: var(--ut-status-closed-bg);
 
   --color-sla-ok: var(--ut-sla-ok);
@@ -63,6 +71,21 @@
 
   --ease-brutal: var(--ut-ease);
   --animate-pulse-critical: pulse-critical 1.8s var(--ut-ease) infinite;
+  --animate-rise: rise 260ms var(--ut-ease) both;
+}
+
+/* List items enter with a short rise; delays are set inline and capped (see stagger()). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes drift {
+  to {
+    transform: translate3d(var(--dx), var(--dy), 0) scale(1.18);
+  }
 }
 
 @keyframes pulse-critical {
@@ -146,5 +169,42 @@
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
+  }
+
+  /*
+   * The living background behind the glass panels (§12.3): three blurred colour fields drifting
+   * slowly. Only transforms animate (GPU-composited, no repaints); paused while the tab is hidden
+   * and switched off by the reduced-motion rule in base.
+   */
+  .app-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .app-backdrop > span {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(70px);
+    opacity: 0.32;
+    animation: drift 26s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  .app-backdrop[data-paused] > span {
+    animation-play-state: paused;
+  }
+}
+
+/* Shared-element and page cross-fades via the View Transitions API (Phase 9, ADR-024). */
+::view-transition-group(*) {
+  animation-duration: var(--ut-dur-slow);
+  animation-timing-function: var(--ut-ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

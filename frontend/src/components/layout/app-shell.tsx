@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate, useNavigation } from 'react-router';
 import {
   Building2,
@@ -21,10 +21,13 @@ import { Button } from '@/components/ui/button';
 import { Kbd } from '@/components/ui/feedback';
 import { logout } from '@/features/auth/auth-api';
 import { useCan, useSession } from '@/features/auth/session-store';
+import { useGlobalShortcuts } from '@/hooks/use-global-shortcuts';
 import { useTheme, type ThemeChoice } from '@/hooks/use-theme';
 import { cn, humanize } from '@/lib/utils';
 import { NotificationBell } from '@/features/notifications/notification-bell';
-import { CommandPalette } from './command-palette';
+import { AppBackdrop } from './app-backdrop';
+
+const CommandPalette = lazy(() => import('./command-palette'));
 import { OfflineBanner } from './offline-banner';
 
 function NavItem({
@@ -93,7 +96,14 @@ export function AppShell() {
   const canManageAgents = useCan('AGENT_MANAGE');
   const canManagePartners = useCan('PARTNER_MANAGE');
   const navigate = useNavigate();
-  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [paletteOpen, setPaletteOpenState] = useState(false);
+  // The palette's code (cmdk) is fetched the first time it opens, then stays mounted.
+  const [paletteLoaded, setPaletteLoaded] = useState(false);
+  const setPaletteOpen = useCallback((open: boolean) => {
+    if (open) setPaletteLoaded(true);
+    setPaletteOpenState(open);
+  }, []);
+  useGlobalShortcuts(paletteOpen, setPaletteOpen);
   const [navOpen, setNavOpen] = useState(false);
   const location = useLocation();
   const navigation = useNavigation();
@@ -116,7 +126,9 @@ export function AppShell() {
   }, [navOpen]);
 
   return (
-    <div className="min-h-dvh bg-paper">
+    // `isolate` makes this a stacking context so the backdrop (z -1) paints above our background.
+    <div className="relative isolate min-h-dvh bg-paper">
+      <AppBackdrop />
       <a
         href="#main"
         className="sr-only-focusable absolute top-2 left-2 z-50 rounded-md bg-brand px-3 py-2 font-semibold"
@@ -151,7 +163,7 @@ export function AppShell() {
         >
           <nav
             aria-label="Main"
-            className="solid-panel flex h-full flex-col gap-1 overflow-y-auto p-3"
+            className="glass-panel flex h-full flex-col gap-1 overflow-y-auto p-3"
           >
             <NavLink to="/" className="mb-4 flex items-center gap-2 px-2 pt-1">
               <LogoMark size={32} title="" />
@@ -207,7 +219,7 @@ export function AppShell() {
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6">
-          <header className="solid-panel flex items-center gap-2 px-2 py-2 sm:gap-3 sm:px-4">
+          <header className="glass-panel flex items-center gap-2 px-2 py-2 sm:gap-3 sm:px-4">
             <Button
               variant="ghost"
               size="icon"
@@ -241,11 +253,19 @@ export function AppShell() {
             <ThemeToggle />
           </header>
           <main id="main" tabIndex={-1} className="min-w-0 outline-none">
-            <Outlet />
+            {/* Each page enters with a short fade-and-rise (§12.3); keyed so it replays per route.
+                Plain CSS, so the animation library stays out of the main bundle. */}
+            <div key={location.pathname} className="animate-rise">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      {paletteLoaded && (
+        <Suspense fallback={null}>
+          <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+        </Suspense>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, ViewTransition } from 'react';
 import { Link, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Flame, Lock, Pencil, RotateCcw } from 'lucide-react';
@@ -11,6 +11,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 import { ApiError, messageFor } from '@/lib/api/problem';
 import type { TicketAction, TicketDetail } from '@/lib/api/types';
 import { queryKeys } from '@/lib/query-client';
+import { ticketTransitionName } from '@/lib/motion';
 import { humanize } from '@/lib/utils';
 import { EscalationBadge, PriorityBadge, SlaIndicator, SourceBadge, StatusBadge } from './badges';
 import { ActionDialog, type ActionRequest } from './detail/action-dialog';
@@ -67,7 +68,12 @@ export default function TicketDetailPage() {
   }
   if (!ticket.data) {
     return (
-      <div className="flex flex-col gap-4" aria-busy="true" aria-label="Loading ticket">
+      <div
+        className="flex flex-col gap-4"
+        role="status"
+        aria-busy="true"
+        aria-label="Loading ticket"
+      >
         <Skeleton className="h-36" />
         <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
           <Skeleton className="h-96" />
@@ -196,7 +202,7 @@ function TicketWorkspace({ ticket }: { ticket: TicketDetail }) {
       {closed && (
         <div
           role="status"
-          className="text-status-closed-fg flex flex-wrap items-center justify-between gap-3 rounded-md border-2 border-line bg-status-closed-bg px-4 py-3"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-md border-2 border-line bg-status-closed-bg px-4 py-3 text-status-closed-fg"
         >
           <p className="flex items-center gap-2 font-semibold">
             <Lock aria-hidden="true" className="size-4" /> This ticket is closed and read-only.
@@ -214,7 +220,9 @@ function TicketWorkspace({ ticket }: { ticket: TicketDetail }) {
       <header className="solid-panel flex flex-col gap-4 p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-mono text-sm font-bold text-muted">{ticket.ticketNumber}</p>
+            <ViewTransition name={ticketTransitionName(ticket.id)}>
+              <p className="w-fit font-mono text-sm font-bold text-muted">{ticket.ticketNumber}</p>
+            </ViewTransition>
             <h1 className="font-display text-2xl font-bold break-words md:text-3xl">
               {ticket.subject}
             </h1>

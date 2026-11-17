@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Check } from 'lucide-react';
 import type { TicketStatus } from '@/lib/api/types';
 import { cn, humanize } from '@/lib/utils';
@@ -6,6 +6,7 @@ import { STATUS_FLOW } from '../ticket-meta';
 
 /** OPEN → IN_PROGRESS → RESOLVED → CLOSED, with an animated progress line (§12.3). */
 export function StatusStepper({ status }: { status: TicketStatus }) {
+  const reduce = useReducedMotion();
   const current = STATUS_FLOW.indexOf(status);
   const progress = current / (STATUS_FLOW.length - 1);
   return (
@@ -18,7 +19,7 @@ export function StatusStepper({ status }: { status: TicketStatus }) {
           className="h-full origin-left rounded-full bg-ink"
           initial={false}
           animate={{ scaleX: progress }}
-          transition={{ type: 'spring', stiffness: 160, damping: 22 }}
+          transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 160, damping: 22 }}
         />
       </div>
       {STATUS_FLOW.map((step, index) => {
@@ -33,7 +34,7 @@ export function StatusStepper({ status }: { status: TicketStatus }) {
           >
             <motion.span
               initial={false}
-              animate={{ scale: active ? 1.12 : 1 }}
+              animate={{ scale: active && !reduce ? 1.12 : 1 }}
               className={cn(
                 'flex size-9 items-center justify-center rounded-full border-2 border-line text-sm font-bold',
                 done && 'bg-ink text-paper',

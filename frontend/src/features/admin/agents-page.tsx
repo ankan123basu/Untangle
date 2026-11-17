@@ -330,15 +330,15 @@ export default function AgentsPage() {
                         <Badge
                           className={
                             a.active
-                              ? 'text-status-resolved-fg bg-status-resolved-bg'
-                              : 'text-status-closed-fg bg-status-closed-bg'
+                              ? 'bg-status-resolved-bg text-status-resolved-fg'
+                              : 'bg-status-closed-bg text-status-closed-fg'
                           }
                         >
                           {a.active ? 'Active' : 'Inactive'}
                         </Badge>
                         {a.locked && (
                           <Badge
-                            className="text-prio-high-fg bg-prio-high-bg"
+                            className="bg-prio-high-bg text-prio-high-fg"
                             title="Too many failed sign-ins; unlocks automatically"
                           >
                             <Lock aria-hidden="true" className="size-3" /> Locked

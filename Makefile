@@ -118,6 +118,10 @@ build: ## Build backend jar and frontend bundle
 	$(MVNW) -q package -DskipTests
 	$(NPM) run -s build
 
+.PHONY: lighthouse
+lighthouse: ## Lighthouse (mobile + desktop) on the signed-in dashboard of the running stack
+	./scripts/lighthouse-dashboard.sh
+
 .PHONY: api-types
 api-types: ## Refresh the OpenAPI contract from the running backend and regenerate TS types
 	curl -fsS http://localhost:8080/v3/api-docs -o frontend/src/lib/api/openapi.json

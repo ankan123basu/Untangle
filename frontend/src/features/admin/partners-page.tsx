@@ -58,7 +58,7 @@ function SecretDialog({ issued, onClose }: { issued: IssuedSecret | null; onClos
       }
     >
       <div className="flex flex-col gap-3">
-        <p className="text-prio-high-fg flex items-start gap-2 rounded-md border-2 border-line bg-prio-high-bg p-3 text-sm">
+        <p className="flex items-start gap-2 rounded-md border-2 border-line bg-prio-high-bg p-3 text-sm text-prio-high-fg">
           <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           This is the only time the secret is shown. Send it to the partner over a secure channel.
         </p>
@@ -274,8 +274,8 @@ export default function PartnersPage() {
                     <Badge
                       className={
                         p.active
-                          ? 'text-status-resolved-fg bg-status-resolved-bg'
-                          : 'text-status-closed-fg bg-status-closed-bg'
+                          ? 'bg-status-resolved-bg text-status-resolved-fg'
+                          : 'bg-status-closed-bg text-status-closed-fg'
                       }
                     >
                       {p.active ? 'Active' : 'Disabled'}

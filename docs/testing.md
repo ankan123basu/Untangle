@@ -49,6 +49,15 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   database with the seed applied.
 - Docker must be running for `make test` (Testcontainers). CI runners have Docker.
 
+### Phase 9 additions (frontend total: 55 tests)
+
+- `src/test/a11y.test.tsx`: axe-core on the app shell + 9 screens with realistic data (10).
+- `hero-support.test.ts`: the 3D hero falls back under reduced motion, without WebGL and on small
+  screens (4).
+- New jsdom stub: `Element.scrollIntoView` (cmdk).
+- `make lighthouse`: Lighthouse mobile + desktop on the signed-in dashboard of the running stack
+  (results in [phase-9](how-it-works/phase-9.md)).
+
 ### Phase 8 additions (frontend total: 41 tests)
 
 - `ticket-logic.test.ts`: URL filter round-trip, invalid values dropped, quick-view detection,

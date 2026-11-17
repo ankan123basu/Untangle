@@ -13,6 +13,11 @@ import {
 import { api } from '@/lib/api/client';
 import type { TicketPage } from '@/lib/api/types';
 import { Kbd } from '@/components/ui/feedback';
+import { QUICK_VIEWS } from '@/features/tickets/filters';
+
+function quickViewSearch(id: (typeof QUICK_VIEWS)[number]['id']): string {
+  return QUICK_VIEWS.find((v) => v.id === id)?.search ?? '';
+}
 
 const TICKET_NUMBER = /^\s*(unt-?)?\d{1,7}\s*$/i;
 
@@ -21,19 +26,12 @@ function normaliseNumber(raw: string): string {
   return `UNT-${digits.padStart(6, '0')}`;
 }
 
-function isTyping(target: EventTarget | null): boolean {
-  return (
-    target instanceof HTMLElement &&
-    (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
-  );
-}
-
 /**
- * Screen 9 (§12.5): Ctrl/Cmd+K opens a palette to jump to a ticket by number, search, create or
- * switch views. Global shortcuts outside text fields: `c` new ticket, `/` search, `g d` dashboard,
- * `g t` tickets.
+ * Screen 9 (§12.5): a palette to jump to a ticket by number, search, create or switch views.
+ * Loaded on first open (cmdk stays out of the main bundle); the keyboard shortcuts that open it
+ * live in use-global-shortcuts.ts.
  */
-export function CommandPalette({
+export default function CommandPalette({
   open,
   onOpenChange,
 }: {
@@ -43,35 +41,6 @@ export function CommandPalette({
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const pendingG = useRef(false);
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        onOpenChange(!open);
-        return;
-      }
-      if (open || isTyping(event.target) || event.metaKey || event.ctrlKey || event.altKey) return;
-      if (event.key === '/') {
-        event.preventDefault();
-        onOpenChange(true);
-      } else if (event.key === 'c') {
-        void navigate('/tickets/new');
-      } else if (event.key === 'g') {
-        pendingG.current = true;
-        setTimeout(() => (pendingG.current = false), 800);
-      } else if (pendingG.current && event.key === 'd') {
-        void navigate('/');
-      } else if (pendingG.current && event.key === 't') {
-        void navigate('/tickets');
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [open, onOpenChange, navigate]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -176,7 +145,7 @@ export function CommandPalette({
             </Item>
             <Item
               onSelect={() => {
-                go('/tickets?view=mine');
+                go(`/tickets?${quickViewSearch('mine')}`);
               }}
               icon={<UserCheck className="size-4" />}
             >
@@ -184,7 +153,7 @@ export function CommandPalette({
             </Item>
             <Item
               onSelect={() => {
-                go('/tickets?view=breached');
+                go(`/tickets?${quickViewSearch('breached')}`);
               }}
               icon={<AlertOctagon className="size-4" />}
             >

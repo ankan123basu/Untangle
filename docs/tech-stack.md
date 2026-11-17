@@ -53,7 +53,9 @@ in the phase that first uses them.
 | Prettier (+ tailwind plugin) | 3.10.1 (+ 0.8.1) | |
 | Vitest / jsdom | 5.1.0 / 31.0.1 | |
 | Testing Library (react / jest-dom / user-event) | 16.3.3 / 7.0.1 / 14.6.12 | |
-| three / @react-three/fiber / drei | 0.187.0 / 9.8.2 / 10.7.9 *(Phase 9)* | |
+| three / @react-three/fiber | 0.187.0 / 9.8.2 *(Phase 9)* | login hero only, lazy chunk; drei not needed (ADR-024) |
+| axe-core | 4.14.1 *(Phase 9, dev)* | automated a11y checks in Vitest |
+| Lighthouse | 13.6.0 *(Phase 9, via `npx` in `make lighthouse`)* | |
 | motion | 14.14.0 *(Phase 7)* | |
 | @tanstack/react-query | 5.108.0 *(Phase 7)* | |
 | zustand | 5.1.0 *(Phase 7)* | |

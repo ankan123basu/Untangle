@@ -76,6 +76,10 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
   (ADR-023). Server state via TanStack Query (`queryKeys`). Tests: MSW 3 (`onUnhandledFrame`),
   `renderRoutes` from `src/test/render.tsx`. React Bits are vendored in `components/reactbits`
   (local patches marked `// untangle:`).
+- Frontend perf/motion (ADR-024): keep three.js, Recharts, cmdk and Motion out of the main bundle
+  (lazy chunks); heavy below-the-fold widgets go in `WhenVisible`; every animation must have a
+  reduced-motion path. Tailwind silently drops unknown classes: colour utilities must exist in
+  `@theme` (`text-prio-high-fg`, `bg-status-open-bg`, ...). `make lighthouse` before/after perf work.
 - Frontend: `src/app`, `src/features/<feature>`, `src/components/{ui,reactbits,three,layout,brand}`,
   `src/lib`, `src/styles/{tokens,globals}.css`. Alias `@/` → `src/`. No `any`. No `dangerouslySetInnerHTML`.
 

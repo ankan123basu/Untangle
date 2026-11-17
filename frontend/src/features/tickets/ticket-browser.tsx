@@ -1,10 +1,11 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, ViewTransition, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/feedback';
 import { Input, Select } from '@/components/ui/field';
 import { CATEGORIES, PRIORITIES, STATUSES, type TicketSummary } from '@/lib/api/types';
+import { stagger, ticketTransitionName } from '@/lib/motion';
 import { cn, humanize, timeAgo } from '@/lib/utils';
 import { EscalationBadge, PriorityBadge, SlaIndicator, SourceBadge, StatusBadge } from './badges';
 import {
@@ -92,16 +93,22 @@ function SearchBox({ value, onChange }: { value: string; onChange: (q: string) =
   );
 }
 
-function TicketRow({ ticket }: { ticket: TicketSummary }) {
+function TicketRow({ ticket, index }: { ticket: TicketSummary; index: number }) {
   return (
-    <tr className="group border-t-2 border-line-soft transition-colors hover:bg-paper-2/60">
+    <tr
+      className="group animate-rise border-t-2 border-line-soft transition-colors hover:bg-paper-2/60"
+      style={stagger(index)}
+    >
       <td className="py-3 pr-3 pl-4 align-top">
-        <Link
-          to={`/tickets/${ticket.id}`}
-          className="font-mono text-sm font-bold text-accent underline-offset-4 group-hover:underline after:absolute after:inset-0"
-        >
-          {ticket.ticketNumber}
-        </Link>
+        {/* Shared element: the number glides into the detail page header (React ViewTransition). */}
+        <ViewTransition name={ticketTransitionName(ticket.id)}>
+          <Link
+            to={`/tickets/${ticket.id}`}
+            className="font-mono text-sm font-bold text-accent underline-offset-4 group-hover:underline after:absolute after:inset-0"
+          >
+            {ticket.ticketNumber}
+          </Link>
+        </ViewTransition>
       </td>
       <td className="max-w-0 py-3 pr-3 align-top">
         <p className="truncate font-semibold">{ticket.subject}</p>
@@ -334,7 +341,12 @@ export function TicketBrowser({
           }}
         />
       ) : !data ? (
-        <div className="flex flex-col gap-3 p-4" aria-busy="true" aria-label="Loading tickets">
+        <div
+          className="flex flex-col gap-3 p-4"
+          role="status"
+          aria-busy="true"
+          aria-label="Loading tickets"
+        >
           {Array.from({ length: 5 }, (_, i) => (
             <Skeleton key={i} className="h-14" />
           ))}
@@ -401,8 +413,8 @@ export function TicketBrowser({
               </tr>
             </thead>
             <tbody className="[&>tr]:relative">
-              {data.content.map((t) => (
-                <TicketRow key={t.id} ticket={t} />
+              {data.content.map((t, i) => (
+                <TicketRow key={t.id} ticket={t} index={i} />
               ))}
             </tbody>
           </table>

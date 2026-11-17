@@ -5,6 +5,8 @@ import { AlertOctagon, Flame, Inbox, UserRound } from 'lucide-react';
 import CountUp from '@/components/reactbits/CountUp';
 import SpotlightCard from '@/components/reactbits/SpotlightCard';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card';
+import { TiltCard } from '@/components/ui/tilt-card';
+import { WhenVisible } from '@/components/ui/when-visible';
 import { ErrorState, Skeleton } from '@/components/ui/feedback';
 import { api } from '@/lib/api/client';
 import { PRIORITIES, type DashboardSummary, type Priority } from '@/lib/api/types';
@@ -32,9 +34,15 @@ function useSummary() {
   });
 }
 
+/** A number that hasn't arrived yet: same box as the real value, so nothing shifts (CLS). */
+function Placeholder({ className }: { className: string }) {
+  return (
+    <span aria-hidden="true" className={cn('animate-pulse rounded-sm bg-paper-2', className)} />
+  );
+}
+
 /** The hero: the one number that matters, and what it's made of. */
-function UnresolvedHero({ summary }: { summary: DashboardSummary }) {
-  const total = summary.unresolved;
+function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) {
   return (
     <section
       aria-labelledby="unresolved-title"
@@ -45,13 +53,19 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary }) {
           Unresolved tickets
         </h2>
         <p className="font-display text-7xl leading-none font-bold tabular-nums md:text-8xl">
-          <span className="sr-only">{total}</span>
-          <span aria-hidden="true">
-            <CountUp to={total} duration={1.2} separator="," trigger="load" />
-          </span>
+          {summary ? (
+            <>
+              <span className="sr-only">{summary.unresolved}</span>
+              <span aria-hidden="true">
+                <CountUp to={summary.unresolved} duration={1.2} separator="," trigger="load" />
+              </span>
+            </>
+          ) : (
+            <Placeholder className="inline-block h-[0.85em] w-[1.6em] align-baseline" />
+          )}
         </p>
         <p className="mt-2 text-sm text-muted">
-          Updated {timeAgo(summary.generatedAt)} · refreshes every minute
+          {summary ? `Updated ${timeAgo(summary.generatedAt)}` : 'Loading'} · refreshes every minute
         </p>
       </div>
       <div className="w-full md:max-w-md">
@@ -61,7 +75,7 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary }) {
           aria-hidden="true"
         >
           {PRIORITIES.map((p) => {
-            const n = summary.unresolvedByPriority[p] ?? 0;
+            const n = summary?.unresolvedByPriority[p] ?? 0;
             return n > 0 ? (
               <div
                 key={p}
@@ -80,7 +94,11 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary }) {
               >
                 <span className="text-xs font-bold text-muted uppercase">{humanize(p)}</span>
                 <span className="font-display text-xl font-bold tabular-nums">
-                  {summary.unresolvedByPriority[p] ?? 0}
+                  {summary ? (
+                    (summary.unresolvedByPriority[p] ?? 0)
+                  ) : (
+                    <Placeholder className="inline-block h-5 w-6" />
+                  )}
                 </span>
               </Link>
             </li>
@@ -99,45 +117,47 @@ function Kpi({
   tone,
 }: {
   label: string;
-  value: number;
+  value: number | undefined;
   to: string;
   icon: ReactNode;
   tone?: 'danger';
 }) {
   return (
-    <Link to={to} className="block rounded-[12px] focus-visible:outline-offset-4">
-      <SpotlightCard
-        className="!rounded-[12px] border-2 border-line !p-4 transition-transform hover:-translate-y-0.5"
-        spotlightColor="var(--ut-brand)"
-        style={
-          {
-            '--spotlight-card-surface': 'var(--ut-surface)',
-            '--spotlight-card-border': 'transparent',
-            '--spotlight-card-shadow': 'var(--ut-shadow-hard)',
-          } as React.CSSProperties
-        }
-      >
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-semibold text-muted">{label}</p>
-          <span
+    <TiltCard>
+      <Link to={to} className="block rounded-[12px] focus-visible:outline-offset-4">
+        <SpotlightCard
+          className="!rounded-[12px] border-2 border-line !p-4"
+          spotlightColor="var(--ut-brand)"
+          style={
+            {
+              '--spotlight-card-surface': 'var(--ut-surface)',
+              '--spotlight-card-border': 'transparent',
+              '--spotlight-card-shadow': 'var(--ut-shadow-hard)',
+            } as React.CSSProperties
+          }
+        >
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-sm font-semibold text-muted">{label}</p>
+            <span
+              className={cn(
+                'rounded-sm border-2 border-line p-1',
+                tone === 'danger' && (value ?? 0) > 0 ? 'bg-danger text-on-danger' : 'bg-paper-2',
+              )}
+            >
+              {icon}
+            </span>
+          </div>
+          <p
             className={cn(
-              'rounded-sm border-2 border-line p-1',
-              tone === 'danger' && value > 0 ? 'bg-danger text-on-danger' : 'bg-paper-2',
+              'font-display text-4xl font-bold tabular-nums',
+              tone === 'danger' && (value ?? 0) > 0 && 'text-danger',
             )}
           >
-            {icon}
-          </span>
-        </div>
-        <p
-          className={cn(
-            'font-display text-4xl font-bold tabular-nums',
-            tone === 'danger' && value > 0 && 'text-danger',
-          )}
-        >
-          {value}
-        </p>
-      </SpotlightCard>
-    </Link>
+            {value}
+          </p>
+        </SpotlightCard>
+      </Link>
+    </TiltCard>
   );
 }
 
@@ -233,42 +253,36 @@ export default function DashboardPage() {
         <section className="solid-panel">
           <ErrorState error={summary.error} onRetry={() => void summary.refetch()} />
         </section>
-      ) : !summary.data ? (
-        <div className="flex flex-col gap-4" aria-busy="true" aria-label="Loading dashboard">
-          <Skeleton className="h-48" />
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {Array.from({ length: 4 }, (_, i) => (
-              <Skeleton key={i} className="h-28" />
-            ))}
-          </div>
-        </div>
       ) : (
         <>
-          <UnresolvedHero summary={summary.data} />
+          {/* Frames render at once; numbers fill in. Keeps layout stable and paints early. */}
+          <div aria-busy={summary.data ? undefined : true}>
+            <UnresolvedHero summary={summary.data} />
+          </div>
           <section aria-label="Key numbers" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <Kpi
               label="SLA breached"
-              value={summary.data.slaBreached}
+              value={summary.data?.slaBreached}
               to="/tickets?slaBreached=true&sort=slaDueAt%2Casc"
               icon={<AlertOctagon className="size-4" />}
               tone="danger"
             />
             <Kpi
               label="Escalated"
-              value={summary.data.escalated}
+              value={summary.data?.escalated}
               to="/tickets?escalated=true"
               icon={<Flame className="size-4" />}
               tone="danger"
             />
             <Kpi
               label="Unassigned"
-              value={summary.data.unassigned}
+              value={summary.data?.unassigned}
               to="/tickets?unassigned=true"
               icon={<Inbox className="size-4" />}
             />
             <Kpi
               label="My open tickets"
-              value={summary.data.myOpen}
+              value={summary.data?.myOpen}
               to="/tickets?mine=true&status=OPEN&status=IN_PROGRESS"
               icon={<UserRound className="size-4" />}
             />
@@ -279,13 +293,30 @@ export default function DashboardPage() {
       <div
         className={cn('grid gap-6', canSeeWorkload && 'xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]')}
       >
-        <Suspense fallback={<Skeleton className="h-[22rem]" />}>
-          <TrendChart />
-        </Suspense>
+        <Card>
+          <CardHeader>
+            <CardTitle>Created vs resolved · last 14 days</CardTitle>
+          </CardHeader>
+          <CardBody>
+            {/* Recharts is ~120 kB; fetch it only once the chart is about to be seen. */}
+            <WhenVisible
+              fallback={<Skeleton className="h-64" />}
+              ready={!summary.isPending}
+              delay={800}
+            >
+              <Suspense fallback={<Skeleton className="h-64" />}>
+                <TrendChart />
+              </Suspense>
+            </WhenVisible>
+          </CardBody>
+        </Card>
         {canSeeWorkload && <WorkloadCard />}
       </div>
 
-      <TicketBrowser title="Queue" compact />
+      {/* Below the fold everywhere: load it after the key numbers so it doesn't slow first paint. */}
+      <WhenVisible fallback={<Skeleton className="h-96" />} ready={!summary.isPending} delay={800}>
+        <TicketBrowser title="Queue" compact />
+      </WhenVisible>
     </div>
   );
 }

@@ -76,3 +76,8 @@ if (typeof window.matchMedia !== 'function') {
       dispatchEvent: () => false,
     }) as unknown as MediaQueryList;
 }
+
+// jsdom has no scrollIntoView (cmdk scrolls the active palette item into view).
+if (typeof Element.prototype.scrollIntoView !== 'function') {
+  Element.prototype.scrollIntoView = () => undefined;
+}

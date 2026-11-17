@@ -89,6 +89,32 @@ only `font-src 'self'` (found during the Phase 7 browser check).
 Below `lg` (1024 px) the sidebar becomes a drawer (menu button, Esc or a tap outside closes it).
 A thin brand-coloured bar shows while a lazy route chunk loads.
 
-### Motion and 3D *(Phase 9)*
+### Motion and 3D (Phase 9, [ADR-024](decisions/ADR-024-motion-and-3d-budget.md))
 
-_Filled in Phase 9._
+| Where | What | Reduced motion / fallback |
+|---|---|---|
+| Login (desktop) | R3F scene: the knot untangles into the checkmark (right end first, like pulling a string), four floating glass ticket cards, cursor parallax | static brand panel (also without WebGL, on < 4 cores, Save-Data or < 1024 px) |
+| Every signed-in page | `.app-backdrop`: three blurred colour fields drifting (transform only), paused when the tab is hidden; header and nav are glass over it | frozen |
+| Route change | page fades and rises 6 px (`animate-rise`) | none |
+| Ticket list → detail | the ticket number morphs into the header (`<ViewTransition name="ticket-…">`) | instant |
+| Lists (tickets, timeline) | staggered rise, first 10 items only (`stagger()`) | none |
+| KPI cards | pointer tilt (`TiltCard`), SpotlightCard glow | flat |
+| Status stepper | spring on the progress line and active step | instant |
+| Resolve | spark burst from the centre | none |
+
+Motion timing tokens: 120 / 200 / 360 ms with `--ut-ease`. Durations stay short so the UI never
+waits on an animation.
+
+### Performance rules
+
+- Every route is its own chunk; three.js, Recharts, cmdk (palette) and Motion are never in the
+  main bundle.
+- Dashboard frames render at once with placeholder numbers (no layout shift); the chart and the
+  queue load after the key numbers, when visible.
+- `make lighthouse` measures the signed-in dashboard (mobile + desktop).
+
+### Gotcha: unknown Tailwind classes are silently ignored
+
+Lighthouse caught critical badges rendering black-on-red: components used `text-prio-critical-fg`
+but the theme only defined `--color-prio-critical`. The theme now defines the `-fg` names too.
+When adding colour utilities, check the class exists in `@theme`.

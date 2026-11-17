@@ -48,7 +48,7 @@ make frontend-dev    # terminal 2 → http://localhost:5173
 | 6 | AI assistance (Groq, optional) | ✅ |
 | 7 | Frontend foundation: design tokens, primitives, auth, API client, shell | ✅ |
 | 8 | Screens: dashboard, tickets, detail, create, board, admin | ✅ |
-| 9 | 3D, motion, accessibility and performance polish | ⏳ next |
+| 9 | 3D, motion, accessibility and performance polish | ✅ |
 | 10–11 | Hardening, E2E, docs and demo | |
 
 ## Documentation

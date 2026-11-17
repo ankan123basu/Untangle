@@ -35,6 +35,9 @@
 > - Phase 8: the dashboard and /tickets share one URL-synced ticket table; Kanban (bonus) included,
 >   with a keyboard "Move to…" alternative to drag-and-drop; the resolve micro-interaction is a small
 >   first-party spark burst (reduced-motion aware) until Phase 9 decides on React Bits ClickSpark.
+> - Phase 9 (ADR-024): no drei; app background is CSS (not Aurora); resolve sparks stay first-party
+>   (not ClickSpark); shared element via React `<ViewTransition>` instead of Motion `layoutId`; route
+>   transition in CSS; Motion only in the ticket-detail chunk. Lighthouse: desktop 100/100, mobile 91/100.
 
 ---
 
