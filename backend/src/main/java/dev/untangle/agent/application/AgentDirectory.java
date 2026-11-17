@@ -32,6 +32,14 @@ public class AgentDirectory {
     return agents.findById(agentId).map(AgentSnapshot::of);
   }
 
+  /** Active leads, who are told about escalations and SLA breaches. */
+  @Transactional(readOnly = true)
+  public java.util.List<UUID> activeLeadIds() {
+    return agents.findAllByRoleAndActiveTrue(dev.untangle.agent.domain.Role.LEAD).stream()
+        .map(dev.untangle.agent.domain.Agent::getId)
+        .toList();
+  }
+
   /** Uncached, for decisions that must see the latest state (token refresh). */
   @Transactional(readOnly = true)
   public Optional<AgentSnapshot> findFresh(UUID agentId) {
