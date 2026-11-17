@@ -41,4 +41,15 @@ stateDiagram-v2
 - While `CLOSED`, every mutation except reopen → `409 TICKET_CLOSED` (one guard in the service layer).
 - `GET /tickets/{id}` returns `allowedActions`, computed from this table **and** the caller's role.
 
-Implementation (`TicketStateMachine`) and the exhaustive transition tests arrive in **Phase 3**.
+### Implementation (Phase 3)
+
+| Piece | Responsibility | Tests |
+|---|---|---|
+| `TicketStateMachine` (domain) | the table above; which moves need a reason or a note | `TicketStateMachineTest`: all 16 from→to pairs |
+| `Ticket` behaviour methods | closed guard; lifecycle timestamps (`first_response_at`, `resolved_at`, `closed_at`); release clears the assignee; reopen restarts the SLA and resets escalation | via HTTP tests |
+| `TicketAccessPolicy` (security) | who may perform each action now; produces `allowedActions` / `deniedActions` | `TicketAccessPolicyTest`: 37 role × ownership × status cases |
+| `TicketService` | order: load → closed → version → policy → input checks → mutate → timeline → event | `TicketLifecycleIntegrationTest` (42) |
+
+Reasons the UI shows for disabled actions: `TICKET_CLOSED`, `ACCESS_DENIED`,
+`INVALID_STATUS_TRANSITION`, `ASSIGNEE_REQUIRED`
+([ADR-015](decisions/ADR-015-allowed-actions-from-server.md)).
