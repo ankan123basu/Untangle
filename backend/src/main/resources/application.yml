@@ -139,6 +139,18 @@ app:
     per-ip-limit:
       capacity: 300
       period: 1m
+  ai:
+    # Optional (§10). Off unless AI_ENABLED=true AND GROQ_API_KEY is set; the app works fully without it.
+    enabled: ${AI_ENABLED:false}
+    api-key: ${GROQ_API_KEY:}
+    base-url: ${GROQ_BASE_URL:https://api.groq.com/openai/v1}
+    # Check https://console.groq.com/docs/models (or GET {base-url}/models) for current production models.
+    model: ${GROQ_MODEL:openai/gpt-oss-20b}
+    timeout: 8s
+    max-tokens: 800
+    per-user-limit:
+      capacity: 20
+      period: 1m
   escalation:
     # One instance runs the SLA scan each minute (ShedLock). Level n = n × SLA target since clock start.
     scheduler-enabled: true

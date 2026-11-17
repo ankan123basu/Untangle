@@ -80,7 +80,11 @@ public class TicketAiInsight extends BaseEntity {
       Agent createdBy) {
     this.ticket = ticket;
     this.kind = Objects.requireNonNull(kind, "kind");
-    this.content = Map.copyOf(Objects.requireNonNull(content, "content"));
+    // Not Map.copyOf: suggestion fields may legitimately be null (e.g. an invalid enum was
+    // dropped).
+    this.content =
+        java.util.Collections.unmodifiableMap(
+            new java.util.LinkedHashMap<>(Objects.requireNonNull(content, "content")));
     this.model = Objects.requireNonNull(model, "model");
     this.promptVersion = Objects.requireNonNull(promptVersion, "promptVersion");
     this.createdBy = createdBy;
