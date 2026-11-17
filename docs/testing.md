@@ -49,6 +49,17 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   database with the seed applied.
 - Docker must be running for `make test` (Testcontainers). CI runners have Docker.
 
+### Phase 3 additions (backend total: 320 tests)
+
+| Class | Tests | Proves |
+|---|---|---|
+| `TicketStateMachineTest` | 22 | the §5.1 table (16 pairs) and reason/note rules |
+| `TicketAccessPolicyTest` | 37 | role × ownership × status → allowed or exact reason code (pure unit test, no Spring) |
+| `TicketLifecycleIntegrationTest` | 42 | create/validate, full lifecycle, every rule violation, closed immutability, versions, concurrent self-assign, comments, escalation, bulk assign |
+| `TicketQueryIntegrationTest` | 26 | every filter, search escaping, severity sort, paging metadata, invalid parameters |
+| `DashboardIntegrationTest` | 4 | zeros, counts = list totals, trends with gaps, workload permission |
+| `EndpointAuthorizationMatrixTest` | +12 | ticket and dashboard endpoints in the role matrix |
+
 ### Phase 2 additions (backend total: 177 tests)
 
 | Class | Tests | Proves |

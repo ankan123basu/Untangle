@@ -33,14 +33,29 @@ Test classes live in `backend/src/test/java/dev/untangle/`.
 | IN_PROGRESS without an assignee | rejected by DB | `rejectsInProgressTicketWithoutAssignee` | ✅ DB |
 | Comment edited after the fact | rejected (append-only) | `commentsCannotBeEdited` | ✅ DB |
 | Human comment without author | rejected | `humanCommentsRequireAnAuthor` | ✅ DB |
-| Every allowed/disallowed transition, same-status, resolve without note, each mutation on CLOSED → 409, reopen rules, SLA recalculation, scheduler idempotency | see §5 | — | Phases 3, 5 |
+| Every one of the 16 from→to pairs | allowed exactly per §5.1 | `TicketStateMachineTest.matchesTheTransitionTable` (16) | ✅ |
+| Full happy path incl. reopen | timeline has every step | `TicketLifecycleIntegrationTest.fullLifecycleFromIntakeToReopen` | ✅ |
+| Disallowed transitions (6 cases incl. same-status) | 409 `INVALID_STATUS_TRANSITION` | `rejectsDisallowedTransitions` | ✅ |
+| IN_PROGRESS without an assignee | 409 `ASSIGNEE_REQUIRED` | `cannotStartWorkOnAnUnassignedTicket` | ✅ |
+| Resolve without a note (blank counts) | 400 `RESOLUTION_NOTE_REQUIRED` | `resolvingRequiresANote` | ✅ |
+| OPEN→CLOSED / RESOLVED→IN_PROGRESS without reason | 400, `errors[reason]` | `closingAnOpenTicketNeedsAReason`, `returningToProgressNeedsAReason` | ✅ |
+| Each mutation on CLOSED (edit, assign, comment, escalate, 2 transitions) | 409 `TICKET_CLOSED` | `closedTicketsRejectEveryMutation` (6) + policy tests | ✅ |
+| Reopen a non-closed ticket / without reason | 409 / 400 | `reopeningANonClosedTicketIs409AndNeedsAReason` | ✅ |
+| Reopen when the previous assignee is deactivated | assignee cleared (R5) | `reopenDropsADeactivatedAssignee` | ✅ |
+| SLA recalculated on priority change | same start, new target | `priorityChangeRecalculatesTheSlaFromTheSameStart` | ✅ |
+| Release (IN_PROGRESS→OPEN) | assignee cleared | `releaseClearsTheAssignee` | ✅ |
+| Agent acting on another agent's ticket | 403 (comment still allowed) | `agentsCannotWorkOtherAgentsTickets` + policy tests | ✅ |
+| Unassign non-OPEN / assign to deactivated agent | 409 `ASSIGNEE_REQUIRED` / `AGENT_INACTIVE` | `assignmentRules` | ✅ |
+| `allowedActions` per role, ownership, status | matches policy | `allowedActionsReflectRoleOwnershipAndState`, `TicketAccessPolicyTest` (37) | ✅ |
+| Scheduler escalates once per level | idempotent | — | Phase 5 |
 
 ### Concurrency
 
 | Case | Expected | Test | Status |
 |---|---|---|---|
-| Two updates with the same version | first wins, second fails | `ConcurrencyIntegrationTest.staleUpdateIsRejectedByOptimisticLocking` | ✅ DB (→ 409 in Phase 3) |
-| Two agents self-assigning at once | one wins | — | Phase 3 |
+| Two updates with the same version | first wins, second fails | `ConcurrencyIntegrationTest.staleUpdateIsRejectedByOptimisticLocking` | ✅ DB |
+| Stale `version` over HTTP | 409 `VERSION_CONFLICT` + `currentVersion` | `TicketLifecycleIntegrationTest.staleVersionIsAConflict` | ✅ |
+| Two agents self-assigning at once | one 200, one 409 | `twoAgentsSelfAssigningAtOnceOnlyOneWins` | ✅ |
 
 ### Validation
 
@@ -52,7 +67,14 @@ Test classes live in `backend/src/test/java/dev/untangle/`.
 | Unknown status / role | rejected | `rejectsUnknownStatus`, `rejectsUnknownRole` | ✅ DB |
 | Description shorter than 10 chars | rejected | `rejectsTooShortDescription` | ✅ DB |
 | Duplicate agent email in different case | rejected | `agentEmailsAreUniqueIgnoringCase` | ✅ DB |
-| 400 field errors, HTML in comments, unknown filters, empty results, page size > 100 | see §5.3/§9 | — | Phase 3 |
+| Priority `high` / `URGENT` / null / `""`, unknown category, blank customer name, short subject, bad email | 400 with that field | `TicketLifecycleIntegrationTest.rejectsInvalidTickets` (8) | ✅ |
+| Description > 5000 chars | 400 | `rejectsADescriptionOver5000Characters` | ✅ |
+| HTML/script in a comment | stored verbatim, served as JSON text (`nosniff`); UI renders as text (Phase 8 test) | `commentsAreStoredVerbatimAndServedAsJsonText` | ✅ API |
+| SYSTEM comment via API | 400 | `systemCommentsCannotBeCreatedThroughTheApi` | ✅ |
+| Unknown filter values, bad sort, bad dates, page < 0 | 400 with field | `TicketQueryIntegrationTest.rejectsInvalidParameters` (8) | ✅ |
+| Page size > 100 | **rejected** with 400 (documented choice: clients learn instead of silently getting fewer rows) | same | ✅ |
+| Empty filter results | 200, empty `content` | `filtersNewestFirstByDefault` (last rows) | ✅ |
+| `%`/`_` in search | treated literally | `filtersNewestFirstByDefault` (`q=100%`, `q=_`) | ✅ |
 
 ### Data integrity extras (added in Phase 1)
 
@@ -98,6 +120,15 @@ Test classes: `AuthIntegrationTest` (A), `AgentAdminIntegrationTest` (G),
 | Log injection via `X-Request-Id` | id replaced | E `unsafeRequestIdsAreReplaced` | ✅ |
 | Two admins demoting each other at once | one fails with `LAST_ADMIN` (row lock) | design: `lockActiveByRole` `FOR UPDATE` | ⚠️ not yet a concurrent test (Phase 10) |
 
-### Dashboard, AI
+### Dashboard (Phase 3)
 
-Phases 3 and 6.
+| Case | Expected | Test | Status |
+|---|---|---|---|
+| Zero tickets | zeros for every key, not errors | `DashboardIntegrationTest.zeroTicketsMeansZerosNotErrors` | ✅ |
+| Counts match the filtered list exactly | unresolved, breached, escalated, unassigned, mine, by status, by priority | `everyCountMatchesTheEquivalentListFilter` | ✅ |
+| Trend days without tickets | present with 0 | `trendsCoverEveryDayIncludingEmptyOnes` | ✅ |
+| Workload for agents | 403 | `workloadIsForLeadsAndCountsPerAgent` | ✅ |
+
+### AI
+
+Phase 6.

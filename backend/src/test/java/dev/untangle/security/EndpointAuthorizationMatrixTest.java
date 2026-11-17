@@ -23,7 +23,8 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
  *
  * <p>"allowed" means the request got past authorisation, i.e. any status except 401/403. The bodies
  * are deliberately minimal, so an allowed call may still end in 400/404/409; that's fine, because
- * this test is only about the authorisation decision. Ticket endpoints join the matrix in Phase 3.
+ * this test is only about the authorisation decision. Per-ticket rules (ownership, state) are
+ * covered by TicketAccessPolicyTest and TicketLifecycleIntegrationTest.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EndpointAuthorizationMatrixTest extends IntegrationTest {
@@ -66,6 +67,16 @@ class EndpointAuthorizationMatrixTest extends IntegrationTest {
           AGENT   | PATCH  | /api/v1/agents/{id}/active    | false   | {"active":false}
           LEAD    | PATCH  | /api/v1/agents/{id}/active    | false   | {"active":false}
           ADMIN   | PATCH  | /api/v1/agents/{id}/active    | true    | {"active":false}
+          AGENT   | GET    | /api/v1/tickets               | true    |
+          AGENT   | POST   | /api/v1/tickets               | true    | {}
+          AGENT   | GET    | /api/v1/dashboard/summary     | true    |
+          AGENT   | GET    | /api/v1/dashboard/trends      | true    |
+          AGENT   | GET    | /api/v1/dashboard/agents-workload | false |
+          LEAD    | GET    | /api/v1/dashboard/agents-workload | true  |
+          ADMIN   | GET    | /api/v1/dashboard/agents-workload | true  |
+          AGENT   | POST   | /api/v1/tickets/bulk/assign   | false   | {}
+          LEAD    | POST   | /api/v1/tickets/bulk/assign   | true    | {}
+          ADMIN   | POST   | /api/v1/tickets/bulk/assign   | true    | {}
           """)
   void enforcesThePermissionMatrix(
       Role role, HttpMethod method, String path, boolean allowed, String body) {
@@ -93,6 +104,8 @@ class EndpointAuthorizationMatrixTest extends IntegrationTest {
     "GET, /api/v1/agents",
     "GET, /api/v1/admin/agents",
     "POST, /api/v1/agents",
+    "GET, /api/v1/tickets",
+    "GET, /api/v1/dashboard/summary",
   })
   void anonymousCallersAreRejected(HttpMethod method, String path) {
     assertThat(mvc.method(method).uri(path)).hasStatus(401);

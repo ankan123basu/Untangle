@@ -34,6 +34,7 @@ public final class TestData {
         Category.ACCOUNT,
         Priority.HIGH,
         creator,
+        Instant.now(),
         Instant.now().plus(4, ChronoUnit.HOURS));
   }
 
@@ -47,6 +48,7 @@ public final class TestData {
         Priority.MEDIUM,
         partner,
         eventId,
+        Instant.now(),
         Instant.now().plus(24, ChronoUnit.HOURS));
   }
 }

@@ -4,8 +4,8 @@
 
 The backend is a JSON API under `/api/v1`. You sign in once, get an access token, and send it with
 every request as `Authorization: Bearer <token>`. Every error has the same shape and a short
-**code** (like `LAST_ADMIN`) that tells the app exactly what went wrong. From Phase 3, Swagger UI at
-`/swagger-ui` lists every endpoint interactively.
+**code** (like `LAST_ADMIN`) that tells the app exactly what went wrong. Swagger UI at `/swagger-ui` lists
+every endpoint interactively.
 
 ## Technical details
 
@@ -59,8 +59,13 @@ Rejected values are never echoed.
 | `LAST_ADMIN` | 409 | demoting the last active admin |
 | `CANNOT_DEACTIVATE_SELF` | 409 | |
 | `AGENT_HAS_OPEN_TICKETS` | 409 | deactivating an agent with OPEN/IN_PROGRESS tickets |
-| `VERSION_CONFLICT` | 409 | stale `version` (Phase 3) |
-| `TICKET_*`, `INVALID_STATUS_TRANSITION`, `RESOLUTION_NOTE_REQUIRED`, `ASSIGNEE_REQUIRED`, `AGENT_INACTIVE` | | Phase 3 |
+| `VERSION_CONFLICT` | 409 | the `version` you sent is stale; body has `currentVersion` |
+| `TICKET_NOT_FOUND` | 404 | |
+| `TICKET_CLOSED` | 409 | any mutation of a CLOSED ticket except reopen |
+| `INVALID_STATUS_TRANSITION` | 409 | move not in the state machine (incl. same status; reopen of a non-closed ticket) |
+| `RESOLUTION_NOTE_REQUIRED` | 400 | resolving without a note |
+| `ASSIGNEE_REQUIRED` | 409 | starting work on an unassigned ticket; unassigning a non-OPEN ticket |
+| `AGENT_INACTIVE` | 409 | assigning to a deactivated agent |
 | `WEBHOOK_REJECTED`, `PAYLOAD_TOO_LARGE` | 401 / 413 | Phase 4 |
 | `AI_UNAVAILABLE` | 503 | Phase 6 |
 | `INTERNAL_ERROR` | 500 | unexpected; quote `traceId` |
@@ -103,6 +108,53 @@ Source of truth: `ErrorCode.java`.
 The admin list lives at `/admin/agents`, next to `/admin/partners` (Phase 4), rather than as a
 role-dependent shape of `GET /agents`. That keeps one response type per endpoint, which is cleaner
 for generated client types.
+
+### Tickets: `/api/v1/tickets`
+
+| Method & path | Permission | Body | Notes |
+|---|---|---|---|
+| `GET /` | `TICKET_VIEW` | — | filters below; `PageResponse<TicketSummary>` |
+| `POST /` | `TICKET_CREATE` | `{subject 5–150, description 10–5000, customerName 2–120, customerEmail?, category, priority, assigneeId?}` | `201` + `Location`; agents may set `assigneeId` only to themselves |
+| `GET /{id}` | `TICKET_VIEW` | — | `TicketDetail` incl. `allowedActions`, `deniedActions[{action, reason}]`, `slaRemainingSeconds`, `version` |
+| `GET /by-number/{UNT-000123}` | `TICKET_VIEW` | — | case-insensitive |
+| `PATCH /{id}` | policy `EDIT` | `{subject?, description?, category?, priority?, version}` | priority change recomputes `slaDueAt` |
+| `PUT /{id}/assignee` | policy `ASSIGN` / `SELF_ASSIGN` | `{agentId \| null, version}` | |
+| `POST /{id}/transitions` | policy per action | `{targetStatus, note?, reason?, version}` | note for →RESOLVED; reason for OPEN→CLOSED, RESOLVED→IN_PROGRESS |
+| `POST /{id}/reopen` | `TICKET_REOPEN` | `{reason, version}` | CLOSED → OPEN only |
+| `POST /{id}/escalate` | policy `ESCALATE` | `{reason}` | OPEN/IN_PROGRESS only |
+| `GET /{id}/comments` | `TICKET_VIEW` | — | timeline oldest first: `{id, type, body, author?, metadata?, createdAt}` |
+| `POST /{id}/comments` | policy `COMMENT` | `{body 1–5000, type: COMMENT \| RESOLUTION_NOTE}` | `201`; `SYSTEM` can't be created via API |
+| `POST /bulk/assign` | `TICKET_ASSIGN_ANY` | `{ticketIds[≤200], agentId}` | `{assigned[], skipped[{ticketId, reason}]}` |
+
+**List filters** (all optional, combinable): `status` (repeatable), `priority` (repeatable),
+`category` (repeatable), `assigneeId`, `unassigned=true`, `mine=true`, `escalated=true`,
+`slaBreached=true`, `q` (case-insensitive contains over number, subject, customer, description;
+`%` and `_` are literal), `createdFrom`, `createdTo` (ISO-8601).
+
+**Paging and sorting:** `page` ≥ 0, `size` 1–100 (**values > 100 are rejected with 400, not
+clamped**, so clients find out), `sort=field[,asc|desc]` with field ∈ `createdAt` (default desc),
+`updatedAt`, `priority` (by severity), `status` (lifecycle order), `slaDueAt`, `ticketNumber`.
+Unknown values → 400 with `errors[].field`.
+
+**Allowed actions:** `EDIT, ASSIGN, SELF_ASSIGN, START_PROGRESS, RELEASE, RESOLVE,
+RETURN_TO_PROGRESS, CLOSE, REOPEN, COMMENT, ESCALATE`
+([ADR-015](decisions/ADR-015-allowed-actions-from-server.md)).
+
+### Dashboard: `/api/v1/dashboard`
+
+| Method & path | Permission | Response |
+|---|---|---|
+| `GET /summary` | `DASHBOARD_VIEW` | `{unresolved, byStatus{4}, unresolvedByPriority{4}, slaBreached, escalated, unassigned, myOpen, generatedAt}` |
+| `GET /trends?days=14` | `DASHBOARD_VIEW` | `[{date, created, resolved}]` per UTC day, zeros included; `days` 1–90 |
+| `GET /agents-workload` | `AGENT_WORKLOAD_VIEW` (leads/admins) | `[{agentId, fullName, role, open, inProgress, breached, total}]` |
+
+Every summary number equals the `totalElements` of the matching list query (same
+Specifications, tested).
+
+### Swagger / OpenAPI
+
+Interactive docs: <http://localhost:8080/swagger-ui> · machine-readable spec:
+<http://localhost:8080/v3/api-docs>. Click *Authorize* and paste an access token.
 
 ### Ops
 

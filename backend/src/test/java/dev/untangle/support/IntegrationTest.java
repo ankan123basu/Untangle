@@ -103,6 +103,52 @@ public abstract class IntegrationTest {
     return cookie == null ? request.exchange() : request.cookie(cookie).exchange();
   }
 
+  // ---- Generic HTTP helpers -----------------------------------------------------------------
+
+  protected MvcTestResult call(
+      org.springframework.http.HttpMethod method, String uri, String bearer, String jsonBody) {
+    var request = mvc.method(method).uri(uri);
+    if (bearer != null) {
+      request = request.header(org.springframework.http.HttpHeaders.AUTHORIZATION, bearer);
+    }
+    if (jsonBody != null) {
+      request = request.contentType(MediaType.APPLICATION_JSON).content(jsonBody);
+    }
+    return request.exchange();
+  }
+
+  protected MvcTestResult get(String uri, String bearer) {
+    return call(org.springframework.http.HttpMethod.GET, uri, bearer, null);
+  }
+
+  protected MvcTestResult post(String uri, String bearer, String json) {
+    return call(org.springframework.http.HttpMethod.POST, uri, bearer, json);
+  }
+
+  // ---- Tickets ------------------------------------------------------------------------------
+
+  public static final String VALID_TICKET =
+      """
+      {"subject":"Card blocked abroad","description":"My card was blocked while travelling.",
+       "customerName":"Rahul Sharma","customerEmail":"rahul@example.com",
+       "category":"ACCOUNT","priority":"HIGH"}\
+      """;
+
+  /** Creates a ticket through the API and returns its detail response. */
+  protected MvcTestResult createTicket(String bearer) {
+    MvcTestResult result = post("/api/v1/tickets", bearer, VALID_TICKET);
+    assertThat(result).hasStatus(201);
+    return result;
+  }
+
+  protected static String id(MvcTestResult ticket) {
+    return json(ticket, "$.id");
+  }
+
+  protected static long version(MvcTestResult ticket) {
+    return ((Number) json(ticket, "$.version")).longValue();
+  }
+
   // ---- JSON ---------------------------------------------------------------------------------
 
   protected static <T> T json(MvcTestResult result, String path) {

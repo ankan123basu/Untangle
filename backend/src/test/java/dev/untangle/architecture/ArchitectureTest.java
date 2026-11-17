@@ -5,6 +5,8 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
+import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
@@ -25,6 +27,16 @@ class ArchitectureTest {
   private static final String ROOT = "dev.untangle";
   private static JavaClasses mainClasses;
 
+  /**
+   * Classes in {@code dev.untangle.<feature>.<layer>..}. The shared {@code common} package (e.g.
+   * {@code common.api.PageResponse}) is not a feature, so it is excluded from the layer rules.
+   */
+  private static DescribedPredicate<JavaClass> featureLayer(String layer) {
+    return JavaClass.Predicates.resideInAPackage(ROOT + ".." + layer + "..")
+        .and(DescribedPredicate.not(JavaClass.Predicates.resideInAPackage(ROOT + ".common..")))
+        .as("feature " + layer + " layer");
+  }
+
   @BeforeAll
   static void importMainCode() {
     mainClasses =
@@ -44,13 +56,13 @@ class ArchitectureTest {
         .consideringOnlyDependenciesInLayers()
         .withOptionalLayers(true)
         .layer("Api")
-        .definedBy(ROOT + "..api..")
+        .definedBy(featureLayer("api"))
         .layer("Application")
-        .definedBy(ROOT + "..application..")
+        .definedBy(featureLayer("application"))
         .layer("Domain")
-        .definedBy(ROOT + "..domain..")
+        .definedBy(featureLayer("domain"))
         .layer("Infrastructure")
-        .definedBy(ROOT + "..infrastructure..")
+        .definedBy(featureLayer("infrastructure"))
         .whereLayer("Api")
         .mayNotBeAccessedByAnyLayer()
         .whereLayer("Application")

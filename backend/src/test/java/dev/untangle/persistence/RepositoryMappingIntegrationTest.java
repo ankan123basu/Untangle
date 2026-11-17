@@ -162,7 +162,7 @@ class RepositoryMappingIntegrationTest extends IntegrationTest {
             Map.of("event", "SLA_BREACH", "level", 1)));
     flushAndClear();
 
-    var timeline = comments.findByTicketIdOrderByCreatedAtAsc(ticket.getId());
+    var timeline = comments.findByTicketIdOrderByCreatedAtAscIdAsc(ticket.getId());
 
     assertThat(timeline)
         .extracting(TicketComment::getType)
