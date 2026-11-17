@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import dev.untangle.common.error.RateLimitExceededException;
+import dev.untangle.common.ratelimit.LocalBucketSource;
 import dev.untangle.common.ratelimit.RateLimitPolicy;
 import dev.untangle.common.ratelimit.RateLimiter;
 import dev.untangle.common.util.Masking;
@@ -29,7 +30,7 @@ class CommonUtilitiesTest {
 
   @Test
   void rateLimiterAllowsUpToCapacityThenRejectsWithRetryAfter() {
-    RateLimiter limiter = new RateLimiter();
+    RateLimiter limiter = new RateLimiter(new LocalBucketSource());
     RateLimitPolicy threePerMinute = new RateLimitPolicy(3, Duration.ofMinutes(1));
 
     for (int i = 0; i < 3; i++) {
@@ -44,7 +45,7 @@ class CommonUtilitiesTest {
 
   @Test
   void rateLimiterKeysAreIndependent() {
-    RateLimiter limiter = new RateLimiter();
+    RateLimiter limiter = new RateLimiter(new LocalBucketSource());
     RateLimitPolicy onePerMinute = new RateLimitPolicy(1, Duration.ofMinutes(1));
 
     limiter.consume("test", onePerMinute, "key-a");

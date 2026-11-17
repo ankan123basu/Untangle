@@ -14,6 +14,8 @@ import dev.untangle.webhook.domain.Partner;
 import dev.untangle.webhook.hmac.HmacSignatures;
 import dev.untangle.webhook.infrastructure.PartnerRepository;
 import dev.untangle.webhook.infrastructure.WebhookDeliveryRepository;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import java.time.Clock;
@@ -66,6 +68,7 @@ public class WebhookService {
   private final SecretCipher cipher;
   private final TicketService ticketService;
   private final DeliveryRecorder recorder;
+  private final MeterRegistry meters;
   private final RateLimiter rateLimiter;
   private final WebhookProperties properties;
   private final JsonMapper jsonMapper;
@@ -82,7 +85,9 @@ public class WebhookService {
       WebhookProperties properties,
       JsonMapper jsonMapper,
       Validator validator,
-      Clock clock) {
+      Clock clock,
+      MeterRegistry meters) {
+    this.meters = meters;
     this.partners = partners;
     this.deliveries = deliveries;
     this.cipher = cipher;
@@ -95,7 +100,17 @@ public class WebhookService {
     this.clock = clock;
   }
 
+  /** Times the whole pipeline ({@code webhook_processing_seconds}), whatever the outcome. */
   public WebhookResponse receive(Headers h, byte[] body, String sourceIp) {
+    Timer.Sample sample = Timer.start(meters);
+    try {
+      return process(h, body, sourceIp);
+    } finally {
+      sample.stop(meters.timer("webhook.processing"));
+    }
+  }
+
+  private WebhookResponse process(Headers h, byte[] body, String sourceIp) {
     String bodyHash = HmacSignatures.sha256Hex(body);
     Attempt attempt = new Attempt(h, sourceIp, bodyHash);
 

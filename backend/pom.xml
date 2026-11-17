@@ -49,10 +49,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        <!-- Health checks (liveness/readiness) and, later, metrics -->
+        <!-- Health checks (liveness/readiness) and Micrometer metrics -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!-- Prometheus format for /actuator/prometheus (version managed by the Micrometer BOM) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
         <!-- ===== Security ===== -->
@@ -74,6 +79,17 @@
         <dependency>
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
+        </dependency>
+        <!-- Optional Redis profile (§15): shared dashboard cache + cluster-wide rate limits.
+             Auto-configuration is excluded unless the "redis" profile is active. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-lettuce</artifactId>
             <version>${bucket4j.version}</version>
         </dependency>
 
@@ -284,7 +300,7 @@
                 </executions>
             </plugin>
 
-            <!-- Code coverage report (thresholds are enforced from Phase 10) -->
+            <!-- Code coverage report + enforced thresholds (Phase 10) -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -302,6 +318,49 @@
                             <goal>report</goal>
                         </goals>
                         <phase>verify</phase>
+                    </execution>
+                    <!-- Quality gate (§14 Phase 10): `mvn verify` fails below these numbers. -->
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>verify</phase>
+                        <configuration>
+                            <rules>
+                                <!-- Every service (application) and domain package: >= 80% lines. -->
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <includes>
+                                        <include>dev.untangle.*.application</include>
+                                        <include>dev.untangle.*.domain</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <!-- The whole backend: >= 80% lines, >= 65% branches. -->
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.65</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

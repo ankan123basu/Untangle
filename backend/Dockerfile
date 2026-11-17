@@ -39,13 +39,14 @@ COPY --from=build /workspace/extracted/snapshot-dependencies/ ./
 COPY --from=build /workspace/extracted/application/ ./
 
 USER untangle:untangle
-EXPOSE 8080
+# 8080: API + /livez and /readyz. 8081: actuator incl. /actuator/prometheus (internal only).
+EXPOSE 8080 8081
 
 # Container-aware JVM: size the heap from the container memory limit, and crash (so Docker
 # restarts us) instead of limping along after an OutOfMemoryError.
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=40s --retries=5 \
-  CMD curl -fsS http://localhost:8080/actuator/health/readiness || exit 1
+  CMD curl -fsS http://localhost:8080/readyz || exit 1
 
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]

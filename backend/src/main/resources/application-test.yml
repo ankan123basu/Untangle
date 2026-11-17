@@ -8,6 +8,12 @@ logging:
     # WARN. Keep CI output readable; real failures still fail the assertions.
     org.hibernate.orm.jdbc.error: ERROR
 
+spring:
+  jpa:
+    properties:
+      # Lets QueryCountIntegrationTest count SQL statements (N+1 guard, §15).
+      hibernate.generate_statistics: true
+
 app:
   security:
     jwt:

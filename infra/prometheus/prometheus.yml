@@ -1,0 +1,14 @@
+# Prometheus for the `observability` Compose profile (§16).
+# Scrapes the backend's actuator on the management port (8081), which is reachable only inside the
+# Compose network; it is never published to the host.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: untangle-backend
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["backend:8081"]
+        labels:
+          service: backend

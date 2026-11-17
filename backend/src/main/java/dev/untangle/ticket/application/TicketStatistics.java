@@ -3,6 +3,7 @@ package dev.untangle.ticket.application;
 import static dev.untangle.ticket.infrastructure.TicketSpecifications.*;
 
 import dev.untangle.agent.domain.Role;
+import dev.untangle.ticket.application.DashboardCounts.TeamCounts;
 import dev.untangle.ticket.domain.Priority;
 import dev.untangle.ticket.domain.TicketStatus;
 import dev.untangle.ticket.infrastructure.TicketRepository;
@@ -10,7 +11,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -46,36 +46,26 @@ public class TicketStatistics {
 
   private final TicketRepository tickets;
   private final Clock clock;
+  private final DashboardCounts counts;
 
-  public TicketStatistics(TicketRepository tickets, Clock clock) {
+  public TicketStatistics(TicketRepository tickets, Clock clock, DashboardCounts counts) {
     this.tickets = tickets;
     this.clock = clock;
+    this.counts = counts;
   }
 
-  @Transactional(readOnly = true)
+  /** Dashboard summary: cached team counts plus this agent's open tickets (§15, 30 s TTL). */
   public Summary summary(UUID currentAgentId) {
-    Instant now = clock.instant();
-
-    Map<TicketStatus, Long> byStatus = new EnumMap<>(TicketStatus.class);
-    for (TicketStatus status : TicketStatus.values()) byStatus.put(status, 0L);
-    tickets.countByStatus().forEach(row -> byStatus.put(row.getStatus(), row.getCount()));
-
-    Map<Priority, Long> byPriority = new EnumMap<>(Priority.class);
-    for (Priority priority : Priority.values()) byPriority.put(priority, 0L);
-    tickets
-        .countByPriorityForStatuses(TicketStatus.UNRESOLVED)
-        .forEach(row -> byPriority.put(row.getPriority(), row.getCount()));
-
-    long unresolved = byStatus.get(TicketStatus.OPEN) + byStatus.get(TicketStatus.IN_PROGRESS);
+    TeamCounts team = counts.team();
     return new Summary(
-        unresolved,
-        byStatus,
-        byPriority,
-        tickets.count(slaBreached(now)),
-        tickets.count(unresolved().and(escalated())),
-        tickets.count(unresolved().and(unassigned())),
-        tickets.count(unresolved().and(assignedTo(currentAgentId))),
-        now);
+        team.unresolved(),
+        team.byStatus(),
+        team.unresolvedByPriority(),
+        team.slaBreached(),
+        team.escalated(),
+        team.unassigned(),
+        counts.myOpen(currentAgentId),
+        team.generatedAt());
   }
 
   @Transactional(readOnly = true)

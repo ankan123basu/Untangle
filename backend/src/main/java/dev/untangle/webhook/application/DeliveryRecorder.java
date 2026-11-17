@@ -5,6 +5,7 @@ import dev.untangle.webhook.domain.DeliveryOutcome;
 import dev.untangle.webhook.domain.Partner;
 import dev.untangle.webhook.domain.WebhookDelivery;
 import dev.untangle.webhook.infrastructure.WebhookDeliveryRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,11 @@ public class DeliveryRecorder {
   private static final int MAX = 128;
 
   private final WebhookDeliveryRepository deliveries;
+  private final MeterRegistry meters;
 
-  public DeliveryRecorder(WebhookDeliveryRepository deliveries) {
+  public DeliveryRecorder(WebhookDeliveryRepository deliveries, MeterRegistry meters) {
     this.deliveries = deliveries;
+    this.meters = meters;
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -49,6 +52,8 @@ public class DeliveryRecorder {
             .sourceIp(truncate(sourceIp, 45))
             .payloadSha256(payloadSha256)
             .build());
+    // webhook_requests_total{outcome}: every exit of the pipeline passes through here (§7.2).
+    meters.counter("webhook.requests", "outcome", outcome.name()).increment();
     if (outcome == DeliveryOutcome.CREATED || outcome == DeliveryOutcome.DUPLICATE) {
       log.info("Webhook {} partner={} event={}", outcome, partnerCodeRaw, eventId);
     } else {

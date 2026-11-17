@@ -6,6 +6,16 @@
 spring:
   application:
     name: untangle
+  autoconfigure:
+    # Redis is optional (§15, ADR-005): its auto-configuration is off unless the "redis" profile is
+    # active (application-redis.yml clears this list), so no profile needs a running Redis.
+    exclude:
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisRepositoriesAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.health.DataRedisHealthContributorAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.health.DataRedisReactiveHealthContributorAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.observation.LettuceObservationAutoConfiguration
   profiles:
     # Local development is the default; Docker Compose and CI set SPRING_PROFILES_ACTIVE explicitly.
     default: dev
@@ -77,13 +87,24 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       probes:
-        # Exposes /actuator/health/liveness and /actuator/health/readiness for Docker/K8s.
+        # Exposes /actuator/health/liveness and /actuator/health/readiness for Docker/K8s, and
+        # /livez + /readyz on the main port (they stay there when actuator moves to its own port).
         enabled: true
+        add-additional-paths: true
       show-details: never
+  metrics:
+    tags:
+      application: untangle
+    distribution:
+      # Histogram buckets so Grafana can compute p95/p99 latency with histogram_quantile().
+      percentiles-histogram:
+        http.server.requests: true
+        webhook.processing: true
+        ai.latency: true
   info:
     env:
       enabled: true

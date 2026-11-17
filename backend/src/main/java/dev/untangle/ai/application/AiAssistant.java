@@ -16,6 +16,8 @@ import dev.untangle.ticket.application.TicketViews.TicketDetail;
 import dev.untangle.ticket.domain.Category;
 import dev.untangle.ticket.domain.Priority;
 import dev.untangle.ticket.domain.Ticket;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
@@ -88,6 +90,7 @@ public class AiAssistant {
   private final RateLimiter rateLimiter;
   private final JsonMapper jsonMapper;
   private final EntityManager entityManager;
+  private final MeterRegistry meters;
   private final Map<String, String> prompts = new LinkedHashMap<>();
 
   public AiAssistant(
@@ -97,7 +100,9 @@ public class AiAssistant {
       TicketAiInsightRepository insights,
       RateLimiter rateLimiter,
       JsonMapper jsonMapper,
-      EntityManager entityManager) {
+      EntityManager entityManager,
+      MeterRegistry meters) {
+    this.meters = meters;
     this.properties = properties;
     this.llm = llm;
     this.tickets = tickets;
@@ -204,14 +209,22 @@ public class AiAssistant {
     rateLimiter.consume("ai-user", properties.perUserLimit(), me.id().toString());
     String userContent =
         "<ticket_data>\n" + neutralise(PiiRedactor.redact(untrustedData)) + "\n</ticket_data>";
-    String raw;
+    // ai_requests_total{feature,outcome} + ai_latency_seconds{feature} (§16).
+    Timer.Sample sample = Timer.start(meters);
+    String outcome = "unavailable";
     try {
-      raw = llm.completeJson(prompts.get(promptName), userContent);
+      String raw = llm.completeJson(prompts.get(promptName), userContent);
+      outcome = "invalid";
+      Map<String, Object> parsed = parseObject(raw);
+      outcome = "success";
+      return parsed;
     } catch (AiUnavailableException e) {
       log.warn("AI {} unavailable: {}", promptName, e.getMessage());
       throw new ApiException(ErrorCode.AI_UNAVAILABLE, "AI assistance is temporarily unavailable");
+    } finally {
+      sample.stop(meters.timer("ai.latency", "feature", promptName));
+      meters.counter("ai.requests", "feature", promptName, "outcome", outcome).increment();
     }
-    return parseObject(raw);
   }
 
   /** Builds the timeline text for summary/drafts. No customer name or email is included. */

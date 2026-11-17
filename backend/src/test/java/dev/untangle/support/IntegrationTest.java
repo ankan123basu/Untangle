@@ -14,6 +14,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,9 +56,21 @@ public abstract class IntegrationTest {
   @Autowired protected MockMvcTester mvc;
   @Autowired protected AgentRepository agentRepository;
   @Autowired protected PasswordEncoder passwordEncoder;
+  @Autowired private List<CacheManager> cacheManagers;
 
+  /** Empties the database and every cache (e.g. the 30 s dashboard cache) between tests. */
   protected void truncateAllTables() {
     jdbc.execute("TRUNCATE " + String.join(", ", APP_TABLES) + " CASCADE");
+    clearCaches();
+  }
+
+  protected void clearCaches() {
+    for (CacheManager manager : cacheManagers) {
+      for (String name : manager.getCacheNames()) {
+        Cache cache = manager.getCache(name);
+        if (cache != null) cache.clear();
+      }
+    }
   }
 
   // ---- Agents & sessions --------------------------------------------------------------------

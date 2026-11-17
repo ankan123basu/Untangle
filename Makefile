@@ -32,6 +32,7 @@ help: ## Show this help
 	@sed -i.bak \
 	  -e "s|^JWT_SECRET=$$|JWT_SECRET=$$(openssl rand -base64 48)|" \
 	  -e "s|^APP_SECRET_ENCRYPTION_KEY=$$|APP_SECRET_ENCRYPTION_KEY=$$(openssl rand -base64 32)|" \
+	  -e "s|^GRAFANA_ADMIN_PASSWORD=$$|GRAFANA_ADMIN_PASSWORD=$$(openssl rand -hex 16)|" \
 	  .env && rm -f .env.bak
 	@echo "Created .env from .env.example with freshly generated secrets (never commit .env)."
 
@@ -49,7 +50,7 @@ up: .env ## Build and start postgres + backend + frontend (waits until healthy)
 	$(COMPOSE) up -d --build --wait
 	@echo ""
 	@echo "  App      http://localhost:$$(grep -E '^FRONTEND_HOST_PORT=' .env | cut -d= -f2 || echo 3000)"
-	@echo "  API      http://localhost:$$(grep -E '^BACKEND_HOST_PORT=' .env | cut -d= -f2 || echo 8080)/actuator/health"
+	@echo "  API      http://localhost:$$(grep -E '^BACKEND_HOST_PORT=' .env | cut -d= -f2 || echo 8080)/readyz"
 	@echo "  Postgres localhost:$$(grep -E '^POSTGRES_HOST_PORT=' .env | cut -d= -f2 || echo 5433)"
 
 .PHONY: down
@@ -137,6 +138,17 @@ ci: lint typecheck test build ## Run exactly what CI runs (minus Docker)
 seed: .env ## Load demo data into the Docker database (restarts backend with the demo profile)
 	SPRING_PROFILES_ACTIVE=prod,demo $(COMPOSE) up -d --wait backend
 	@echo "Demo data loaded. Log in as admin@untangle.local / Untangle@2026 (Phase 2+)."
+
+.PHONY: e2e
+e2e: ## Playwright end-to-end tests against the running stack (`make up` first)
+	cd frontend && npx playwright test
+
+.PHONY: load
+load: ## k6 load tests (ticket list + webhook) against the running stack, in Docker
+	docker run --rm --network untangle_default -v "$(CURDIR)/load/k6:/scripts:ro" \
+	  grafana/k6:1.8.2 run /scripts/tickets-list.js -e BASE_URL=http://frontend:8080
+	docker run --rm --network untangle_default -v "$(CURDIR)/load/k6:/scripts:ro" \
+	  grafana/k6:1.8.2 run /scripts/webhook.js -e BASE_URL=http://frontend:8080
 
 .PHONY: simulate
 simulate: .env ## Run every partner webhook scenario against the running stack (in Docker)

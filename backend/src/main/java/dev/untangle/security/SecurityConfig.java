@@ -53,6 +53,10 @@ public class SecurityConfig {
     "/actuator/health",
     "/actuator/health/**",
     "/actuator/info",
+    // Prometheus scrape: in prod it only exists on the unpublished management port (8081).
+    "/actuator/prometheus",
+    "/livez",
+    "/readyz",
     // API documentation (no data, only the contract)
     "/v3/api-docs",
     "/v3/api-docs/**",

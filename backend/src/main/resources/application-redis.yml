@@ -1,0 +1,11 @@
+# Optional scale-out profile (§15, ADR-005): add "redis" to SPRING_PROFILES_ACTIVE and start
+# Compose with --profile redis. Shares the dashboard cache and rate-limit buckets across instances.
+
+spring:
+  autoconfigure:
+    exclude: []
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2s

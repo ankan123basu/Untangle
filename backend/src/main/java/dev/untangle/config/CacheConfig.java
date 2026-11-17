@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 /**
  * In-memory caches (Caffeine). Each cache gets an explicit TTL and size bound, never "forever".
@@ -24,7 +25,9 @@ public class CacheConfig {
 
   public static final String AGENT_PRINCIPAL = "agentPrincipal";
 
+  /** Default manager for {@code @Cacheable} without an explicit one; always local (R8). */
   @Bean
+  @Primary
   CacheManager cacheManager(
       @Value("${app.security.principal-cache-ttl:30s}") Duration principalTtl) {
     CaffeineCacheManager manager = new CaffeineCacheManager();

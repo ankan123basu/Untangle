@@ -4,7 +4,7 @@
 #   docker compose --profile redis up -d     ...plus Redis (optional cache / rate limiting)
 #
 #   make simulate                   partner webhook scenarios (profile `simulator`)
-# Phase 10 adds the `observability` profile (Prometheus + Grafana).
+#   docker compose --profile observability up -d   ...plus Prometheus (:9090) + Grafana (:3001)
 # All values come from .env (copied from .env.example by `make up` on a fresh clone).
 
 name: untangle
@@ -57,8 +57,12 @@ services:
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
       BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
       BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-Administrator}
+      # Only read when SPRING_PROFILES_ACTIVE includes "redis" (start Compose with --profile redis).
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
       TZ: UTC
     ports:
+      # API on 8080. Actuator (incl. /actuator/prometheus) is on 8081 and deliberately NOT published.
       - "${BACKEND_HOST_PORT:-8080}:8080"
     deploy:
       resources:
@@ -103,5 +107,43 @@ services:
       timeout: 3s
       retries: 10
 
+  # ---- Observability (§16): Prometheus scrapes the backend's internal port 8081; Grafana ships a
+  # provisioned "Untangle overview" dashboard. Both are bound to localhost only.
+  prometheus:
+    image: prom/prometheus:v3.15.1
+    profiles: ["observability"]
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:${PROMETHEUS_HOST_PORT:-9090}:9090"
+
+  grafana:
+    image: grafana/grafana:13.3.1
+    profiles: ["observability"]
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me-grafana}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/untangle.json
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:${GRAFANA_HOST_PORT:-3001}:3000"
+
 volumes:
   postgres-data:
+  prometheus-data:
