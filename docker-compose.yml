@@ -1,0 +1,79 @@
+# Untangle — local stack.
+#
+#   make up                         postgres + backend + frontend
+#   docker compose --profile redis up -d     ...plus Redis (optional cache / rate limiting)
+#
+# Later phases add profiles: `simulator` (Phase 4) and `observability` (Prometheus + Grafana).
+# All values come from .env (copied from .env.example by `make up` on a fresh clone).
+
+name: untangle
+
+services:
+  postgres:
+    image: postgres:18.7-alpine3.24
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-untangle}
+      POSTGRES_USER: ${POSTGRES_USER:-untangle}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      TZ: UTC
+    ports:
+      # Host 5433 by default, because a local Homebrew Postgres usually owns 5432.
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      # Postgres 18 images keep data under /var/lib/postgresql/<major>/, so mount the parent.
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    image: untangle/backend:local
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      # Database settings are wired now and used from Phase 1 (JPA + Flyway).
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-untangle}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-untangle}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: UTC
+    ports:
+      - "${BACKEND_HOST_PORT:-8080}:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+
+  frontend:
+    build:
+      context: ./frontend
+    image: untangle/frontend:local
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:8080"
+
+  redis:
+    image: redis:8.10.3-alpine
+    profiles: ["redis"]
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
