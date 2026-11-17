@@ -9,3 +9,12 @@ management:
 logging:
   level:
     dev.untangle: DEBUG
+
+app:
+  security:
+    jwt:
+      # DEV ONLY: a fixed key so local restarts keep you logged in. Docker/prod use JWT_SECRET.
+      secret: ${JWT_SECRET:WoPT2ZsGMbOLYLB2T/F94g0RqBQlhoXlD2FUzeDp+1KHwAQyK47z084stqCTbYfz}
+    refresh:
+      # Vite dev server is plain http://localhost:5173; Safari drops Secure cookies on plain HTTP.
+      cookie-secure: ${AUTH_COOKIE_SECURE:false}

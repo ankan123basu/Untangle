@@ -30,6 +30,7 @@
         <spotless-maven-plugin.version>3.11.0</spotless-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
         <archunit.version>1.5.1</archunit.version>
+        <bucket4j.version>8.22.0</bucket4j.version>
     </properties>
 
     <dependencies>
@@ -47,6 +48,28 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- ===== Security ===== -->
+        <!-- Spring Security + JWT resource server (Nimbus JOSE) for issuing/verifying access tokens (ADR-013) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+        </dependency>
+        <!-- Short-TTL caches (agent active/role lookup, rate-limit buckets) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+        <!-- Token-bucket rate limiting (login now; webhook and AI later) -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
         </dependency>
 
         <!-- ===== Persistence ===== -->
@@ -90,6 +113,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-test</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- Real PostgreSQL 18 in Docker for integration tests (never H2: constraints must match prod) -->

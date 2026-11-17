@@ -63,6 +63,10 @@ server:
   port: ${SERVER_PORT:8080}
   # Finish in-flight requests before the container stops.
   shutdown: graceful
+  # Trust X-Forwarded-For/-Proto only from internal proxy addresses (Tomcat RemoteIpValve defaults:
+  # 10/8, 172.16/12, 192.168/16, 127/8). Behind nginx this gives the real client IP for rate
+  # limiting and audit, while a client can't spoof it by sending the header directly.
+  forward-headers-strategy: native
   error:
     # Never leak stack traces or exception messages to clients (Section 6.3).
     include-stacktrace: never
@@ -88,3 +92,44 @@ info:
   app:
     name: Untangle
     tagline: Every complaint, untangled.
+
+logging:
+  # Readable dev logs still show the correlation id of each request.
+  pattern:
+    level: "%5p [%X{requestId:-}]"
+
+# -----------------------------------------------------------------------------
+# Application settings (typed: SecurityProperties, BootstrapAdminProperties)
+# -----------------------------------------------------------------------------
+app:
+  security:
+    jwt:
+      # REQUIRED. Base64, >= 32 bytes. `make up` generates one into .env. The app refuses to start
+      # without it (fail fast).
+      secret: ${JWT_SECRET:}
+      issuer: untangle
+      access-token-ttl: 15m
+    refresh:
+      ttl: 7d
+      cookie-secure: ${AUTH_COOKIE_SECURE:true}
+    lockout:
+      max-failed-attempts: 5
+      duration: 15m
+    bcrypt-strength: 12
+    # How long a deactivated agent's still-valid JWT may keep working on OTHER instances (R8).
+    principal-cache-ttl: 30s
+    cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+    rate-limits:
+      login-per-ip:
+        capacity: 20
+        period: 1m
+      login-per-email:
+        capacity: 10
+        period: 1m
+  bootstrap-admin:
+    email: ${BOOTSTRAP_ADMIN_EMAIL:}
+    password: ${BOOTSTRAP_ADMIN_PASSWORD:}
+    full-name: ${BOOTSTRAP_ADMIN_NAME:Administrator}
+  tickets:
+    # MASTER_PROMPT §6.2: may an AGENT close their own RESOLVED ticket?
+    agent-can-close-own-resolved: false

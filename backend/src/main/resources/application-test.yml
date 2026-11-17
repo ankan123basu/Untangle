@@ -4,3 +4,22 @@ logging:
   level:
     root: WARN
     dev.untangle: INFO
+    # The concurrency tests provoke unique-constraint violations on purpose; Hibernate logs each at
+    # WARN. Keep CI output readable; real failures still fail the assertions.
+    org.hibernate.orm.jdbc.error: ERROR
+
+app:
+  security:
+    jwt:
+      # TEST ONLY. Not used anywhere else.
+      secret: aczAz91ytoLrhfflpq3hMxjO30WXJzHRBnoVLd9WIqSkjC+oug/fX5eeg/96hfJw
+    # Cost 4 keeps the suite fast; production uses 12. Hashes embed their cost, so both verify.
+    bcrypt-strength: 4
+    rate-limits:
+      # Generous per-IP limit: every MockMvc request comes from 127.0.0.1.
+      login-per-ip:
+        capacity: 1000
+        period: 1m
+      login-per-email:
+        capacity: 10
+        period: 1m
