@@ -119,8 +119,9 @@ ci: lint typecheck test build ## Run exactly what CI runs (minus Docker)
 # Later phases (placeholders so the command surface is stable)
 # ---------------------------------------------------------------------------
 .PHONY: seed
-seed: ## (Phase 1) Load demo data
-	@echo "Dev seed arrives in Phase 1 (Flyway, dev profile only)."
+seed: .env ## Load demo data into the Docker database (restarts backend with the demo profile)
+	SPRING_PROFILES_ACTIVE=prod,demo $(COMPOSE) up -d --wait backend
+	@echo "Demo data loaded. Log in as admin@untangle.local / Untangle@2026 (Phase 2+)."
 
 .PHONY: simulate
 simulate: ## (Phase 4) Run partner webhook scenarios

@@ -1,0 +1,10 @@
+# `demo` profile: loads realistic demo data (agents, a partner, ~60 tickets with timelines).
+# Included automatically by `dev`. Add it explicitly elsewhere (e.g. SPRING_PROFILES_ACTIVE=prod,demo)
+# for a demo environment. NEVER enable it in a real production environment: it creates
+# accounts with a published password.
+
+spring:
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/seed-demo

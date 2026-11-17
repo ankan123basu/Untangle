@@ -38,8 +38,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
-      # Database settings are wired now and used from Phase 1 (JPA + Flyway).
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod,demo}
+      # Flyway migrates this database on startup, then Hibernate validates the schema.
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-untangle}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-untangle}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}

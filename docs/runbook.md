@@ -37,6 +37,18 @@ make fmt            # auto-format everything
 make ci             # what CI runs
 ```
 
+### Database and demo data
+
+- On startup, **Flyway** applies pending migrations (`backend/src/main/resources/db/migration`), then
+  Hibernate **validates** that entities match the schema. A mismatch stops the app (by design).
+- `SPRING_PROFILES_ACTIVE=prod,demo` (the default in `.env.example`) also loads the demo data:
+  9 staff, 1 partner, 60 tickets. **Every demo account's password is `Untangle@2026`**, e.g.
+  `admin@untangle.local`, `leela.thomas@untangle.local` (lead), `riya.sen@untangle.local` (agent).
+- `make seed` loads the demo data into an already-running stack.
+- For an empty database: remove `demo` from `SPRING_PROFILES_ACTIVE` and run `make nuke`, then `make up`.
+- Local `make backend-run` uses the `dev` profile, which includes `demo`, and connects to the Docker
+  Postgres on `localhost:5433`. Start it with `docker compose up -d postgres` first.
+
 ### Environment variables
 
 All are documented in [`.env.example`](../.env.example). Never commit `.env`.
@@ -51,6 +63,9 @@ All are documented in [`.env.example`](../.env.example). Never commit `.env`.
 | Maven error `Untangle needs JDK 21 or newer` / odd compiler errors | Maven picked another JDK | the Makefile sets `JAVA_HOME` to JDK 21 on macOS; outside make: ``export JAVA_HOME=$(/usr/libexec/java_home -v 21)`` |
 | `make up` times out waiting for `backend` | backend failed to start | `docker compose logs backend` |
 | Postgres container restarts after changing major version | old volume from another major | `make nuke` (deletes local data) |
+| Backend exits with `Schema validation: wrong column type ...` | an entity and the SQL schema disagree | fix the entity or add a migration; never switch `ddl-auto` away from `validate` |
+| `make test` fails with `Could not find a valid Docker environment` | Testcontainers needs Docker | start Docker Desktop |
+| `Validate failed: Migrations have failed validation` | an applied migration file was edited | never edit applied migrations; add `V2__...`. Locally: `make nuke` |
 
 ### Secret rotation
 
