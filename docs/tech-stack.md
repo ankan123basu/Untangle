@@ -58,10 +58,12 @@ in the phase that first uses them.
 | @tanstack/react-query | 5.108.0 *(Phase 7)* | |
 | zustand | 5.1.0 *(Phase 7)* | |
 | react-router | 8.5.1 *(Phase 7)* | |
-| react-hook-form / zod | 7.92.0 / 4.6.7 *(Phase 8)* | |
-| recharts / sonner / cmdk | 3.11.0 / 2.0.8 / 1.1.1 *(Phase 8)* | |
+| react-hook-form / zod / @hookform/resolvers | 7.92.0 / 4.6.7 / 7.0.7 *(Phase 7)* | |
+| recharts / sonner / cmdk | 3.11.0 / 2.0.8 / 1.1.1 *(Phase 7–8)* | |
+| lucide-react / clsx / tailwind-merge | 1.74.0 / pinned in package.json *(Phase 7)* | |
+| @fontsource-variable (space-grotesk, inter, jetbrains-mono) | 5.3.0 *(Phase 7)* | self-hosted: CSP `font-src 'self'` |
 | msw / @playwright/test | 3.0.6 / 1.65.1 *(Phases 7 / 10)* | |
-| axios, openapi-typescript | pinned when installed *(Phase 7)* | |
+| axios / openapi-typescript | 1.21.1 / 7.13.0 *(Phase 7)* | openapi-typescript runs via `npx` (its TS ^5 peer conflicts with TS 6; it is a generator, not a dependency) |
 | shadcn CLI (React Bits registry) | 4.23.0 *(Phase 7)* | |
 
 ### Infrastructure

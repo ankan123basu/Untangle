@@ -49,6 +49,19 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   database with the seed applied.
 - Docker must be running for `make test` (Testcontainers). CI runners have Docker.
 
+### Phase 7 additions (frontend: 15 tests)
+
+- Stack: Vitest 5 (jsdom) + Testing Library + MSW 3. `src/test/server.ts` holds the MSW server,
+  realistic fixtures (`leadAgent`, `tokenResponse`) and `problem()` for RFC 9457 bodies;
+  `src/test/render.tsx` renders routes in a memory router with a fresh query cache.
+- MSW 3 renamed `onUnhandledRequest` to `onUnhandledFrame`; we use `'error'` so an unmocked call
+  fails the test instead of reaching the network.
+- jsdom gaps are stubbed in `src/test/setup.ts`: `IntersectionObserver` (reports visible) and
+  `HTMLDialogElement.showModal/close`.
+- Covered: single-flight token refresh (3 concurrent 401s → 1 refresh), sign-out on failed refresh,
+  Problem Details → `ApiError`, login validation / success / wrong credentials / locked account,
+  `RequireAuth` and `RequirePermission`, `Field`/`Button` accessibility wiring.
+
 ### Phase 6 additions (backend total: 392 tests)
 
 | Class | Tests | Proves |

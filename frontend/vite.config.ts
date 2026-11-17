@@ -24,6 +24,9 @@ export default defineConfig({
   build: {
     sourcemap: true,
     target: 'es2023',
+    // Never inline fonts as data: URIs; the nginx CSP only allows font-src 'self'.
+    // Returning undefined keeps Vite's default size-based rule for everything else.
+    assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/.test(file) ? false : undefined),
   },
   test: {
     environment: 'jsdom',

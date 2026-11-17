@@ -118,6 +118,11 @@ build: ## Build backend jar and frontend bundle
 	$(MVNW) -q package -DskipTests
 	$(NPM) run -s build
 
+.PHONY: api-types
+api-types: ## Refresh the OpenAPI contract from the running backend and regenerate TS types
+	curl -fsS http://localhost:8080/v3/api-docs -o frontend/src/lib/api/openapi.json
+	$(NPM) run -s api:types
+
 .PHONY: ci
 ci: lint typecheck test build ## Run exactly what CI runs (minus Docker)
 

@@ -1,41 +1,110 @@
 @import 'tailwindcss';
 @import './tokens.css';
 
+/* Class-based dark variant that follows data-theme (and the OS when no override is set). */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 /*
  * Tailwind v4 has no tailwind.config.js. @theme maps our tokens into utilities:
- * --color-ink  -> bg-ink / text-ink / border-ink / stroke-ink ...
- * `inline` makes the utility reference the variable, so light/dark switching just works.
+ *   --color-ink → bg-ink / text-ink / border-ink ...   --shadow-hard → shadow-hard
+ * `inline` makes utilities reference the CSS variable, so theme switching needs no rebuild.
  */
 @theme inline {
   --color-brand: var(--ut-brand);
   --color-on-brand: var(--ut-on-brand);
-  --color-ink: var(--ut-ink);
+  --color-accent: var(--ut-accent);
+  --color-on-accent: var(--ut-on-accent);
   --color-paper: var(--ut-paper);
+  --color-paper-2: var(--ut-paper-2);
   --color-surface: var(--ut-surface);
+  --color-glass: var(--ut-glass);
+  --color-glass-strong: var(--ut-glass-strong);
+  --color-ink: var(--ut-ink);
+  --color-muted: var(--ut-muted);
+  --color-line: var(--ut-line);
+  --color-line-soft: var(--ut-line-soft);
+  --color-danger: var(--ut-danger);
+  --color-on-danger: var(--ut-on-danger);
+  --color-success: var(--ut-success);
+  --color-warning: var(--ut-warning);
 
+  --color-prio-low: var(--ut-prio-low-fg);
+  --color-prio-low-bg: var(--ut-prio-low-bg);
+  --color-prio-medium: var(--ut-prio-medium-fg);
+  --color-prio-medium-bg: var(--ut-prio-medium-bg);
+  --color-prio-high: var(--ut-prio-high-fg);
+  --color-prio-high-bg: var(--ut-prio-high-bg);
+  --color-prio-critical: var(--ut-prio-critical-fg);
+  --color-prio-critical-bg: var(--ut-prio-critical-bg);
+
+  --color-status-open: var(--ut-status-open-fg);
+  --color-status-open-bg: var(--ut-status-open-bg);
+  --color-status-progress: var(--ut-status-progress-fg);
+  --color-status-progress-bg: var(--ut-status-progress-bg);
+  --color-status-resolved: var(--ut-status-resolved-fg);
+  --color-status-resolved-bg: var(--ut-status-resolved-bg);
+  --color-status-closed: var(--ut-status-closed-fg);
+  --color-status-closed-bg: var(--ut-status-closed-bg);
+
+  --color-sla-ok: var(--ut-sla-ok);
+  --color-sla-risk: var(--ut-sla-risk);
+  --color-sla-breached: var(--ut-sla-breached);
+
+  --radius-sm: var(--ut-radius-sm);
+  --radius-md: var(--ut-radius);
   --radius-card: var(--ut-radius-card);
+  --shadow-hard-sm: var(--ut-shadow-hard-sm);
   --shadow-hard: var(--ut-shadow-hard);
+  --shadow-hard-lg: var(--ut-shadow-hard-lg);
 
-  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ease-brutal: var(--ut-ease);
+  --animate-pulse-critical: pulse-critical 1.8s var(--ut-ease) infinite;
+}
+
+@keyframes pulse-critical {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(200 30 30 / 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgb(200 30 30 / 0);
+  }
 }
 
 @layer base {
   html {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   body {
     background-color: var(--ut-paper);
     color: var(--ut-ink);
+    min-height: 100dvh;
   }
 
-  /* Brutalist, always-visible keyboard focus (WCAG 2.4.7). */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: var(--ut-accent);
+    color: var(--ut-on-accent);
+  }
+
+  /* Brutalist, always-visible keyboard focus (WCAG 2.4.7 / 2.4.11). */
   :focus-visible {
-    outline: 3px solid var(--ut-ink);
+    outline: 3px solid var(--ut-accent);
     outline-offset: 3px;
+    border-radius: 4px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -47,5 +116,35 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@layer components {
+  /* Glass panel with a brutalist frame: translucent fill, hard border, hard shadow. */
+  .glass-panel {
+    background: var(--ut-glass);
+    backdrop-filter: blur(var(--ut-blur)) saturate(1.2);
+    -webkit-backdrop-filter: blur(var(--ut-blur)) saturate(1.2);
+    border: var(--ut-border) solid var(--ut-line);
+    border-radius: var(--ut-radius-card);
+    box-shadow: var(--ut-shadow-hard);
+  }
+
+  /* Solid fallback where glass would hurt contrast or performance. */
+  .solid-panel {
+    background: var(--ut-surface);
+    border: var(--ut-border) solid var(--ut-line);
+    border-radius: var(--ut-radius-card);
+    box-shadow: var(--ut-shadow-hard);
+  }
+
+  /* Visually hidden but available to screen readers. */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }

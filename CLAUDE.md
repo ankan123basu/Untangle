@@ -70,6 +70,12 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
 - Two entry doors, one brain: JWT REST and HMAC webhook both call `TicketService`.
 - Success = plain DTOs (`PageResponse` for lists); errors = RFC 9457 with `code`, `traceId`, `errors[]`.
 - Business rules live server-side; the UI renders `allowedActions` from the server.
+- Frontend data: access token in memory only (zustand `useSession`), refresh via HttpOnly cookie;
+  `lib/api/client.ts` = axios + single-flight refresh + `ApiError` (`messageFor(code)`). Types are
+  generated (`make api-types`); response fields nullable only when marked `@Nullable` in Java
+  (ADR-023). Server state via TanStack Query (`queryKeys`). Tests: MSW 3 (`onUnhandledFrame`),
+  `renderRoutes` from `src/test/render.tsx`. React Bits are vendored in `components/reactbits`
+  (local patches marked `// untangle:`).
 - Frontend: `src/app`, `src/features/<feature>`, `src/components/{ui,reactbits,three,layout,brand}`,
   `src/lib`, `src/styles/{tokens,globals}.css`. Alias `@/` → `src/`. No `any`. No `dangerouslySetInnerHTML`.
 

@@ -1,25 +1,26 @@
-import { LogoMark } from '@/components/brand/LogoMark';
+import { useState } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { RouterProvider } from 'react-router/dom';
+import { Toaster } from 'sonner';
+import { AuthBootstrap } from '@/features/auth/guards';
+import { createQueryClient } from '@/lib/query-client';
+import { router } from './router';
 
-/**
- * Phase 0 placeholder. It proves the toolchain works end to end (React, TypeScript, Tailwind
- * tokens, the build and the nginx container). The router, providers and real screens arrive in
- * Phases 7 and 8.
- */
+/** Root providers: server-state cache, toasts, session bootstrap, router. */
 export function App() {
+  const [queryClient] = useState(createQueryClient);
   return (
-    <main className="grid min-h-dvh place-items-center bg-paper p-6 text-ink">
-      <section
-        aria-labelledby="brand-title"
-        className="w-full max-w-md rounded-card border-3 border-ink bg-surface p-8 shadow-hard"
-      >
-        <div className="flex items-center gap-3">
-          <LogoMark size={48} title="" />
-          <h1 id="brand-title" className="font-display text-4xl font-bold tracking-tight">
-            Untangle
-          </h1>
-        </div>
-        <p className="mt-4 text-lg">Every complaint, untangled.</p>
-      </section>
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <AuthBootstrap>
+        <RouterProvider router={router} />
+      </AuthBootstrap>
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          className:
+            'rounded-md! border-2! border-line! bg-surface! text-ink! shadow-hard-sm! font-sans!',
+        }}
+      />
+    </QueryClientProvider>
   );
 }
