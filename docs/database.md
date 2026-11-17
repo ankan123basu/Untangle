@@ -246,8 +246,34 @@ ShedLock's lock table (Phase 5), so only one backend instance runs the SLA sched
 **Deliberately not indexed:** `tickets.created_by_agent_id` (never filtered on; agents are never
 deleted, so FK checks don't need it); `agents.role` (a few dozen rows; a sequential scan is faster).
 
-`EXPLAIN ANALYZE` output for the real list and filter queries will be added in Phase 3, when those
-queries exist (Section 15).
+#### V2 additions (Phase 3)
+
+| Column / index | Why |
+|---|---|
+| `sla_started_at` | when the SLA clock (re)started: creation or latest reopen. A priority change recomputes `sla_due_at` from the same start; a reopen restarts it (R4) |
+| `priority_rank`, `status_rank` (generated `STORED` columns) | sorting by *severity* (CRITICAL > HIGH > MEDIUM > LOW) and lifecycle order; the enum names sort alphabetically, which would be wrong |
+| `ix_tickets_queue (status_rank, priority_rank DESC, created_at)` | "work queue" ordering for an unresolved-first view |
+
+### Query plans (Section 15: verified with `EXPLAIN ANALYZE`)
+
+Measured on PostgreSQL 18.7 with **200,000 synthetic tickets** (10% OPEN, 10% IN_PROGRESS, 20%
+RESOLVED, 60% CLOSED; 50 agents), warm cache, `ANALYZE` run first. With the 60-row demo data the
+planner rightly prefers sequential scans, so the numbers only mean something at volume.
+
+| Query (as issued by the app) | Plan | Execution |
+|---|---|---|
+| Default list: unresolved, newest first, `LIMIT 20` | Index Scan `ix_tickets_created_at` + incremental sort; stops after 21 rows | **0.10 ms** |
+| "My open tickets" (assignee + status, newest first) | Index Scan `ix_tickets_created_at`, filter on assignee/status | **0.59 ms** |
+| SLA breached / scheduler (`status IN unresolved AND sla_due_at < now()`) | Index Scan on **partial** `ix_tickets_sla_due_unresolved`, with no filter step at all | **0.08 ms** |
+| Search `q=refund` (`ILIKE '%refund%'` on subject OR description) | BitmapOr of the two **pg_trgm GIN** indexes | **1.12 ms** |
+| Severity queue (`status_rank, priority_rank DESC, created_at`) | Index Scan `ix_tickets_queue`, index order = result order | **0.05 ms** |
+
+How to reproduce: the SQL used is in `docs/how-it-works/phase-3.md` §6.
+
+**Observation, not yet acted on:** "My open tickets" walks `ix_tickets_created_at` and filters about
+3,000 rows to find 20, because the planner prefers the sort order over `ix_tickets_assignee_status`.
+Fine at this scale (0.6 ms). At 10× volume, add `(assigned_agent_id, status, created_at DESC)`
+(recorded in scalability.md).
 
 ### Demo data (`demo` profile)
 

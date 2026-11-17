@@ -121,8 +121,8 @@ final AS (
 )
 INSERT INTO tickets (id, ticket_number, subject, description, customer_name, customer_email,
                      category, priority, status, assigned_agent_id, created_by_agent_id, source,
-                     partner_id, external_event_id, escalation_level, sla_due_at, first_response_at,
-                     resolved_at, closed_at, reopened_count, created_at, updated_at)
+                     partner_id, external_event_id, escalation_level, sla_started_at, sla_due_at,
+                     first_response_at, resolved_at, closed_at, reopened_count, created_at, updated_at)
 SELECT md5('ticket:' || f.n)::uuid,
        'UNT-' || lpad(f.num::text, 6, '0'),
        tpl.subject,
@@ -139,6 +139,7 @@ SELECT md5('ticket:' || f.n)::uuid,
        CASE WHEN f.from_webhook THEN 'evt_demo_' || lpad(f.n::text, 4, '0') END,
        CASE WHEN f.status IN ('OPEN', 'IN_PROGRESS') AND f.sla_due_at < now()
             THEN 1 + (f.n % 7 = 0)::int ELSE 0 END,
+       f.created_at,
        f.sla_due_at,
        f.first_response_at,
        f.resolved_at,
