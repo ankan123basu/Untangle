@@ -62,6 +62,9 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
 - Scheduled jobs: logic in a plain service method taking `now` (testable), trigger in a
   `@Scheduled` + `@SchedulerLock` component, disabled in tests (`app.escalation.scheduler-enabled`).
   Notifications are `@TransactionalEventListener` + `REQUIRES_NEW` on ticket events.
+- AI: optional (`AI_ENABLED` + `GROQ_API_KEY`). `AiAssistant` = redact → wrap in `<ticket_data>` →
+  `LlmClient` (Groq, timeout + circuit breaker) → validate every field → store insight. Never act on
+  model output. Tests use a fake HTTP server, never the real provider.
 - Cross-feature calls go through the other feature's `application` services or events, never its
   repositories; keep feature dependencies one-way (auth → agent, agent → ticket).
 - Two entry doors, one brain: JWT REST and HMAC webhook both call `TicketService`.

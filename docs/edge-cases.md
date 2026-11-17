@@ -154,6 +154,15 @@ Test classes: `AuthIntegrationTest` (A), `AgentAdminIntegrationTest` (G),
 | Trend days without tickets | present with 0 | `trendsCoverEveryDayIncludingEmptyOnes` | ✅ |
 | Workload for agents | 403 | `workloadIsForLeadsAndCountsPerAgent` | ✅ |
 
-### AI
+### AI (Phase 6)
 
-Phase 6.
+| Case | Expected | Test | Status |
+|---|---|---|---|
+| Missing key | status `enabled:false`; endpoints 503; core app unaffected | `AiDisabledIntegrationTest` | ✅ |
+| Groq timeout / 5xx | graceful 503 `AI_UNAVAILABLE` within the timeout | `AiIntegrationTest.providerErrorsAndTimeoutsDegradeGracefully` | ✅ |
+| Repeated failures | circuit opens; no further provider calls | `circuitOpensAfterRepeatedFailuresAndStopsCallingTheProvider` | ✅ |
+| Model returns invalid JSON | suggestion discarded (503) | `invalidJsonIsDiscarded` | ✅ |
+| Model returns invalid enum | field dropped, rest kept | `invalidEnumValuesAreDroppedButTheRestIsKept` | ✅ |
+| Prompt-injection text in a ticket | no effect on system behaviour | `promptInjectionInATicketHasNoEffectOnTheSystem` | ✅ |
+| PII in ticket text | redacted before sending | `piiIsRedactedBeforeLeavingTheSystem`, `PiiRedactorTest` (10) | ✅ |
+| Feedback on someone else's insight | 404 | `summaryAndFeedback` | ✅ |

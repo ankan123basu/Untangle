@@ -36,7 +36,7 @@ in the phase that first uses them.
 | ShedLock (`shedlock-spring`, `shedlock-provider-jdbc-template`) | 7.11.0 | DB-time locks for `@Scheduled` jobs (ADR-020) |
 | Bucket4j (`bucket4j_jdk17-core`) | 8.22.0 | login rate limits; webhook/AI later |
 | Caffeine (+ `spring-boot-starter-cache`) | managed (3.2.4) | principal cache, rate-limit buckets |
-| Resilience4j (`resilience4j-spring-boot4`) | 2.4.0 *(Phase 6)* | |
+| Resilience4j (`resilience4j-circuitbreaker`, core only) | 2.4.0 | circuit breaker around Groq; used programmatically, so no AOP starter is needed |
 | ~~logstash-logback-encoder~~ | not used | Spring Boot 4 has built-in structured JSON logging (`logging.structured.format.console: logstash`), one dependency fewer | |
 
 ### Frontend

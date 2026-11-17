@@ -45,8 +45,8 @@ make frontend-dev    # terminal 2 → http://localhost:5173
 | 3 | Ticket core, lifecycle, filters, dashboard API | ✅ |
 | 4 | HMAC webhook + partner simulator | ✅ |
 | 5 | SLA escalation + notifications | ✅ |
-| 6 | AI assistance (Groq, optional) | ⏳ next |
-| 7–9 | Frontend foundation, screens, 3D and motion | |
+| 6 | AI assistance (Groq, optional) | ✅ |
+| 7–9 | Frontend foundation, screens, 3D and motion | ⏳ next |
 | 10–11 | Hardening, E2E, docs and demo | |
 
 ## Documentation

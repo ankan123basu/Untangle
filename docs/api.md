@@ -182,6 +182,18 @@ examples and retry advice: [webhook-integration-guide.md](webhook-integration-gu
 Types: `ASSIGNED` (to the new assignee), `ESCALATED` (manual: leads + assignee), `SLA_BREACH`
 (scheduler: leads + assignee), `REOPENED` (assignee). Nobody is notified about their own action.
 
+### AI (optional; 503 `AI_UNAVAILABLE` when off)
+
+| Method & path | Permission | Body | Response |
+|---|---|---|---|
+| `GET /api/v1/ai/status` | signed in | — | `{enabled, model}` |
+| `POST /api/v1/ai/triage` | `AI_USE` | `{subject, description}` | `{insightId, category?, priority?, summary, sentiment?, rationale?, model, promptVersion}` |
+| `POST /api/v1/tickets/{id}/ai/summary` | `AI_USE` | — | `{insightId, summary, keyPoints[], nextStep?, ...}` |
+| `POST /api/v1/tickets/{id}/ai/reply-draft` | `AI_USE` | — | `{insightId, draft, ...}` |
+| `PATCH /api/v1/ai/insights/{id}/feedback` | `AI_USE` (own insight) | `{accepted}` | 204 |
+
+Details and safety: [ai-features.md](ai-features.md).
+
 ### Swagger / OpenAPI
 
 Interactive docs: <http://localhost:8080/swagger-ui> · machine-readable spec:

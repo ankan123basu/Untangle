@@ -49,6 +49,14 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   database with the seed applied.
 - Docker must be running for `make test` (Testcontainers). CI runners have Docker.
 
+### Phase 6 additions (backend total: 392 tests)
+
+| Class | Tests | Proves |
+|---|---|---|
+| `PiiRedactorTest` | 10 | emails, cards (3 formats), long numbers, phones redacted; ordinary numbers kept |
+| `AiIntegrationTest` | 9 | against a **fake Groq HTTP server**: validated suggestions + provenance, PII never sent, invalid enum dropped, invalid JSON discarded, 5xx and timeout → 503, circuit opens and stops calling, prompt injection has no effect, summary + feedback |
+| `AiDisabledIntegrationTest` | 1 | no key → disabled, 503, core app works |
+
 ### Phase 5 additions (backend total: 372 tests)
 
 | Class | Tests | Proves |

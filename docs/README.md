@@ -20,7 +20,7 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [decisions/](decisions/) | Architecture Decision Records (ADRs) | Living |
 | [edge-cases.md](edge-cases.md) | Case → expected behaviour → test name | Living (DB-level cases done) |
 | [testing.md](testing.md) | Test strategy and how to run tests | Phase 0 baseline |
-| [ai-features.md](ai-features.md) | AI helpers, safety, failure modes | Phase 6 |
+| [ai-features.md](ai-features.md) | AI helpers, safety, failure modes | Done (Phase 6) |
 | [frontend-design-system.md](frontend-design-system.md) | Tokens, theme, motion, a11y | Phases 7 and 9 |
 | [scalability.md](scalability.md) | Today's scaling choices and the 10x/100x plan | Phases 10–11 |
 | [observability.md](observability.md) | Logs, metrics, health, dashboards | Request id + JSON logs done; metrics Phase 10 |
@@ -53,3 +53,4 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [019](decisions/ADR-019-partner-simulator-node-typescript.md) | Partner simulator in Node + TypeScript, zero runtime deps |
 | [020](decisions/ADR-020-sla-scheduler-with-shedlock.md) | SLA escalation: idempotent scan + ShedLock + row locks |
 | [021](decisions/ADR-021-notifications-polling-over-sse.md) | Notifications by polling the unread count (SSE deferred) |
+| [022](decisions/ADR-022-ai-suggestion-only.md) | AI is optional, suggestion-only and never trusted |

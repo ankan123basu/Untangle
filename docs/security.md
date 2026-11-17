@@ -141,6 +141,12 @@ which arrives in Phase 3.
 
 Never committed: `.env` is git-ignored; config records redact secrets in `toString()`.
 
+### AI (Phase 6)
+
+PII redaction before sending, delimiter-wrapped untrusted data, output validated field by field and
+never executed, per-user rate limit, timeouts + circuit breaker, off by default
+([ADR-022](decisions/ADR-022-ai-suggestion-only.md), [ai-features.md](ai-features.md)).
+
 ### Webhook verification pipeline (§7.2)
 
 ```
