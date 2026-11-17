@@ -1,7 +1,10 @@
-import { useState, type ReactNode } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router';
+import { useEffect, useState, type ReactNode } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate, useNavigation } from 'react-router';
 import {
   Building2,
+  Columns3,
+  Menu,
+  X,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -91,6 +94,26 @@ export function AppShell() {
   const canManagePartners = useCan('PARTNER_MANAGE');
   const navigate = useNavigate();
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  const location = useLocation();
+  const navigation = useNavigation();
+
+  // On small screens the nav is a drawer; close it whenever the page changes or Esc is pressed.
+  const [lastPath, setLastPath] = useState(location.pathname);
+  if (lastPath !== location.pathname) {
+    setLastPath(location.pathname);
+    setNavOpen(false);
+  }
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setNavOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [navOpen]);
 
   return (
     <div className="min-h-dvh bg-paper">
@@ -100,10 +123,36 @@ export function AppShell() {
       >
         Skip to content
       </a>
+      {navigation.state === 'loading' && (
+        // Lazy route chunks can take a moment on slow networks; show that something is happening.
+        <div
+          role="progressbar"
+          aria-label="Loading page"
+          className="fixed inset-x-0 top-0 z-[70] h-1 origin-left animate-pulse bg-brand"
+        />
+      )}
       <OfflineBanner />
       <div className="mx-auto grid max-w-[1500px] gap-6 p-4 lg:grid-cols-[230px_1fr] lg:p-6">
-        <aside className="lg:sticky lg:top-6 lg:h-[calc(100dvh-3rem)]">
-          <nav aria-label="Main" className="solid-panel flex h-full flex-col gap-1 p-3">
+        {navOpen && (
+          <div
+            aria-hidden="true"
+            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            onClick={() => {
+              setNavOpen(false);
+            }}
+          />
+        )}
+        <aside
+          id="main-nav"
+          className={cn(
+            'fixed inset-y-0 left-0 z-50 w-[260px] p-3 transition-transform duration-200 ease-brutal lg:sticky lg:top-6 lg:z-auto lg:h-[calc(100dvh-3rem)] lg:w-auto lg:translate-x-0 lg:p-0',
+            navOpen ? 'translate-x-0' : '-translate-x-[110%]',
+          )}
+        >
+          <nav
+            aria-label="Main"
+            className="solid-panel flex h-full flex-col gap-1 overflow-y-auto p-3"
+          >
             <NavLink to="/" className="mb-4 flex items-center gap-2 px-2 pt-1">
               <LogoMark size={32} title="" />
               <span className="font-display text-xl font-bold">Untangle</span>
@@ -113,6 +162,9 @@ export function AppShell() {
             </NavItem>
             <NavItem to="/tickets" end icon={<ListChecks className="size-4" />}>
               Tickets
+            </NavItem>
+            <NavItem to="/board" icon={<Columns3 className="size-4" />}>
+              Board
             </NavItem>
             <NavItem to="/tickets/new" icon={<PlusCircle className="size-4" />}>
               New ticket
@@ -155,7 +207,20 @@ export function AppShell() {
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6">
-          <header className="solid-panel flex items-center gap-3 px-4 py-2">
+          <header className="solid-panel flex items-center gap-2 px-2 py-2 sm:gap-3 sm:px-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              aria-label={navOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={navOpen}
+              aria-controls="main-nav"
+              onClick={() => {
+                setNavOpen((o) => !o);
+              }}
+            >
+              {navOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            </Button>
             <button
               type="button"
               onClick={() => {
@@ -164,8 +229,13 @@ export function AppShell() {
               className="flex h-10 flex-1 items-center gap-2 rounded-md border-2 border-line-soft bg-paper px-3 text-left text-sm text-muted hover:border-line"
             >
               <Search aria-hidden="true" className="size-4" />
-              <span className="flex-1">Search tickets, jump to UNT-…, create…</span>
-              <Kbd>⌘K</Kbd>
+              <span className="flex-1 truncate">
+                <span className="sm:hidden">Search…</span>
+                <span className="hidden sm:inline">Search tickets, jump to UNT-…, create…</span>
+              </span>
+              <span className="hidden sm:inline">
+                <Kbd>⌘K</Kbd>
+              </span>
             </button>
             <NotificationBell />
             <ThemeToggle />

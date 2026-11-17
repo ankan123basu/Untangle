@@ -73,6 +73,22 @@ Space Grotesk (display), Inter (body), JetBrains Mono (ticket ids, code), self-h
 `@fontsource-variable`. Vite is told never to inline fonts as `data:` URIs because the CSP allows
 only `font-src 'self'` (found during the Phase 7 browser check).
 
+### Screens (Phase 8)
+
+| Route | Screen | Notes |
+|---|---|---|
+| `/` | Dashboard | CountUp unresolved total + priority bar; SpotlightCard KPIs linking to filtered lists; trend chart (lazy chunk, with a table alternative); workload for leads/admins; the shared ticket table |
+| `/tickets` | Ticket list | every filter in the URL; quick views; debounced search; sort; page size; skeleton / empty / error states |
+| `/tickets/:id` | Ticket detail | header + live SLA countdown; status stepper; action bar from `allowedActions` (denied → disabled + reason tooltip); timeline; composer (Ctrl+Enter); details + assignee picker with workload; AI panel; edit, action and conflict dialogs; closed banner |
+| `/tickets/new` | Create | RHF + Zod mirroring the backend; AI triage chips; assignee picker (leads) or "Assign to me" (agents); server field errors inline |
+| `/board` | Kanban (bonus) | drag-and-drop or "Move to…" select; each move checks the server's `allowedActions` first |
+| `/admin/agents` | Agents | add, change role, deactivate with bulk-reassign flow |
+| `/admin/partners` | Partners | add, rotate (secret shown once, copy button), enable/disable, link to logs |
+| `/admin/webhooks` | Webhook logs | filters (partner, outcome, dates) in the URL; linked tickets |
+
+Below `lg` (1024 px) the sidebar becomes a drawer (menu button, Esc or a tap outside closes it).
+A thin brand-coloured bar shows while a lazy route chunk loads.
+
 ### Motion and 3D *(Phase 9)*
 
 _Filled in Phase 9._

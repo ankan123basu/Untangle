@@ -49,6 +49,23 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   database with the seed applied.
 - Docker must be running for `make test` (Testcontainers). CI runners have Docker.
 
+### Phase 8 additions (frontend total: 41 tests)
+
+- `ticket-logic.test.ts`: URL filter round-trip, invalid values dropped, quick-view detection,
+  board move → action mapping, close-needs-reason rule, SLA on-track / at-risk / breached / stopped.
+- `ticket-detail.test.tsx`: action bar from `allowedActions` (denied ones disabled with the reason
+  as their accessible description), HTML in comments rendered as text, resolve requires a note and
+  sends the loaded `version`, `VERSION_CONFLICT` → conflict dialog → reload, closed ticket is
+  read-only with Reopen, optimistic comment rolls back and returns the text.
+- `screens.test.tsx`: list filters ↔ URL ↔ API query, empty state clears filters, dashboard KPIs
+  link to filtered lists and workload is hidden from agents, create-form validation, AI chips
+  accept/ignore per field, server field errors shown inline, agents can only self-assign.
+- `admin.test.tsx`: rotated secret shown once and gone after closing, partner code validation,
+  deactivate → `AGENT_HAS_OPEN_TICKETS` → bulk reassign → deactivate.
+- New jsdom stubs: `ResizeObserver`, `matchMedia`. Fixtures in `src/test/fixtures.ts`.
+- These tests found a real bug: every dialog used the id `dialog-title`, so on pages with several
+  dialogs screen readers announced the wrong title. Dialogs now use `useId()`.
+
 ### Phase 7 additions (frontend: 15 tests)
 
 - Stack: Vitest 5 (jsdom) + Testing Library + MSW 3. `src/test/server.ts` holds the MSW server,

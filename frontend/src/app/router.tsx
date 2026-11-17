@@ -33,6 +33,10 @@ export const router = createBrowserRouter([
           import('@/features/tickets/tickets-page').then((m) => ({ Component: m.default })),
       },
       {
+        path: 'board',
+        lazy: () => import('@/features/tickets/board-page').then((m) => ({ Component: m.default })),
+      },
+      {
         path: 'tickets/new',
         lazy: () =>
           import('@/features/tickets/create-ticket-page').then((m) => ({ Component: m.default })),

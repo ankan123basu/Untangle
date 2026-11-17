@@ -46,15 +46,15 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
 interface FieldProps {
   label: string;
   error?: string | undefined;
-  hint?: string;
-  required?: boolean;
+  hint?: string | undefined;
+  required?: boolean | undefined;
   /** Receives the generated id and aria props to spread on the control. */
   children: (props: {
     id: string;
     'aria-invalid': boolean;
     'aria-describedby'?: string;
   }) => ReactNode;
-  className?: string;
+  className?: string | undefined;
 }
 
 /** Label + control + hint/error, wired up for screen readers (aria-invalid, aria-describedby). */

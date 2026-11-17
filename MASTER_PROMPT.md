@@ -32,6 +32,9 @@
 > - Phase 7: OpenAPI response fields are all `required`, nullable ones marked `@Nullable` (ADR-023), so
 >   generated TS types are exact. React Bits components are vendored and type-patched; Aurora and
 >   ClickSpark are not adopted yet (decided in Phase 9). Access token in memory only.
+> - Phase 8: the dashboard and /tickets share one URL-synced ticket table; Kanban (bonus) included,
+>   with a keyboard "Move to…" alternative to drag-and-drop; the resolve micro-interaction is a small
+>   first-party spark burst (reduced-motion aware) until Phase 9 decides on React Bits ClickSpark.
 
 ---
 

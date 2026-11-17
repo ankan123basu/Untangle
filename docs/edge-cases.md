@@ -94,7 +94,9 @@ Test classes live in `backend/src/test/java/dev/untangle/`.
 | Duplicate agent email in different case | rejected | `agentEmailsAreUniqueIgnoringCase` | ✅ DB |
 | Priority `high` / `URGENT` / null / `""`, unknown category, blank customer name, short subject, bad email | 400 with that field | `TicketLifecycleIntegrationTest.rejectsInvalidTickets` (8) | ✅ |
 | Description > 5000 chars | 400 | `rejectsADescriptionOver5000Characters` | ✅ |
-| HTML/script in a comment | stored verbatim, served as JSON text (`nosniff`); UI renders as text (Phase 8 test) | `commentsAreStoredVerbatimAndServedAsJsonText` | ✅ API |
+| HTML/script in a comment | stored verbatim, served as JSON text (`nosniff`); UI renders it as text, no element is created | `commentsAreStoredVerbatimAndServedAsJsonText`; frontend `renders HTML in comments as plain text (§11)` | ✅ API + UI |
+| Two people edit the same ticket | second write gets 409 `VERSION_CONFLICT`; UI shows the conflict dialog and reloads | `ConcurrencyIntegrationTest`; frontend `shows the conflict dialog on VERSION_CONFLICT…` | ✅ API + UI |
+| Kanban drop that the server wouldn't allow | nothing moves; toast says why (from `deniedActions`) | `maps board moves to the action the server must allow` + browser check | ✅ UI |
 | SYSTEM comment via API | 400 | `systemCommentsCannotBeCreatedThroughTheApi` | ✅ |
 | Unknown filter values, bad sort, bad dates, page < 0 | 400 with field | `TicketQueryIntegrationTest.rejectsInvalidParameters` (8) | ✅ |
 | Page size > 100 | **rejected** with 400 (documented choice: clients learn instead of silently getting fewer rows) | same | ✅ |

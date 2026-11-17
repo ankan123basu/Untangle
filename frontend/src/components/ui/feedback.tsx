@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { AlertTriangle, Inbox } from 'lucide-react';
+import { ApiError, messageFor } from '@/lib/api/problem';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 
@@ -28,17 +29,27 @@ export function EmptyState({
   );
 }
 
+/**
+ * Error panel. Pass `error` (anything thrown by the API client) and it shows the friendly message
+ * and the server traceId so support can find the request in the logs.
+ */
 export function ErrorState({
   title = 'Something went wrong',
   description,
   onRetry,
   traceId,
+  error,
 }: {
   title?: string;
-  description?: string;
-  onRetry?: () => void;
+  description?: string | undefined;
+  onRetry?: (() => void) | undefined;
   traceId?: string | undefined;
+  error?: unknown;
 }) {
+  if (error instanceof ApiError) {
+    description ??= messageFor(error);
+    traceId ??= error.traceId;
+  }
   return (
     <div role="alert" className="flex flex-col items-center gap-3 px-6 py-12 text-center">
       <AlertTriangle aria-hidden="true" className="size-10 text-danger" />

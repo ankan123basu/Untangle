@@ -55,3 +55,24 @@ if (typeof globalThis.IntersectionObserver === 'undefined') {
   }
   globalThis.IntersectionObserver = VisibleObserver as unknown as typeof IntersectionObserver;
 }
+
+// jsdom has no ResizeObserver (Recharts' ResponsiveContainer) or matchMedia (theme, motion).
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+if (typeof window.matchMedia !== 'function') {
+  // Old-style addListener/removeListener are left out on purpose (deprecated; nothing here uses them).
+  window.matchMedia = (query: string) =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      dispatchEvent: () => false,
+    }) as unknown as MediaQueryList;
+}
