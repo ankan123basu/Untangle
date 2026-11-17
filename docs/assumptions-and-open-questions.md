@@ -43,7 +43,7 @@ When the lead answers, fill in the **Lead's answer** column and link the commit 
 | R9 | `Secure` refresh cookie over plain HTTP in dev | Works on `localhost` in Chrome/Firefox; same origin via nginx/Vite proxy. `AUTH_COOKIE_SECURE` env flag for Safari/plain-HTTP dev | 2 |
 | R10 | Groq receives ticket text (fintech context) | AI **off by default** (`AI_ENABLED=false`), PII redacted before sending. **Open question for the lead:** is sending redacted ticket text to a third-party LLM acceptable? | 6 |
 | R11 | Lighthouse ≥ 90 vs a 3D dashboard | R3F only on the login page. Dashboard uses a lightweight background deferred after LCP and paused when hidden | 9 |
-| R12 | Dev seed vs A12 (admin from env vars) | First admin created by a Java startup runner from env vars. Demo data is SQL under `db/seed-dev`, enabled **only** in the `dev` profile, with pre-computed BCrypt hashes | 1–2 |
+| R12 | Dev seed vs A12 (admin from env vars) | First admin created by a Java startup runner from env vars (Phase 2). Demo data is SQL under `db/seed-demo`, enabled by the `demo` profile (included by `dev`, default in `.env.example` for Docker demos), with a pre-computed BCrypt hash. **Done in Phase 1** | 1–2 |
 | R13 | Simulator language | Node.js + TypeScript (closest to a real external partner; built-in `crypto` HMAC). ADR in Phase 4 | 4 |
 | R14 | Comments on RESOLVED tickets? | Allowed. Only CLOSED is frozen | 3 |
 
@@ -57,6 +57,9 @@ When the lead answers, fill in the **Lead's answer** column and link the commit 
 | Docker Postgres on host port 5433 | Local Homebrew Postgres already owns 5432 | `.env.example` |
 | Local toolchain + Docker runtime | Faster feedback; reviewers still only need Docker for `make up` | [ADR-004](decisions/ADR-004-local-toolchain-docker-runtime.md) |
 | TypeScript 6.0.x, not 7.x | typescript-eslint supports `<6.1` | [ADR-006](decisions/ADR-006-frontend-toolchain.md) |
+| UUIDv7 primary keys instead of `gen_random_uuid()` (v4) | time-ordered inserts; PG 18 native | [ADR-008](decisions/ADR-008-uuidv7-primary-keys.md) |
+| Extra DB invariants: IN_PROGRESS ⇒ assignee, RESOLVED ⇒ `resolved_at`, MANUAL ⇔ creator, comments append-only (trigger) | defence in depth beyond §8's list | [database.md](database.md) |
+| `ticket_ai_insights.ticket_id` nullable for `TRIAGE` | triage runs on the create form before the ticket exists | [database.md](database.md) |
 
 ### D. Still open (for the lead)
 

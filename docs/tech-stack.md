@@ -24,14 +24,14 @@ in the phase that first uses them.
 | Maven / Wrapper | 3.10.1 via `./mvnw` | |
 | Spotless (google-java-format) | 3.11.0 | |
 | JaCoCo | 0.8.16 | |
-| Flyway | managed (12.4.x) *(Phase 1)* | Boot-managed, not the newest 13.x, to stay compatible |
-| PostgreSQL JDBC | managed (42.7.x) *(Phase 1)* | |
-| Testcontainers | managed (2.0.x) *(Phase 1)* | |
-| ArchUnit | 1.5.1 *(Phase 1)* | |
+| Flyway (+ `flyway-database-postgresql`) | managed (12.4.x) | Boot-managed, not the newest 13.x, to stay compatible |
+| PostgreSQL JDBC | managed (42.7.14) | |
+| Testcontainers (`testcontainers-postgresql`, `-junit-jupiter`) | managed (2.0.5) | |
+| ArchUnit (`archunit-junit5`) | 1.5.1 | |
 | jjwt | 0.13.0 *(Phase 2)* | ADR in Phase 2 |
 | springdoc-openapi | 3.2.0 *(Phase 3)* | 3.x line targets Boot 4 |
 | MapStruct | 1.6.3 *(Phase 3)* | latest GA (1.7 is still beta) |
-| Lombok | managed (1.18.48) *(Phase 1)* | |
+| Lombok (annotation processor path) | managed (1.18.48) | |
 | ShedLock | 7.11.0 *(Phase 5)* | |
 | Bucket4j (`bucket4j_jdk17-core`) | 8.22.0 *(Phase 2/4)* | |
 | Resilience4j (`resilience4j-spring-boot4`) | 2.4.0 *(Phase 6)* | |

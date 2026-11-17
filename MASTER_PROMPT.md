@@ -13,6 +13,10 @@
 > - Tailwind v4 has no JS config: tokens are mapped with `@theme` in CSS.
 > - Success responses are plain DTOs (lists use `PageResponse`); errors are RFC 9457 only. No `ApiResponse` envelope.
 > - Resolved ambiguities R1–R14 are listed in `docs/assumptions-and-open-questions.md`.
+> - Phase 1: primary keys are **UUIDv7** (PG 18 `uuidv7()`; ADR-008) instead of `gen_random_uuid()`.
+>   Demo data lives in `db/seed-demo` under a `demo` profile (included by `dev`). Hash columns
+>   are `varchar(64)` + regex CHECK. Extra DB invariants beyond §8 are listed in `docs/database.md`.
+>   Feature packages use `api/application/domain/infrastructure` uniformly.
 
 ---
 

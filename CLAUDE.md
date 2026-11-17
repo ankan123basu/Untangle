@@ -33,7 +33,15 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
 ## Architecture
 - Modular monolith, **package-by-feature** under `dev.untangle`: `auth agent ticket comment webhook
   escalation notification dashboard ai` + shared `common config security`.
-  `controller → service → repository`; controllers use DTOs only; entities never leave services.
+  Every feature uses the same sub-packages: `api` (controllers, DTOs) → `application` (services)
+  → `domain` (entities, enums, rules; no Spring) / `infrastructure` (repositories, private to the
+  feature). Entities never reach `api`. ArchUnit enforces all of this (`ArchitectureTest`).
+- Persistence: Flyway SQL (`db/migration`, never edit an applied file), Hibernate `validate`.
+  UUIDv7 ids via `BaseEntity`; `AuditedEntity` adds timestamps + `@Version`. Entities have no public
+  setters (factories and behaviour methods only), Lombok `@Getter` only. Invariants are mirrored as
+  named DB constraints. Demo data: `db/seed-demo` (profile `demo`, included by `dev`; password
+  `Untangle@2026`).
+- Tests touching the DB extend `support/IntegrationTest` (Testcontainers Postgres 18, shared context).
 - Two entry doors, one brain: JWT REST and HMAC webhook both call `TicketService`.
 - Success = plain DTOs (`PageResponse` for lists); errors = RFC 9457 with `code`, `traceId`, `errors[]`.
 - Business rules live server-side; the UI renders `allowedActions` from the server.
