@@ -1,0 +1,39 @@
+/*
+ * Untangle design tokens (seed). Raw values live here as CSS variables; globals.css maps them
+ * into Tailwind with @theme so classes like `bg-paper` or `shadow-hard` exist.
+ *
+ * Phase 0 only defines the brand core. Phase 7 adds the full set: priority, status and SLA
+ * colours, glass surfaces, motion durations and focus rings. See docs/frontend-design-system.md.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Brand: a warm "untangled" yellow on paper, inked in near-black. */
+  --ut-brand: #ffd23f;
+  --ut-on-brand: #111111;
+  --ut-ink: #111111;
+  --ut-paper: #f5f1e8;
+  --ut-surface: #ffffff;
+
+  /* Brutalist structure */
+  --ut-border-width: 3px;
+  --ut-radius-card: 12px;
+  --ut-shadow-hard: 4px 4px 0 0 var(--ut-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --ut-ink: #f3efe6;
+    --ut-paper: #121212;
+    --ut-surface: #1d1d1d;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ut-ink: #f3efe6;
+  --ut-paper: #121212;
+  --ut-surface: #1d1d1d;
+}
