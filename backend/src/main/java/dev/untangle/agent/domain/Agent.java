@@ -64,4 +64,17 @@ public class Agent extends AuditedEntity {
   public void activate() {
     this.active = true;
   }
+
+  public void rename(String fullName) {
+    this.fullName = Objects.requireNonNull(fullName, "fullName").strip();
+  }
+
+  public void changeRole(Role role) {
+    this.role = Objects.requireNonNull(role, "role");
+  }
+
+  /** True while a lockout (5 failed logins) is in force. */
+  public boolean isLockedAt(Instant now) {
+    return lockedUntil != null && lockedUntil.isAfter(now);
+  }
 }
