@@ -5,6 +5,7 @@ import dev.untangle.comment.domain.CommentType;
 import dev.untangle.comment.domain.TicketComment;
 import dev.untangle.comment.infrastructure.TicketCommentRepository;
 import dev.untangle.ticket.domain.Ticket;
+import jakarta.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,8 @@ public class Timeline {
       UUID id,
       CommentType type,
       String body,
-      AuthorRef author,
-      Map<String, Object> metadata,
+      @Nullable AuthorRef author,
+      @Nullable Map<String, Object> metadata,
       Instant createdAt) {
 
     static Entry of(TicketComment c) {

@@ -6,6 +6,7 @@ import dev.untangle.ticket.domain.Priority;
 import dev.untangle.ticket.domain.TicketAction;
 import dev.untangle.ticket.domain.TicketSource;
 import dev.untangle.ticket.domain.TicketStatus;
+import jakarta.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,7 @@ public final class TicketViews {
       Priority priority,
       TicketStatus status,
       TicketSource source,
-      AgentRef assignee,
+      @Nullable AgentRef assignee,
       int escalationLevel,
       Instant slaDueAt,
       boolean slaBreached,
@@ -45,24 +46,24 @@ public final class TicketViews {
       String subject,
       String description,
       String customerName,
-      String customerEmail,
+      @Nullable String customerEmail,
       Category category,
       Priority priority,
       TicketStatus status,
       TicketSource source,
-      String partnerCode,
-      String externalEventId,
-      AgentRef assignee,
-      AgentRef createdBy,
+      @Nullable String partnerCode,
+      @Nullable String externalEventId,
+      @Nullable AgentRef assignee,
+      @Nullable AgentRef createdBy,
       int escalationLevel,
       int reopenedCount,
       Instant slaStartedAt,
       Instant slaDueAt,
       boolean slaBreached,
       long slaRemainingSeconds,
-      Instant firstResponseAt,
-      Instant resolvedAt,
-      Instant closedAt,
+      @Nullable Instant firstResponseAt,
+      @Nullable Instant resolvedAt,
+      @Nullable Instant closedAt,
       Instant createdAt,
       Instant updatedAt,
       long version,

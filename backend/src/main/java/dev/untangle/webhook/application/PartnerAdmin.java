@@ -9,6 +9,7 @@ import dev.untangle.webhook.domain.Partner;
 import dev.untangle.webhook.domain.WebhookDelivery;
 import dev.untangle.webhook.infrastructure.PartnerRepository;
 import dev.untangle.webhook.infrastructure.WebhookDeliveryRepository;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -64,7 +65,7 @@ public class PartnerAdmin {
       String name,
       boolean active,
       int rateLimitPerMinute,
-      Instant previousSecretValidUntil,
+      @Nullable Instant previousSecretValidUntil,
       Instant createdAt,
       Instant updatedAt) {
     static PartnerView of(Partner p, Instant now) {
@@ -91,14 +92,14 @@ public class PartnerAdmin {
   public record DeliveryView(
       UUID id,
       Instant receivedAt,
-      String partnerCode,
-      String eventId,
+      @Nullable String partnerCode,
+      @Nullable String eventId,
       DeliveryOutcome outcome,
-      String reason,
-      UUID ticketId,
-      String ticketNumber,
-      String sourceIp,
-      String payloadSha256) {
+      @Nullable String reason,
+      @Nullable UUID ticketId,
+      @Nullable String ticketNumber,
+      @Nullable String sourceIp,
+      @Nullable String payloadSha256) {
     static DeliveryView of(WebhookDelivery d) {
       return new DeliveryView(
           d.getId(),

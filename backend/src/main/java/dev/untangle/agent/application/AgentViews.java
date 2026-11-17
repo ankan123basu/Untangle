@@ -2,6 +2,7 @@ package dev.untangle.agent.application;
 
 import dev.untangle.agent.domain.Agent;
 import dev.untangle.agent.domain.Role;
+import jakarta.annotation.Nullable;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ public final class AgentViews {
       Role role,
       boolean active,
       boolean locked,
-      Instant lastLoginAt,
+      @Nullable Instant lastLoginAt,
       Instant createdAt,
       long version) {
     static AgentAdminView of(Agent a, Instant now) {

@@ -16,6 +16,7 @@ import dev.untangle.ticket.application.TicketViews.TicketDetail;
 import dev.untangle.ticket.domain.Category;
 import dev.untangle.ticket.domain.Priority;
 import dev.untangle.ticket.domain.Ticket;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -55,15 +56,15 @@ public class AiAssistant {
   private static final Logger log = LoggerFactory.getLogger(AiAssistant.class);
   static final String PROMPT_VERSION = "v1";
 
-  public record Status(boolean enabled, String model) {}
+  public record Status(boolean enabled, @Nullable String model) {}
 
   public record TriageSuggestion(
       UUID insightId,
-      Category category,
-      Priority priority,
-      String summary,
-      String sentiment,
-      String rationale,
+      @Nullable Category category,
+      @Nullable Priority priority,
+      @Nullable String summary,
+      @Nullable String sentiment,
+      @Nullable String rationale,
       String model,
       String promptVersion) {}
 
@@ -71,7 +72,7 @@ public class AiAssistant {
       UUID insightId,
       String summary,
       List<String> keyPoints,
-      String nextStep,
+      @Nullable String nextStep,
       String model,
       String promptVersion) {}
 

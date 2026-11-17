@@ -29,6 +29,9 @@
 > - Phase 6: default model `openai/gpt-oss-20b` (configurable); Resilience4j core used programmatically;
 >   webhook auto-triage bonus skipped (category is required in the payload).
 > - Phase 5: notifications by 30 s polling (+ `GET /notifications/unread-count`); SSE deferred (ADR-021).
+> - Phase 7: OpenAPI response fields are all `required`, nullable ones marked `@Nullable` (ADR-023), so
+>   generated TS types are exact. React Bits components are vendored and type-patched; Aurora and
+>   ClickSpark are not adopted yet (decided in Phase 9). Access token in memory only.
 
 ---
 
