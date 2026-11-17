@@ -33,7 +33,7 @@ in the phase that first uses them.
 | MapStruct (+ processor) | 1.6.3 | latest GA (1.7 is beta); `unmappedTargetPolicy=ERROR`, Spring component model |
 | lombok-mapstruct-binding | 0.2.0 | lets MapStruct see Lombok getters (processor order matters) |
 | Lombok (annotation processor path) | managed (1.18.48) | |
-| ShedLock | 7.11.0 *(Phase 5)* | |
+| ShedLock (`shedlock-spring`, `shedlock-provider-jdbc-template`) | 7.11.0 | DB-time locks for `@Scheduled` jobs (ADR-020) |
 | Bucket4j (`bucket4j_jdk17-core`) | 8.22.0 | login rate limits; webhook/AI later |
 | Caffeine (+ `spring-boot-starter-cache`) | managed (3.2.4) | principal cache, rate-limit buckets |
 | Resilience4j (`resilience4j-spring-boot4`) | 2.4.0 *(Phase 6)* | |

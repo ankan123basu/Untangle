@@ -51,3 +51,5 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [017](decisions/ADR-017-hmac-over-timestamp-and-raw-body.md) | HMAC over `timestamp.rawBody`, verified before parsing |
 | [018](decisions/ADR-018-generic-webhook-errors-and-delivery-log.md) | Generic 401s + admin delivery log; 200 for duplicates |
 | [019](decisions/ADR-019-partner-simulator-node-typescript.md) | Partner simulator in Node + TypeScript, zero runtime deps |
+| [020](decisions/ADR-020-sla-scheduler-with-shedlock.md) | SLA escalation: idempotent scan + ShedLock + row locks |
+| [021](decisions/ADR-021-notifications-polling-over-sse.md) | Notifications by polling the unread count (SSE deferred) |

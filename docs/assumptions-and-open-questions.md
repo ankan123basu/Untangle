@@ -81,6 +81,10 @@ When the lead answers, fill in the **Lead's answer** column and link the commit 
 | Simulator creates its own throwaway partners via the admin API | results never depend on leftovers; demo partner `acme-bank` stays for curl examples | ADR-019 |
 | Demo partner secret set at startup (`DemoPartnerSecretInitializer`, demo profile only) | the SQL seed can't encrypt with an env key | [webhook-integration-guide.md](webhook-integration-guide.md) |
 | `PARTNER_NOT_FOUND`, `PARTNER_CODE_TAKEN` error codes | partner admin | [api.md](api.md) |
+| Escalation levels (R4) implemented as `min(3, floor(elapsed / target))` | level 1 at the deadline, 2 at 2×, 3 at 3× | [ADR-020](decisions/ADR-020-sla-scheduler-with-shedlock.md) |
+| Notifications via 30 s polling instead of SSE | `EventSource` can't send the bearer header; no token-in-URL | [ADR-021](decisions/ADR-021-notifications-polling-over-sse.md) |
+| Extra endpoint `GET /notifications/unread-count` | cheap bell badge for polling | [api.md](api.md) |
+| `MENTION` notification type defined but unused | @mentions aren't in scope; kept in the CHECK for forward compatibility | [database.md](database.md) |
 | Malformed `X-Event-Id` logged as `REJECTED_VALIDATION` (still a generic 401) | the outcome enum has no header-specific value; the reason text is precise | ADR-018 |
 
 ### D. Still open (for the lead)

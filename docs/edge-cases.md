@@ -67,7 +67,12 @@ Test classes live in `backend/src/test/java/dev/untangle/`.
 | Agent acting on another agent's ticket | 403 (comment still allowed) | `agentsCannotWorkOtherAgentsTickets` + policy tests | ✅ |
 | Unassign non-OPEN / assign to deactivated agent | 409 `ASSIGNEE_REQUIRED` / `AGENT_INACTIVE` | `assignmentRules` | ✅ |
 | `allowedActions` per role, ownership, status | matches policy | `allowedActionsReflectRoleOwnershipAndState`, `TicketAccessPolicyTest` (37) | ✅ |
-| Scheduler escalates once per level | idempotent | — | Phase 5 |
+| SLA levels: due at n × target, capped at 3; resolved tickets never breach | levels 0/1/2/3 | `SlaEscalationIntegrationTest.levelsFollowMultiplesOfTheTargetAndAreCapped` | ✅ |
+| **Scheduler escalates once per level (re-runs)** | second run is a no-op; the next level follows later | `rerunningIsIdempotentAndLaterLevelsFollow` | ✅ |
+| **Two instances running the scan at once** | each ticket escalated exactly once | `twoConcurrentRunsEscalateEachTicketOnce` (row locks) + `shedLockLetsOnlyOneInstanceHoldTheJobLock` | ✅ |
+| Manual escalation above the due level | kept, not repeated | `manualEscalationAboveTheDueLevelIsNotDowngradedOrRepeated` | ✅ |
+| SLA breach notifications | leads + assignee | `breachNotifiesLeadsAndTheAssignee` | ✅ |
+| Notifications: no self-notification; others' notifications → 404 | | `NotificationIntegrationTest` (3) | ✅ |
 
 ### Concurrency
 

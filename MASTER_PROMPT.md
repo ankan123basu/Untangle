@@ -26,6 +26,7 @@
 >   added; reopen resets escalation level.
 > - Phase 4: per-IP webhook limit before header checks (R2); simulator creates its own partners via the
 >   admin API (13 scenarios, also in CI); demo partner `acme-bank` gets its secret at startup.
+> - Phase 5: notifications by 30 s polling (+ `GET /notifications/unread-count`); SSE deferred (ADR-021).
 
 ---
 

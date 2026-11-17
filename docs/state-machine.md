@@ -50,6 +50,15 @@ stateDiagram-v2
 | `TicketAccessPolicy` (security) | who may perform each action now; produces `allowedActions` / `deniedActions` | `TicketAccessPolicyTest`: 37 role × ownership × status cases |
 | `TicketService` | order: load → closed → version → policy → input checks → mutate → timeline → event | `TicketLifecycleIntegrationTest` (42) |
 
+### SLA and escalation (Phase 5)
+
+- `sla_due_at = sla_started_at + target(priority)`; targets in `app.tickets.sla.*`.
+- Every minute, one instance (ShedLock) raises `escalation_level` to
+  `min(3, floor((now − sla_started_at) / target))` for OPEN/IN_PROGRESS tickets past their deadline,
+  writes a SYSTEM entry `{event: SLA_BREACH, level}` and notifies leads + assignee
+  ([ADR-020](decisions/ADR-020-sla-scheduler-with-shedlock.md)).
+- Manual `escalate` adds 1 (any role, reason required). Reopen restarts the SLA clock and resets the level.
+
 Reasons the UI shows for disabled actions: `TICKET_CLOSED`, `ACCESS_DENIED`,
 `INVALID_STATUS_TRANSITION`, `ASSIGNEE_REQUIRED`
 ([ADR-015](decisions/ADR-015-allowed-actions-from-server.md)).

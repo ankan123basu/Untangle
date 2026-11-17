@@ -53,6 +53,15 @@ docker compose logs backend --no-log-prefix | grep '"requestId":"<id>"'
 
 `/actuator/health/liveness` and `/readiness` back the Docker healthchecks.
 
+### Scheduled jobs (Phase 5)
+
+| Job | Schedule | Lock (ShedLock) | Log line |
+|---|---|---|---|
+| SLA escalation | every minute (`app.escalation.cron`) | `sla-escalation`, at most 5 min, at least 20 s | `SLA scan escalated N ticket(s)` (only when N > 0) |
+| Webhook delivery retention | 03:15 daily | `webhook-delivery-retention` | `Webhook delivery retention: deleted N row(s)` |
+
+Who holds a lock right now: `SELECT * FROM shedlock;`
+
 ### Metrics and dashboards (Phase 10)
 
 Micrometer + Prometheus registry, custom counters (`tickets_created_total{source}`,

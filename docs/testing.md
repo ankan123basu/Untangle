@@ -49,6 +49,13 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   database with the seed applied.
 - Docker must be running for `make test` (Testcontainers). CI runners have Docker.
 
+### Phase 5 additions (backend total: 372 tests)
+
+| Class | Tests | Proves |
+|---|---|---|
+| `SlaEscalationIntegrationTest` | 6 | level formula and cap, idempotent re-runs, two concurrent runs → once per ticket, manual level kept, breach notifications, ShedLock exclusivity |
+| `NotificationIntegrationTest` | 3 | assignment and escalation fan-out, no self-notification, read / read-all, others' → 404 |
+
 ### Phase 4 additions (backend total: 363 tests + 13 simulator scenarios)
 
 | Class / tool | Tests | Proves |

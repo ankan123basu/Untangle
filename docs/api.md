@@ -170,6 +170,18 @@ examples and retry advice: [webhook-integration-guide.md](webhook-integration-gu
 | `PATCH /partners/{id}/active` | `{active}` | `PartnerView` |
 | `GET /webhook-deliveries?partnerId&outcome&from&to&page&size≤100` | — | `PageResponse<DeliveryView{receivedAt, partnerCode, eventId, outcome, reason, ticketId, ticketNumber, sourceIp, payloadSha256}>` newest first |
 
+### Notifications (`/api/v1/notifications`, the caller's own)
+
+| Method & path | Response |
+|---|---|
+| `GET /?unreadOnly=false&page&size≤100` | `PageResponse<{id, type, ticketId, ticketNumber, message, read, createdAt}>` newest first |
+| `GET /unread-count` | `{count}` (the SPA polls this every 30 s, ADR-021) |
+| `PATCH /{id}/read` | the notification (someone else's → 404) |
+| `POST /read-all` | `{count: 0}` |
+
+Types: `ASSIGNED` (to the new assignee), `ESCALATED` (manual: leads + assignee), `SLA_BREACH`
+(scheduler: leads + assignee), `REOPENED` (assignee). Nobody is notified about their own action.
+
 ### Swagger / OpenAPI
 
 Interactive docs: <http://localhost:8080/swagger-ui> · machine-readable spec:

@@ -44,8 +44,8 @@ make frontend-dev    # terminal 2 → http://localhost:5173
 | 2 | Auth, JWT + refresh rotation, RBAC | ✅ |
 | 3 | Ticket core, lifecycle, filters, dashboard API | ✅ |
 | 4 | HMAC webhook + partner simulator | ✅ |
-| 5 | SLA escalation + notifications | ⏳ next |
-| 6 | AI assistance (Groq, optional) | |
+| 5 | SLA escalation + notifications | ✅ |
+| 6 | AI assistance (Groq, optional) | ⏳ next |
 | 7–9 | Frontend foundation, screens, 3D and motion | |
 | 10–11 | Hardening, E2E, docs and demo | |
 

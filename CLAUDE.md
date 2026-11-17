@@ -59,6 +59,9 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
   `TicketService.createFromWebhook` (idempotent via unique index). Partner secrets only through
   `SecretCipher` (AES-GCM, AAD = partner code). 401s stay generic. Simulator: `partner-simulator/`
   (Node 26 runs .ts directly; `make simulate`).
+- Scheduled jobs: logic in a plain service method taking `now` (testable), trigger in a
+  `@Scheduled` + `@SchedulerLock` component, disabled in tests (`app.escalation.scheduler-enabled`).
+  Notifications are `@TransactionalEventListener` + `REQUIRES_NEW` on ticket events.
 - Cross-feature calls go through the other feature's `application` services or events, never its
   repositories; keep feature dependencies one-way (auth → agent, agent → ticket).
 - Two entry doors, one brain: JWT REST and HMAC webhook both call `TicketService`.
