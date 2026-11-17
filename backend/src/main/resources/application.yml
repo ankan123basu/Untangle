@@ -9,6 +9,48 @@ spring:
   profiles:
     # Local development is the default; Docker Compose and CI set SPRING_PROFILES_ACTIVE explicitly.
     default: dev
+    group:
+      # `dev` always brings demo data. Production never does unless `demo` is added on purpose.
+      dev: demo
+
+  datasource:
+    # Local default = the Docker Compose Postgres published on host port 5433.
+    # Docker/CI override all three via SPRING_DATASOURCE_* environment variables.
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/untangle}
+    username: ${SPRING_DATASOURCE_USERNAME:untangle}
+    password: ${SPRING_DATASOURCE_PASSWORD:untangle-local-dev-only}
+    hikari:
+      pool-name: untangle-db
+      # Small pool on purpose: Postgres performs best with few busy connections, and virtual
+      # threads queue cheaply for one. Tune with load tests (Phase 10), not by guessing.
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: 2
+      # Hikari's own properties are plain milliseconds (not Spring Duration strings like "5s").
+      connection-timeout: 5000
+      max-lifetime: 1800000
+
+  jpa:
+    # Never keep a DB session open while rendering the HTTP response: lazy loading must happen
+    # inside service transactions, where it is visible and testable (no hidden N+1 in controllers).
+    open-in-view: false
+    hibernate:
+      # Flyway owns the schema (ADR-003). Hibernate only checks that entities match it.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        # Loads lazy collections/associations in batches instead of one query per row.
+        default_batch_fetch_size: 32
+
+  flyway:
+    locations: classpath:db/migration
+    # The demo seed is a repeatable migration in a separate folder. Switching an existing database
+    # from demo to non-demo must not fail validation because that seed "disappeared".
+    ignore-migration-patterns: "*:future,repeatable:missing"
   threads:
     virtual:
       # Java 21 virtual threads: each request gets a cheap thread, so blocking I/O (JDBC, HTTP

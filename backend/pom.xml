@@ -29,6 +29,7 @@
         <!-- Build plugin versions not managed by Spring Boot -->
         <spotless-maven-plugin.version>3.11.0</spotless-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
+        <archunit.version>1.5.1</archunit.version>
     </properties>
 
     <dependencies>
@@ -48,6 +49,33 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- ===== Persistence ===== -->
+        <!-- JPA (Hibernate 7) + Spring Data repositories -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <!-- Flyway runs SQL migrations on startup (ADR-003). Postgres support is a separate module. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- Boilerplate only (getters, constructors). Never @Data on entities. -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- ===== Test ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -59,6 +87,34 @@
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Real PostgreSQL 18 in Docker for integration tests (never H2: constraints must match prod) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Architecture rules (layering, feature boundaries) as tests -->
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <version>${archunit.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -68,6 +124,20 @@
               allows Mockito's inline mock maker on JDK 21+ without the "dynamic agent" warning,
               and -Xshare:off avoids the CDS warning caused by the JaCoCo agent.
             -->
+            <!-- Annotation processors run only from this explicit list (JDK 23+ disables implicit discovery). -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
