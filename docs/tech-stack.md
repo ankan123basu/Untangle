@@ -29,8 +29,9 @@ in the phase that first uses them.
 | Testcontainers (`testcontainers-postgresql`, `-junit-jupiter`) | managed (2.0.5) | |
 | ArchUnit (`archunit-junit5`) | 1.5.1 | |
 | Spring Security OAuth2 Resource Server (Nimbus JOSE) | managed (Security 7.1.2) | via `spring-boot-starter-security-oauth2-resource-server` (the old `-oauth2-resource-server` name is deprecated in Boot 4). Chosen over jjwt: ADR-013 |
-| springdoc-openapi | 3.2.0 *(Phase 3)* | 3.x line targets Boot 4 |
-| MapStruct | 1.6.3 *(Phase 3)* | latest GA (1.7 is still beta). Phase 2 views are tiny records with `of(entity)` factories |
+| springdoc-openapi (webmvc-ui) | 3.2.0 | Swagger UI `/swagger-ui`, spec `/v3/api-docs`; 3.x targets Boot 4 |
+| MapStruct (+ processor) | 1.6.3 | latest GA (1.7 is beta); `unmappedTargetPolicy=ERROR`, Spring component model |
+| lombok-mapstruct-binding | 0.2.0 | lets MapStruct see Lombok getters (processor order matters) |
 | Lombok (annotation processor path) | managed (1.18.48) | |
 | ShedLock | 7.11.0 *(Phase 5)* | |
 | Bucket4j (`bucket4j_jdk17-core`) | 8.22.0 | login rate limits; webhook/AI later |

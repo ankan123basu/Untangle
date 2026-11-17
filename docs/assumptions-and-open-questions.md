@@ -68,6 +68,14 @@ When the lead answers, fill in the **Lead's answer** column and link the commit 
 | No `logstash-logback-encoder` | Boot 4 has native structured JSON logging | [observability.md](observability.md) |
 | MapStruct deferred to Phase 3 | Phase 2 views are 3–9 field records with `of(entity)` factories; MapStruct earns its keep with ticket DTOs | [tech-stack.md](tech-stack.md) |
 | `TicketAccessPolicy` (ownership) moved to Phase 3 | it needs the ticket endpoints and `allowedActions` it serves | [ADR-014](decisions/ADR-014-rbac-via-permissions.md) |
+| `sla_started_at` column (V2) | priority edits recompute from the same start; reopen restarts the clock | [database.md](database.md) |
+| Reopen resets `escalation_level` to 0 | a new SLA period begins, so scheduler levels start over (R4) | [state-machine.md](state-machine.md) |
+| Escalation only for OPEN/IN_PROGRESS | escalating resolved work has no meaning | `TicketAccessPolicy` |
+| Unassigning only allowed for OPEN tickets | IN_PROGRESS/RESOLVED work must have an owner (DB CHECK too) | `Ticket.assignTo` |
+| Page size > 100 → 400 (rejected, not clamped) | §11 asked to document the choice; clients learn instead of silently getting fewer rows | [api.md](api.md) |
+| Comments stored verbatim (no server-side HTML stripping) | no data loss; the API serves JSON with `nosniff`; the UI must render as text (lint rule + Phase 8 test) | [api.md](api.md) |
+| `deniedActions[{action, reason}]` alongside `allowedActions` | lets disabled buttons explain themselves (§12.5 tooltips) | [ADR-015](decisions/ADR-015-allowed-actions-from-server.md) |
+| Extra endpoint `GET /tickets/by-number/{n}` | command palette "jump to UNT-…" (§12.5) | [api.md](api.md) |
 
 ### D. Still open (for the lead)
 

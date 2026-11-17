@@ -50,6 +50,10 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
   role names: URL rules in `SecurityConfig` for admin paths + `@PreAuthorize("hasAuthority('X')")`.
 - Errors: throw `ApiException(ErrorCode.X, detail)`; `GlobalExceptionHandler` renders RFC 9457 with
   `code` + `traceId`. Never echo rejected values; mask emails in logs (`Masking.email`).
+- Tickets: every mutation in `TicketService` follows load → `ensureNotClosed` → `checkVersion` →
+  `TicketAccessPolicy.require` → entity behaviour method → `Timeline.system(...)` → event. Never add
+  setters to `Ticket`; add a behaviour method. Filters = `TicketSpecifications` (reuse them for any
+  count). DTO mapping via MapStruct (`TicketMapper`, unmapped targets fail the build).
 - Cross-feature calls go through the other feature's `application` services or events, never its
   repositories; keep feature dependencies one-way (auth → agent, agent → ticket).
 - Two entry doors, one brain: JWT REST and HMAC webhook both call `TicketService`.

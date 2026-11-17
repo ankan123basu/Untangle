@@ -12,8 +12,8 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [tech-stack.md](tech-stack.md) | Exact pinned versions and why | Done (living) |
 | [architecture.md](architecture.md) | How the pieces fit together; request flows | Phase 0 outline, grows each phase |
 | [database.md](database.md) | Tables, constraints, indexes, ER diagram | Done (Phase 1) |
-| [state-machine.md](state-machine.md) | Ticket lifecycle rules and who may do what | Done (spec); code in Phase 3 |
-| [api.md](api.md) | Endpoints, error codes, pagination | Auth + agents done; tickets in Phase 3 |
+| [state-machine.md](state-machine.md) | Ticket lifecycle rules and who may do what | Done (Phase 3) |
+| [api.md](api.md) | Endpoints, error codes, pagination | Auth, agents, tickets, dashboard done |
 | [security.md](security.md) | Threat model, auth, RBAC, HMAC, secrets | Auth/RBAC done (Phase 2); HMAC in Phase 4 |
 | [webhook-integration-guide.md](webhook-integration-guide.md) | For partners: how to send signed tickets | Phase 4 |
 | [tradeoffs.md](tradeoffs.md) | Options, choice, gained, given up | Living |
@@ -46,3 +46,4 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [012](decisions/ADR-012-db-unique-constraint-for-idempotency.md) | DB unique constraint guarantees webhook idempotency |
 | [013](decisions/ADR-013-jwt-and-refresh-rotation.md) | JWT via Spring resource server + rotating refresh tokens |
 | [014](decisions/ADR-014-rbac-via-permissions.md) | RBAC through permissions mapped from roles |
+| [015](decisions/ADR-015-allowed-actions-from-server.md) | Server-computed `allowedActions` from the enforcing policy |

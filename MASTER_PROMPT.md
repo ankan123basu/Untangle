@@ -21,6 +21,9 @@
 >   structured logging instead of logstash-logback-encoder. Locked accounts → 423. Admin agent list at
 >   `/api/v1/admin/agents`. Extra error codes listed in docs/api.md. `TicketAccessPolicy` moves to
 >   Phase 3; MapStruct starts in Phase 3.
+> - Phase 3: `deniedActions` returned next to `allowedActions` (ADR-015); V2 adds `sla_started_at`
+>   and severity/status rank columns; page size > 100 is rejected (400); `GET /tickets/by-number/{n}`
+>   added; reopen resets escalation level.
 
 ---
 
