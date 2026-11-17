@@ -133,3 +133,17 @@ app:
   tickets:
     # MASTER_PROMPT §6.2: may an AGENT close their own RESOLVED ticket?
     agent-can-close-own-resolved: false
+    # §5.4 resolution targets. sla_due_at = SLA clock start + target(priority).
+    sla:
+      CRITICAL: 1h
+      HIGH: 4h
+      MEDIUM: 24h
+      LOW: 72h
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+    operations-sorter: method
+    tags-sorter: alpha

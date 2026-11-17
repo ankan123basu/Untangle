@@ -12,6 +12,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import lombok.AccessLevel;
@@ -70,7 +72,10 @@ public class TicketComment extends BaseEntity {
     this.author = author;
     this.type = Objects.requireNonNull(type, "type");
     this.body = Objects.requireNonNull(body, "body");
-    this.metadata = metadata == null ? null : Map.copyOf(metadata);
+    // Not Map.copyOf: metadata may legitimately hold null values (e.g. "from": null on first
+    // assignment).
+    this.metadata =
+        metadata == null ? null : Collections.unmodifiableMap(new LinkedHashMap<>(metadata));
   }
 
   /** A comment or resolution note written by a person. */

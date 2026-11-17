@@ -46,7 +46,14 @@ public class SecurityConfig {
   };
 
   private static final String[] PUBLIC_GET = {
-    "/actuator/health", "/actuator/health/**", "/actuator/info"
+    "/actuator/health",
+    "/actuator/health/**",
+    "/actuator/info",
+    // API documentation (no data, only the contract)
+    "/v3/api-docs",
+    "/v3/api-docs/**",
+    "/swagger-ui.html",
+    "/swagger-ui/**"
   };
 
   @Bean
@@ -77,6 +84,10 @@ public class SecurityConfig {
                 .hasAuthority(Permission.AGENT_MANAGE.name())
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/agents/**")
                 .hasAuthority(Permission.AGENT_MANAGE.name())
+                .requestMatchers(HttpMethod.POST, "/api/v1/tickets/bulk/**")
+                .hasAuthority(Permission.TICKET_ASSIGN_ANY.name())
+                .requestMatchers("/api/v1/dashboard/agents-workload")
+                .hasAuthority(Permission.AGENT_WORKLOAD_VIEW.name())
                 .anyRequest()
                 .authenticated())
         .oauth2ResourceServer(oauth ->
