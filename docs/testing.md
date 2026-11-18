@@ -20,6 +20,30 @@ journeys. Every edge case from the brief gets a named test, listed in
 | End to end | Playwright | login → create → assign → progress → resolve → close → reopen; RBAC UI; webhook ticket appears | 10 |
 | Contract scenarios | partner simulator | every webhook scenario against a running stack | 4 |
 | Load (bonus) | k6 | list/filter and webhook endpoints | 10 |
+| Feature + RBAC walkthrough | `scripts/check-features.py` | every feature through the real API, plus a live role × action matrix | 10 |
+
+### Current totals
+
+| Suite | Command | Count | Needs |
+|---|---|---|---|
+| Backend unit + integration (incl. ArchUnit, coverage gate) | `make test-backend` | **404** | Docker (Testcontainers) |
+| Frontend components, logic, accessibility (axe) | `make test-frontend` | **56** | — |
+| Browser end-to-end (Playwright) | `make e2e` | **9** | `make up` |
+| Feature walkthrough + RBAC matrix | `make check-features` | **103** checks | `make up` (demo data) |
+| Partner webhook scenarios | `make simulate` | **13** | `make up` |
+| Load | `make load` | 2 scripts | `make up` |
+| Lighthouse | `make lighthouse` | dashboard, mobile + desktop | `make up`, Chrome |
+
+### Test data
+
+| Where | What | Created by |
+|---|---|---|
+| Backend integration tests | each test creates its own agents/tickets/partners through helpers (`createAgent`, `createTicket`, `bearer(role)`) and truncates all tables and caches afterwards | `support/IntegrationTest` |
+| Demo seed (`db/seed-demo/R__demo_data.sql`, profile `demo`) | 9 staff (1 admin, 2 leads, 6 agents), 60 tickets across every status, priority, category and SLA state, comments, 1 partner `acme-bank` | Flyway repeatable migration; `DemoSeedIntegrationTest` checks it |
+| Frontend tests | realistic API objects in `src/test/fixtures.ts`; MSW handlers in `src/test/server.ts` (unhandled requests fail the test) | — |
+| E2E / feature check / simulator / k6 | create their own uniquely tagged data on top of the demo seed (partners are disabled afterwards) | the scripts themselves |
+
+Reset the local data at any time: `make nuke` then `make up`.
 
 ### How to run
 
@@ -35,7 +59,8 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
 - Test names describe behaviour: `rejectsTransitionFromClosedToResolved`, not `test1`.
 - Integration tests use Testcontainers (real PostgreSQL 18), never H2: constraint and concurrency
   behaviour must match production.
-- Coverage gate: JaCoCo ≥ 80% on `service`/`domain` packages, enforced from Phase 10.
+- Coverage gate (enforced by `mvn verify`): every `application`/`domain` package ≥ 80 % lines;
+  whole backend ≥ 80 % lines and ≥ 65 % branches.
 
 ### Integration test setup (Phase 1)
 
@@ -48,6 +73,16 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
 - `DemoSeedIntegrationTest` uses its own context (profiles `test,demo`), so it gets a fresh
   database with the seed applied.
 - Docker must be running for `make test` (Testcontainers). CI runners have Docker.
+
+### Phase 10 additions
+
+- Backend (404): `MetricsIntegrationTest` (scrape, counters, probes), `DashboardCacheIntegrationTest`,
+  `RedisProfileIntegrationTest` (real Redis), `QueryCountIntegrationTest` (N+1 guard),
+  `SlaEscalationSchedulerTest`.
+- Frontend (56): `command-palette.test.tsx` (Ctrl+K focuses the search box, number jump) — added
+  after the end-to-end feature check found the palette wasn't focusing its input.
+- Playwright (9): lifecycle, RBAC ×3, webhook, security headers ×4 (`frontend/e2e`).
+- `scripts/check-features.py` (103 checks): every feature by API plus the live RBAC matrix.
 
 ### Phase 9 additions (frontend total: 55 tests)
 

@@ -149,5 +149,6 @@ their ticket. In the ticket list those tickets carry a "Partner" badge.
 
 ### Automated equivalents
 
-`make test` (unit + integration), `make e2e` (browser journeys), `make simulate` (webhook),
+`make test` (unit + integration), `make e2e` (browser journeys), `make check-features` (every
+feature through the API + a live RBAC matrix, 103 checks), `make simulate` (webhook),
 `make lighthouse`, `make load`.

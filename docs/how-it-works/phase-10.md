@@ -1,4 +1,4 @@
-# How it works — Phase 10: Quality hardening (in progress)
+# How it works — Phase 10: Quality hardening
 
 ## Simple explanation
 
@@ -26,5 +26,8 @@ numbers; eviction now uses `beforeInvocation = true` (immediate `invalidate()`).
 
 Verified: SLA scheduler runs in Docker (ShedLock row + "SLA scan escalated" log).
 
-Still to do: scalability.md / observability.md / security.md write-ups and an ADR for the
-management port; Phase 11 (final docs, README screenshots, demo script).
+Also added at the end of the phase: `make check-features` (103 API checks including a live RBAC
+matrix), the scalability/observability/security write-ups, and a full README.
+
+Bugs found by the final end-to-end feature check: the command palette didn't focus its search box
+(fixed + test).

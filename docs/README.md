@@ -21,6 +21,7 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [edge-cases.md](edge-cases.md) | Case → expected behaviour → test name | Done (110+ cases) |
 | [testing.md](testing.md) | Test strategy and how to run tests | Done |
 | [manual-test-guide.md](manual-test-guide.md) | Try every feature and requirement by hand, step by step | Done |
+| [demo-script.md](demo-script.md) | A 10-minute walkthrough to present the project | Done |
 | [ai-features.md](ai-features.md) | AI helpers, safety, failure modes | Done (Phase 6) |
 | [frontend-design-system.md](frontend-design-system.md) | Tokens, theme, screens, motion, a11y | Done |
 | [scalability.md](scalability.md) | Scaling built, load-test results, 10x/100x plan | Done |

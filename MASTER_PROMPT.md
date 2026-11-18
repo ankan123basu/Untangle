@@ -38,6 +38,10 @@
 > - Phase 9 (ADR-024): no drei; app background is CSS (not Aurora); resolve sparks stay first-party
 >   (not ClickSpark); shared element via React `<ViewTransition>` instead of Motion `layoutId`; route
 >   transition in CSS; Motion only in the ticket-detail chunk. Lighthouse: desktop 100/100, mobile 91/100.
+> - Phase 10: metric `ticket_creations_total` (Prometheus reserves `_created`); actuator on internal
+>   port 8081 in prod, probes at `/livez` `/readyz`; Dependabot + `npm audit` instead of OWASP
+>   dependency-check; `make check-features` adds a live RBAC matrix. AI "reply draft" is a resolution
+>   note draft (comments are team-internal).
 
 ---
 

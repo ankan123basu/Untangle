@@ -143,6 +143,10 @@ seed: .env ## Load demo data into the Docker database (restarts backend with the
 e2e: ## Playwright end-to-end tests against the running stack (`make up` first)
 	cd frontend && npx playwright test
 
+.PHONY: check-features
+check-features: ## API walkthrough of every feature + live RBAC matrix against the running stack
+	python3 -I scripts/check-features.py
+
 .PHONY: load
 load: ## k6 load tests (ticket list + webhook) against the running stack, in Docker
 	docker run --rm --network untangle_default -v "$(CURDIR)/load/k6:/scripts:ro" \

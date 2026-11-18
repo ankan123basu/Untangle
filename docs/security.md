@@ -117,8 +117,11 @@ Source of truth: `RolePermissions` (tested cell by cell in `RolePermissionsTest`
 | `TICKET_EDIT_ANY`, `AGENT_WORKLOAD_VIEW` | ❌ | ✅ | ✅ |
 | `AGENT_MANAGE`, `PARTNER_MANAGE`, `WEBHOOK_LOG_VIEW` | ❌ | ❌ | ✅ |
 
-*Own* permissions also need an ownership check ("am I the assignee?") from `TicketAccessPolicy`,
-which arrives in Phase 3.
+*Own* permissions also need an ownership check ("am I the assignee?") from `TicketAccessPolicy`
+(37 role × ownership × status cases in `TicketAccessPolicyTest`).
+
+Verified live as well: `make check-features` tries every role against every protected action on
+the running stack and prints the matrix (all cells as expected; anonymous calls get 401).
 
 ### Deactivation timeline
 

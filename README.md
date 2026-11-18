@@ -14,7 +14,7 @@ sent it through an **HMAC-signed webhook**.
 | **Backend** | Java 21 · Spring Boot 4.1 · Spring Security (JWT) · PostgreSQL 18 · Flyway · Micrometer |
 | **Frontend** | React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · TanStack Query · React Three Fiber |
 | **Infra** | Docker Compose · nginx · GitHub Actions · Prometheus + Grafana · optional Redis |
-| **Quality** | 404 backend tests · 55 frontend tests · 9 Playwright E2E · 13 webhook scenarios · coverage gate ≥ 80 % · Lighthouse 91–100 |
+| **Quality** | 404 backend tests · 56 frontend tests · 9 Playwright E2E · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
 
 ---
 
@@ -378,7 +378,8 @@ dashboard cache and cluster-wide rate limits, constant-query list endpoints (N+1
 |---|---|---|
 | Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 404 |
 | Architecture rules | ArchUnit | included above |
-| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 55 |
+| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 56 |
+| Every feature through the API + live RBAC matrix | `make check-features` | 103 checks |
 | End-to-end in a real browser | Playwright | 9 |
 | Partner webhook scenarios | Node simulator | 13 |
 | Load | k6 | 2 scripts |
@@ -397,7 +398,7 @@ make up | down | logs | ps          # Docker stack
 make nuke                           # stop and DELETE local data (asks first)
 make test | test-backend | test-frontend
 make lint | typecheck | fmt | build | ci
-make e2e | simulate | load | lighthouse
+make e2e | check-features | simulate | load | lighthouse
 make backend-run | frontend-dev     # local development
 make api-types                      # regenerate TypeScript types from the OpenAPI spec
 make help                           # everything
@@ -431,6 +432,7 @@ MASTER_PROMPT.md    the full specification and agreed deviations
 | Read this | For |
 |---|---|
 | [manual-test-guide.md](docs/manual-test-guide.md) | trying every feature by hand |
+| [demo-script.md](docs/demo-script.md) | presenting the project in 10 minutes |
 | [architecture.md](docs/architecture.md) | components, layers, request flows |
 | [database.md](docs/database.md) | schema, constraints, indexes, query plans |
 | [api.md](docs/api.md) | every endpoint, filters, errors |
