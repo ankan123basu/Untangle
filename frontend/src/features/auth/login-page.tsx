@@ -100,7 +100,7 @@ export default function LoginPage() {
     <main className="relative isolate grid min-h-dvh overflow-hidden lg:grid-cols-[1.15fr_1fr]">
       <AppBackdrop />
       <LoginHero />
-      <section className="relative z-10 flex items-center justify-center p-6 sm:p-10">
+      <section className="relative z-10 flex items-center justify-center px-4 pt-20 pb-10 sm:px-10">
         <AppearanceMenu className="absolute top-4 right-4 z-20" />
         <div className="w-full max-w-md">
           <div className="solid-panel p-8 shadow-hard-lg">

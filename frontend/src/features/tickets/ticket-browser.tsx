@@ -244,7 +244,7 @@ export function TicketBrowser({
               update({ q: q.trim() || undefined });
             }}
           />
-          <div className="grid grid-cols-2 gap-2 md:flex">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex">
             <Select
               aria-label="Category"
               value={query.category?.[0] ?? ''}
@@ -285,7 +285,7 @@ export function TicketBrowser({
             </Select>
             <Select
               aria-label="Sort"
-              className="col-span-2"
+              className="sm:col-span-2"
               value={query.sort}
               onChange={(e) => {
                 update({ sort: e.target.value as TicketQuery['sort'] });

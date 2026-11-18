@@ -82,7 +82,50 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
   `SlaEscalationSchedulerTest`.
 - Frontend (56): `command-palette.test.tsx` (Ctrl+K focuses the search box, number jump) — added
   after the end-to-end feature check found the palette wasn't focusing its input.
-- Playwright (9): lifecycle, RBAC ×3, webhook, security headers ×4 (`frontend/e2e`).
+- Playwright (14): lifecycle, RBAC ×3, webhook, security headers ×4, and the layout guard ×5
+  (`frontend/e2e`).
+
+### Layout guard (`e2e/layout.spec.ts`)
+
+**Simple explanation:** a robot opens every screen as admin, lead and agent, at phone (375 px),
+tablet, laptop and desktop sizes. It fails if anything sticks out sideways, if one control covers
+another, if a floating button sits on top of a card, or if a heading is cut off. It also opens the
+menu drawer, Appearance menu, notifications, search and the edit dialog on a phone and checks they
+fit on screen.
+
+**Technical details:** an in-page audit scrolls each page in steps and runs:
+- `scrollWidth` against the screen width, naming the widest offenders
+- `elementFromPoint` at the centre of every visible link, button and field. Hidden elements are
+  skipped: sr-only content, collapsed `<details>`, `aria-hidden`, and anything off screen.
+- absolute or fixed controls against `.solid-panel` / `.glass-panel` boxes they don't belong to
+- `h1`/`h2` scroll width against their box
+
+Pop-ups are measured once their animation has finished. A run on the old build caught the login
+palette icon sitting on the card at phone size; it is fixed.
+
+### Verifying end to end without touching your data
+
+Run the checks on a throwaway copy of the stack (its own database and ports):
+
+```bash
+FRONTEND_HOST_PORT=3200 BACKEND_HOST_PORT=8280 POSTGRES_HOST_PORT=5436 docker compose -p untangle-verify up -d --build --wait
+```
+```bash
+CHECK_BASE_URL=http://localhost:3200 python3 -I scripts/check-features.py
+```
+```bash
+FRONTEND_HOST_PORT=3200 BACKEND_HOST_PORT=8280 POSTGRES_HOST_PORT=5436 docker compose -p untangle-verify --profile simulator run --rm partner-simulator --scenario all
+```
+```bash
+cd frontend && E2E_BASE_URL=http://localhost:3200 npx playwright test
+```
+```bash
+docker compose -p untangle-verify down -v
+```
+
+Run the simulator before the checker on a fresh stack: the checker's "webhook log readable" check
+needs at least one delivery. Last run (2026-11-18): 103/103 checks, 13/13 webhook scenarios,
+14/14 Playwright.
 - `scripts/check-features.py` (103 checks): every feature by API plus the live RBAC matrix.
 
 ### Phase 9 additions (frontend total: 55 tests)
