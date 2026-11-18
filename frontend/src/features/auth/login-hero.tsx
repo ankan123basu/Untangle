@@ -1,4 +1,5 @@
 import { Component, lazy, Suspense, useState, type ReactNode } from 'react';
+import { Clock, ShieldCheck, Webhook } from 'lucide-react';
 import { LogoMark } from '@/components/brand/LogoMark';
 import { canRunHeroScene } from './hero-support';
 
@@ -25,7 +26,6 @@ export function LoginHero() {
     >
       {/* Static art: the fallback, and what shows while the 3D chunk loads. */}
       <div className="absolute -top-24 -right-24 size-96 rounded-full border-2 border-line bg-paper/40" />
-      <div className="absolute -right-28 -bottom-36 size-[26rem] rounded-full border-2 border-line bg-accent/15" />
       {show3d && (
         <SceneBoundary>
           {/* The scene owns the band between the logo and the headline, so they never overlap. */}
@@ -47,12 +47,24 @@ export function LoginHero() {
           untangled.
         </p>
         <p className="mt-6 max-w-sm text-lg text-on-brand/80">
-          Prioritised, owned, tracked and escalated before it rots, from your agents and your
-          partners.
+          Every customer complaint, from your agents or your partners, gets an owner, a deadline and
+          an escalation path, so nothing slips through.
         </p>
-        <p className="mt-10 font-mono text-sm text-on-brand/70">
-          UNT · support that keeps its promises
-        </p>
+        <ul className="mt-10 flex flex-wrap gap-2">
+          {[
+            { icon: <Clock className="size-4" />, text: 'SLA timers & auto-escalation' },
+            { icon: <Webhook className="size-4" />, text: 'Signed partner webhooks' },
+            { icon: <ShieldCheck className="size-4" />, text: 'Role-based access' },
+          ].map((item) => (
+            <li
+              key={item.text}
+              className="inline-flex items-center gap-2 rounded-md border-2 border-line bg-paper/80 px-3 py-1.5 text-sm font-semibold text-ink shadow-hard-sm"
+            >
+              {item.icon}
+              {item.text}
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

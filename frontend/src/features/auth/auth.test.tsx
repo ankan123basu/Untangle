@@ -34,7 +34,7 @@ const routes = [
 async function fillAndSubmit(email: string, password: string) {
   const user = userEvent.setup();
   await user.type(screen.getByLabelText(/work email/i), email);
-  await user.type(screen.getByLabelText(/password/i), password);
+  await user.type(screen.getByLabelText(/^password/i), password);
   await user.click(screen.getByRole('button', { name: /sign in/i }));
 }
 
