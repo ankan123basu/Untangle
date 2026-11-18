@@ -208,3 +208,47 @@
     animation: none !important;
   }
 }
+
+/*
+ * Data tables on phones (< 768 px): each row becomes a card and every cell shows its column name
+ * (from data-label). One markup for both sizes; used by the admin tables.
+ */
+@media (max-width: 767px) {
+  .stack-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .stack-table tbody {
+    display: block;
+  }
+  .stack-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+    padding: 0.875rem 1rem;
+  }
+  .stack-table tr > * {
+    display: block;
+    padding: 0 !important;
+    text-align: left !important;
+    max-width: none !important;
+    white-space: normal !important;
+  }
+  .stack-table tr > th[scope='row'],
+  .stack-table tr > td:last-child:not([data-label]) {
+    grid-column: 1 / -1;
+  }
+  .stack-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.125rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ut-muted);
+  }
+}

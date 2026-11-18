@@ -242,7 +242,7 @@ export default function PartnersPage() {
             description="Add one to start receiving webhook tickets."
           />
         ) : (
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="stack-table w-full text-left text-sm md:min-w-[720px]">
             <caption className="sr-only">Partners</caption>
             <thead className="bg-paper-2 text-xs font-bold text-muted uppercase">
               <tr>
@@ -270,7 +270,7 @@ export default function PartnersPage() {
                     {p.name}
                     <span className="block font-mono text-xs font-normal text-muted">{p.code}</span>
                   </th>
-                  <td className="py-3 pr-3">
+                  <td data-label="Status" className="py-3 pr-3">
                     <Badge
                       className={
                         p.active
@@ -281,14 +281,16 @@ export default function PartnersPage() {
                       {p.active ? 'Active' : 'Disabled'}
                     </Badge>
                   </td>
-                  <td className="py-3 pr-3 tabular-nums">{p.rateLimitPerMinute}/min</td>
-                  <td className="py-3 pr-3 text-xs text-muted">
+                  <td data-label="Rate limit" className="py-3 pr-3 tabular-nums">
+                    {p.rateLimitPerMinute}/min
+                  </td>
+                  <td data-label="Secret" className="py-3 pr-3 text-xs text-muted">
                     {p.previousSecretValidUntil && Date.parse(p.previousSecretValidUntil) > loadedAt
                       ? `Old secret valid until ${formatDateTime(p.previousSecretValidUntil)}`
                       : 'One secret active'}
                   </td>
                   <td className="py-3 pr-4">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex flex-wrap gap-2 md:justify-end">
                       <Link
                         to={`/admin/webhooks?partnerId=${p.id}`}
                         className="inline-flex h-8 items-center rounded-md px-3 text-sm font-semibold hover:bg-paper-2"

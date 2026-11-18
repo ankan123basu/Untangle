@@ -277,7 +277,7 @@ export default function AgentsPage() {
         ) : agents.data.length === 0 ? (
           <EmptyState title="No agents yet" />
         ) : (
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="stack-table w-full text-left text-sm md:min-w-[720px]">
             <caption className="sr-only">Agents</caption>
             <thead className="bg-paper-2 text-xs font-bold text-muted uppercase">
               <tr>
@@ -308,7 +308,7 @@ export default function AgentsPage() {
                       {self && <span className="text-xs font-normal text-muted">(you)</span>}
                       <span className="block text-xs font-normal text-muted">{a.email}</span>
                     </th>
-                    <td className="py-3 pr-3">
+                    <td data-label="Role" className="py-3 pr-3">
                       <Select
                         aria-label={`Role of ${a.fullName}`}
                         className="h-8 w-auto py-0"
@@ -325,7 +325,7 @@ export default function AgentsPage() {
                         ))}
                       </Select>
                     </td>
-                    <td className="py-3 pr-3">
+                    <td data-label="Status" className="py-3 pr-3">
                       <div className="flex flex-wrap gap-1">
                         <Badge
                           className={
@@ -346,7 +346,7 @@ export default function AgentsPage() {
                         )}
                       </div>
                     </td>
-                    <td className="py-3 pr-3 text-muted">
+                    <td data-label="Last sign-in" className="py-3 pr-3 text-muted">
                       {a.lastLoginAt ? (
                         <time dateTime={a.lastLoginAt} title={formatDateTime(a.lastLoginAt)}>
                           {timeAgo(a.lastLoginAt)}

@@ -173,7 +173,7 @@ export default function LoginPage() {
                 aria-labelledby="demo-title"
                 className="mt-6 rounded-md border-2 border-dashed border-line-soft bg-paper/60 p-4"
               >
-                <div className="flex items-baseline justify-between gap-2">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                   <h2 id="demo-title" className="text-sm font-bold">
                     Try the demo
                   </h2>

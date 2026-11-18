@@ -144,11 +144,11 @@ export default function WebhookLogsPage() {
         ) : data.content.length === 0 ? (
           <EmptyState
             title="No deliveries"
-            description="Run `make simulate` to send test calls from the partner simulator."
+            description="Calls from partner systems will appear here as they arrive."
           />
         ) : (
           <div className={cn('overflow-x-auto', deliveries.isPlaceholderData && 'opacity-60')}>
-            <table className="w-full min-w-[900px] text-left text-sm">
+            <table className="stack-table w-full text-left text-sm md:min-w-[900px]">
               <caption className="sr-only">Webhook deliveries</caption>
               <thead className="bg-paper-2 text-xs font-bold text-muted uppercase">
                 <tr>
@@ -178,21 +178,26 @@ export default function WebhookLogsPage() {
               <tbody>
                 {data.content.map((d) => (
                   <tr key={d.id} className="border-t-2 border-line-soft align-top">
-                    <td className="px-4 py-2 whitespace-nowrap tabular-nums">
+                    <td data-label="Received" className="px-4 py-2 whitespace-nowrap tabular-nums">
                       {formatDateTime(d.receivedAt)}
                     </td>
-                    <td className="py-2 pr-3 font-mono text-xs">{d.partnerCode ?? '—'}</td>
-                    <td className="py-2 pr-3">
+                    <td data-label="Partner" className="py-2 pr-3 font-mono text-xs">
+                      {d.partnerCode ?? '—'}
+                    </td>
+                    <td data-label="Outcome" className="py-2 pr-3">
                       <Badge className={outcomeClass(d.outcome)}>{humanize(d.outcome)}</Badge>
                     </td>
                     <td
+                      data-label="Event id"
                       className="max-w-48 truncate py-2 pr-3 font-mono text-xs"
                       title={d.eventId ?? undefined}
                     >
                       {d.eventId ?? '—'}
                     </td>
-                    <td className="max-w-64 py-2 pr-3 text-xs break-words">{d.reason ?? '—'}</td>
-                    <td className="py-2 pr-3">
+                    <td data-label="Reason" className="max-w-64 py-2 pr-3 text-xs break-words">
+                      {d.reason ?? '—'}
+                    </td>
+                    <td data-label="Ticket" className="py-2 pr-3">
                       {d.ticketId && d.ticketNumber ? (
                         <Link
                           to={`/tickets/${d.ticketId}`}
@@ -204,7 +209,9 @@ export default function WebhookLogsPage() {
                         '—'
                       )}
                     </td>
-                    <td className="py-2 pr-4 font-mono text-xs">{d.sourceIp ?? '—'}</td>
+                    <td data-label="Source IP" className="py-2 pr-4 font-mono text-xs">
+                      {d.sourceIp ?? '—'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

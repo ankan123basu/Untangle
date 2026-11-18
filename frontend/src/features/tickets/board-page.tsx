@@ -64,7 +64,7 @@ function Column({
         onDropTicket(status);
       }}
       className={cn(
-        'flex min-h-64 w-72 shrink-0 flex-col rounded-[12px] border-2 border-line bg-paper-2 transition-colors md:w-auto md:shrink',
+        'flex min-h-64 w-[82vw] max-w-80 shrink-0 snap-start flex-col rounded-[12px] border-2 border-line bg-paper-2 transition-colors md:w-auto md:max-w-none md:shrink',
         over && 'bg-brand/30',
       )}
     >
@@ -234,9 +234,16 @@ export default function BoardPage() {
     <div className="flex flex-col gap-4">
       <div>
         <h1 className="font-display text-3xl font-bold">Board</h1>
-        <p className="text-muted">Drag a card to change its status, or use “Move to…”.</p>
+        <p className="text-muted">
+          <span className="hidden md:inline">
+            Drag a card to change its status, or use “Move to…”.
+          </span>
+          <span className="md:hidden">
+            Swipe sideways for more columns. Use “Move to…” to change a status.
+          </span>
+        </p>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-4 md:overflow-visible">
+      <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:snap-none md:grid-cols-4 md:overflow-visible md:px-0">
         {STATUSES.map((status) => (
           <Column
             key={status}

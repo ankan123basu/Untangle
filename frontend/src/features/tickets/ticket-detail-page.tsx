@@ -236,7 +236,7 @@ function TicketWorkspace({ ticket }: { ticket: TicketDetail }) {
               </span>
             </div>
           </div>
-          <div className="text-right">
+          <div className="w-full sm:w-auto sm:text-right">
             <p className="text-xs font-bold tracking-wide text-muted uppercase">SLA</p>
             <SlaIndicator
               status={ticket.status}
