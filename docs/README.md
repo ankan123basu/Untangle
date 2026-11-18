@@ -16,6 +16,7 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [api.md](api.md) | Endpoints, error codes, pagination | Done |
 | [security.md](security.md) | Threat model, auth, RBAC, HMAC, secrets | Done |
 | [webhook-integration-guide.md](webhook-integration-guide.md) | For partners: how to send signed tickets | Done (Phase 4) |
+| [engineering-decisions.md](engineering-decisions.md) | Every key decision and trade-off on one page: escalation basis, database, HMAC webhook pipeline, scalability | Done |
 | [tradeoffs.md](tradeoffs.md) | Options, choice, gained, given up | Done (23 entries) |
 | [decisions/](decisions/) | Architecture Decision Records (ADRs) | Living |
 | [edge-cases.md](edge-cases.md) | Case → expected behaviour → test name | Done (110+ cases) |

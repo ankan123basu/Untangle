@@ -325,7 +325,7 @@ Agreed deviations from the original brief are listed at the top of
 
 ## Trade-offs
 
-The main ones (full list with reasons in [docs/tradeoffs.md](docs/tradeoffs.md)):
+The main ones (full list with reasons in [docs/tradeoffs.md](docs/tradeoffs.md); every decision, the escalation basis and the HMAC pipeline explained on one page in [docs/engineering-decisions.md](docs/engineering-decisions.md)):
 
 | Chose | Over | Because | Cost |
 |---|---|---|---|
