@@ -51,7 +51,7 @@ Prometheus confirmed the same counts (`webhook_requests_total{outcome}`).
 | Global users | **CDN** for the SPA; API in more regions | lower latency for static assets |
 | Free-text search becomes slow | move search to **OpenSearch** fed by the outbox | relevance ranking, typo tolerance |
 | Multi-region | one primary region for writes, read replicas elsewhere; partner webhooks routed to the primary | avoids conflicting writes; ShedLock and idempotency keep working |
-| Real-time needs | SSE behind a pub/sub fan-out (Redis) | replaces the 30 s polling (ADR-021) |
+| Real-time needs | SSE behind a pub/sub fan-out (Redis) | replaces polling (ADR-021) |
 
 The design choices that make these steps easy: idempotency enforced by the database (safe to retry
 from a queue), events published after commit (a natural outbox source), stateless instances, and

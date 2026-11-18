@@ -39,6 +39,8 @@ export function EditDialog({
       category: ticket.category,
       priority: ticket.priority,
     },
+    // The ticket refreshes in the background; never throw away what the user is typing.
+    resetOptions: { keepDirtyValues: true },
   });
   const { errors, isSubmitting } = form.formState;
 

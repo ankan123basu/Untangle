@@ -14,7 +14,7 @@ sent it through an **HMAC-signed webhook**.
 | **Backend** | Java 21 · Spring Boot 4.1 · Spring Security (JWT) · PostgreSQL 18 · Flyway · Micrometer |
 | **Frontend** | React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · TanStack Query · React Three Fiber |
 | **Infra** | Docker Compose · nginx · GitHub Actions · Prometheus + Grafana · optional Redis |
-| **Quality** | 404 backend tests · 56 frontend tests · 9 Playwright E2E · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
+| **Quality** | 404 backend tests · 57 frontend tests · 9 Playwright E2E · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
 
 ---
 
@@ -332,7 +332,7 @@ The main ones (full list with reasons in [docs/tradeoffs.md](docs/tradeoffs.md))
 | Modular monolith | microservices | one team, one database, simple deploys | must keep module boundaries disciplined (ArchUnit) |
 | DB unique index for idempotency | Redis/in-memory "seen" sets | correct under concurrency and restarts | a duplicate costs one failed insert |
 | Optimistic locking | pessimistic locks | no lock waits for a read-heavy UI | users occasionally see a conflict dialog |
-| Polling notifications (30 s) | SSE/WebSockets | works through every proxy, stateless | up to 30 s delay |
+| Polling (bell 15 s, open ticket 10 s, lists 20 s) | SSE/WebSockets | works through every proxy, stateless, pauses in hidden tabs | changes appear within seconds, not instantly |
 | Close, never delete tickets | hard delete | audit trail | data only grows (partitioning documented) |
 | Synchronous webhook processing | queue + worker | immediate 201/200 answer, simpler | bursts are absorbed by rate limits, not a queue |
 | Access token in memory | localStorage | XSS can't steal a stored token | a silent refresh on every reload |
@@ -378,7 +378,7 @@ dashboard cache and cluster-wide rate limits, constant-query list endpoints (N+1
 |---|---|---|
 | Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 404 |
 | Architecture rules | ArchUnit | included above |
-| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 56 |
+| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 57 |
 | Every feature through the API + live RBAC matrix | `make check-features` | 103 checks |
 | End-to-end in a real browser | Playwright | 9 |
 | Partner webhook scenarios | Node simulator | 13 |
@@ -450,7 +450,7 @@ MASTER_PROMPT.md    the full specification and agreed deviations
 
 ## Known limitations
 
-- Notifications arrive by 30-second polling, not push (ADR-021).
+- Live updates are polling, not push: notifications within ~15 s, an open ticket within ~10 s, lists within ~20 s (ADR-021).
 - The webhook is processed synchronously; very large partner bursts are rate-limited rather than
   queued (an outbox + queue design is in [scalability.md](docs/scalability.md)).
 - Without a Groq key the AI features stay hidden; they were tested against a fake Groq server.

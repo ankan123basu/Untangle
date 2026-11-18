@@ -41,7 +41,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
  *   <tr><td>reopened</td><td>assignee</td><td>REOPENED</td></tr>
  * </table>
  *
- * Delivery to the browser is by polling the unread count (the SPA polls every 30 s; ADR-021).
+ * Delivery to the browser is by polling the unread count (the SPA polls every 15 s and pops up new
+ * ones; ADR-021).
  */
 @Service
 public class NotificationService {

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { Bell, CheckCheck } from 'lucide-react';
@@ -11,7 +12,7 @@ import { queryKeys } from '@/lib/query-client';
 import { cn, humanize, timeAgo } from '@/lib/utils';
 
 /**
- * Screen 8 (§12.5): the bell with an unread count. Polls every 30 s (ADR-021) and on window focus,
+ * Screen 8 (§12.5): the bell with an unread count. Polls every 15 s (ADR-021) and on window focus,
  * so nothing urgent is missed. Opening it shows the latest notifications; clicking one opens the
  * ticket and marks it read.
  */
@@ -24,7 +25,7 @@ export function NotificationBell() {
     queryKey: queryKeys.notifications.unread,
     queryFn: async () =>
       (await api.get<{ count: number }>('/notifications/unread-count')).data.count,
-    refetchInterval: 30_000,
+    refetchInterval: 15_000,
   });
 
   const list = useQuery({
@@ -43,6 +44,39 @@ export function NotificationBell() {
     mutationFn: () => api.post('/notifications/read-all'),
     onSuccess: invalidate,
   });
+
+  // When new notifications arrive, pop them up and refresh ticket data so every open screen
+  // reflects the change at once (not just the counter).
+  const seen = useRef<number | null>(null);
+  useEffect(() => {
+    const count = unread.data;
+    if (count === undefined) return;
+    const previous = seen.current;
+    seen.current = count;
+    if (previous === null || count <= previous) return;
+    void client.invalidateQueries({ queryKey: queryKeys.tickets.all });
+    void client.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+    void client.invalidateQueries({ queryKey: queryKeys.notifications.list });
+    void api
+      .get<NotificationPage>('/notifications', {
+        params: { unreadOnly: true, size: Math.min(count - previous, 3) },
+      })
+      .then(({ data }) => {
+        for (const n of data.content) {
+          toast(n.message, {
+            description: n.ticketNumber,
+            action: {
+              label: 'Open',
+              onClick: () => {
+                markRead.mutate(n.id);
+                void navigate(`/tickets/${n.ticketId}`);
+              },
+            },
+          });
+        }
+      })
+      .catch(() => undefined);
+  }, [unread.data, client, navigate, markRead]);
 
   const count = unread.data ?? 0;
 

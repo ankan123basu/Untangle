@@ -115,6 +115,39 @@ rotation → still accepted.
 Then as **Admin** → Webhook logs: every attempt with its outcome and reason; created ones link to
 their ticket. In the ticket list those tickets carry a "Partner" badge.
 
+### 9b. Live updates and notifications (two people at once)
+
+Use **two separate sessions**: a normal window and a private/incognito window (or two different
+browsers). Sign in as **Agent (Riya)** in one and **Lead (Leela)** in the other, side by side.
+
+| Lead does | Within | Agent sees, without reloading |
+|---|---|---|
+| Creates a ticket and assigns it to Riya | ~15–20 s | a pop-up "UNT-… was assigned to you" with **Open**; bell count +1; the ticket at the top of her list |
+| Comments on that ticket (Riya has it open) | ~10 s | the comment appears in her timeline |
+| Escalates it | ~10–15 s | "Escalated L1" badge on the ticket; pop-up; bell +1 |
+| Resolves and closes it | ~10 s | status steps appear; the page turns read-only |
+| Reopens it | ~10–15 s | pop-up "UNT-… was reopened"; the closed banner disappears |
+
+Who gets which notification (people are never notified about their own actions):
+
+| Event | Who |
+|---|---|
+| Assigned | the new assignee |
+| Manual escalation | all active leads + the assignee |
+| SLA breach (automatic, every minute) | all active leads + the assignee |
+| Reopened | the assignee |
+
+Comments don't create notifications (the open ticket updates itself). Click a notification to open
+its ticket; "Mark all read" clears the count. Signing out and in as someone else shows only that
+person's data.
+
+To see an automatic SLA breach without waiting hours, move a test ticket's deadline into the past
+(local demo data only) and wait up to a minute:
+
+```bash
+docker compose exec postgres psql -U untangle -d untangle -c "UPDATE tickets SET sla_started_at = now() - interval '5 hours', sla_due_at = now() - interval '1 hour', version = version + 1 WHERE ticket_number = 'UNT-000XXX';"   # use the number of a ticket you created
+```
+
 ### 10. Admin
 
 | Do | Expect |

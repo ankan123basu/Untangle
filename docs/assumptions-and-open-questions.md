@@ -82,7 +82,7 @@ When the lead answers, fill in the **Lead's answer** column and link the commit 
 | Demo partner secret set at startup (`DemoPartnerSecretInitializer`, demo profile only) | the SQL seed can't encrypt with an env key | [webhook-integration-guide.md](webhook-integration-guide.md) |
 | `PARTNER_NOT_FOUND`, `PARTNER_CODE_TAKEN` error codes | partner admin | [api.md](api.md) |
 | Escalation levels (R4) implemented as `min(3, floor(elapsed / target))` | level 1 at the deadline, 2 at 2×, 3 at 3× | [ADR-020](decisions/ADR-020-sla-scheduler-with-shedlock.md) |
-| Notifications via 30 s polling instead of SSE | `EventSource` can't send the bearer header; no token-in-URL | [ADR-021](decisions/ADR-021-notifications-polling-over-sse.md) |
+| Notifications and live screens via polling (15 s / 10 s / 20 s) instead of SSE | `EventSource` can't send the bearer header; no token-in-URL | [ADR-021](decisions/ADR-021-notifications-polling-over-sse.md) |
 | Extra endpoint `GET /notifications/unread-count` | cheap bell badge for polling | [api.md](api.md) |
 | Default Groq model `openai/gpt-oss-20b`, configurable via `GROQ_MODEL` | sources disagreed on Groq's live list (Nov 2026); verify with `GET /models` before deploying | [ai-features.md](ai-features.md) |
 | Resilience4j used programmatically (core circuit breaker), not via annotations | no AOP starter or extra auto-config; one breaker, one client | ADR-022 |

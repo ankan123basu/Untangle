@@ -45,7 +45,7 @@ Each row links to its ADR where one exists.
 
 | # | Chose | Over | Why | What it costs |
 |---|---|---|---|---|
-| 18 | **Polling notifications (30 s)** ([ADR-021](decisions/ADR-021-notifications-polling-over-sse.md)) | SSE / WebSockets | works through any proxy, no sticky connections | up to 30 s delay |
+| 18 | **Polling for live updates** (bell 15 s, open ticket 10 s, lists 20 s; [ADR-021](decisions/ADR-021-notifications-polling-over-sse.md)) | SSE / WebSockets | works through any proxy, no sticky connections, pauses in hidden tabs | changes appear within seconds, not instantly |
 | 19 | **AI suggestion-only** ([ADR-022](decisions/ADR-022-ai-suggestion-only.md)) | AI auto-applies | a wrong or manipulated answer can't change data | an extra click to accept |
 | 20 | **Filters in the URL** | component state | shareable, back button works | URL parsing must reject bad values |
 | 21 | **Exact OpenAPI contract** ([ADR-023](decisions/ADR-023-exact-api-contract-and-vendored-react-bits.md)) | hand-written TS types | types can't drift from the backend | `@Nullable` must be remembered on new optional fields |

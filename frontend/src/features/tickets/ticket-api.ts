@@ -13,6 +13,12 @@ import { queryKeys } from '@/lib/query-client';
 import { useSession } from '@/features/auth/session-store';
 import type { TicketQuery } from './filters';
 
+/**
+ * How often open screens re-check the server (ms). TanStack Query pauses these while the tab is
+ * hidden and refetches on focus, so idle tabs cost nothing (ADR-021: polling, not push).
+ */
+export const LIVE = { detail: 10_000, list: 20_000, workload: 30_000 } as const;
+
 /** Server-state hooks for tickets. Components never call axios directly. */
 
 export function useTicketList(query: TicketQuery) {
@@ -27,6 +33,8 @@ export function useTicketList(query: TicketQuery) {
         })
       ).data,
     placeholderData: keepPreviousData,
+    // Near-real-time: other people's changes show up without a reload (paused in hidden tabs).
+    refetchInterval: LIVE.list,
   });
 }
 
@@ -34,6 +42,7 @@ export function useTicket(id: string) {
   return useQuery({
     queryKey: queryKeys.tickets.detail(id),
     queryFn: async ({ signal }) => (await api.get<TicketDetail>(`/tickets/${id}`, { signal })).data,
+    refetchInterval: LIVE.detail,
   });
 }
 
@@ -42,6 +51,7 @@ export function useTimeline(id: string) {
     queryKey: queryKeys.tickets.timeline(id),
     queryFn: async ({ signal }) =>
       (await api.get<TimelineEntry[]>(`/tickets/${id}/comments`, { signal })).data,
+    refetchInterval: LIVE.detail,
   });
 }
 
@@ -58,6 +68,7 @@ export function useWorkload(enabled = true) {
     queryKey: queryKeys.dashboard.workload,
     queryFn: async () => (await api.get<Workload[]>('/dashboard/agents-workload')).data,
     enabled,
+    refetchInterval: LIVE.workload,
   });
 }
 

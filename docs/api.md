@@ -175,7 +175,7 @@ examples and retry advice: [webhook-integration-guide.md](webhook-integration-gu
 | Method & path | Response |
 |---|---|
 | `GET /?unreadOnly=false&page&size≤100` | `PageResponse<{id, type, ticketId, ticketNumber, message, read, createdAt}>` newest first |
-| `GET /unread-count` | `{count}` (the SPA polls this every 30 s, ADR-021) |
+| `GET /unread-count` | `{count}` (the SPA polls this every 15 s and pops up new ones, ADR-021) |
 | `PATCH /{id}/read` | the notification (someone else's → 404) |
 | `POST /read-all` | `{count: 0}` |
 
