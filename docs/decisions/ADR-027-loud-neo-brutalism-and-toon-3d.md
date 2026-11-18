@@ -77,6 +77,14 @@ Both scenes sit in their own boxes; nothing overlaps text or controls.
 7. **Dashboard** (`ticket-stacks.tsx`, `ticket-stacks-scene.tsx`).
    - Counts come from `unresolvedByPriority`, capped at 7 slabs; the exact numbers are beside it.
    - It mounts via `WhenVisible`. The fallback is flat CSS stacks.
+   - Interactive, added at the owner's request:
+     - Hover lifts a stack and shows "Critical · 2 open" in a single label slot.
+     - Click opens `/tickets?priority=X&status=OPEN&status=IN_PROGRESS`.
+     - Drag turns the set (±0.75 rad) and it springs back; a drag never counts as a click.
+     - Each stack has an invisible hit box, so even an empty one can be pointed at.
+     - It is pointer-only and `aria-hidden`; the priority chips beside it are the keyboard and
+       screen-reader path to the same lists.
+     - The flat fallback behaves the same way and is unit-tested (`ticket-stacks.test.tsx`).
 8. **Fix.** The header is `relative z-30`, so the Appearance and notification menus open above
    page content. Before, they opened underneath it.
 9. **Removed.**
