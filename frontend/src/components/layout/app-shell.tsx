@@ -22,7 +22,6 @@ import { useGlobalShortcuts } from '@/hooks/use-global-shortcuts';
 import { cn, humanize } from '@/lib/utils';
 import { NotificationBell } from '@/features/notifications/notification-bell';
 import { AppBackdrop } from './app-backdrop';
-import { AmbientLayer } from '@/components/three/ambient-layer';
 import { AppearanceMenu } from './appearance-menu';
 
 const CommandPalette = lazy(() => import('./command-palette'));
@@ -47,7 +46,7 @@ function NavItem({
         cn(
           'flex items-center gap-3 rounded-full border px-3.5 py-2 text-sm font-semibold transition-[background-color,box-shadow,transform] duration-150',
           isActive
-            ? 'border-white/25 bg-brand-gradient text-on-brand shadow-soft-sm'
+            ? 'nav-active border-white/25'
             : 'border-transparent hover:translate-x-0.5 hover:bg-paper-2',
         )
       }
@@ -100,7 +99,6 @@ export function AppShell() {
     // `isolate` makes this a stacking context so the backdrop (z -1) paints above our background.
     <div className="relative isolate min-h-dvh">
       <AppBackdrop />
-      <AmbientLayer />
       <a
         href="#main"
         className="sr-only-focusable absolute top-2 left-2 z-50 rounded-md bg-brand-gradient px-3 py-2 font-semibold"

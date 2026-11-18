@@ -12,13 +12,13 @@ describe('appearance menu (ADR-025)', () => {
     html.removeAttribute('data-accent');
   });
 
-  it('offers ten colour themes and applies and remembers the picked one', async () => {
+  it('offers sixteen colour themes and applies and remembers the picked one', async () => {
     const user = userEvent.setup();
     render(<AppearanceMenu />);
 
     await user.click(screen.getByRole('button', { name: 'Appearance' }));
     const panel = screen.getByRole('dialog', { name: 'Appearance' });
-    expect(within(panel).getAllByRole('radio')).toHaveLength(10);
+    expect(within(panel).getAllByRole('radio')).toHaveLength(16);
     expect(within(panel).getByRole('radio', { name: 'Violet' })).toBeChecked();
 
     await user.click(within(panel).getByRole('radio', { name: 'Emerald' }));

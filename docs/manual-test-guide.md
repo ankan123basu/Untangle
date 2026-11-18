@@ -183,7 +183,7 @@ docker compose exec postgres psql -U untangle -d untangle -c "UPDATE tickets SET
 | Escalation | Escalate with a reason; leads get a notification (bell) |
 | SLA auto-escalation | wait for a ticket's SLA to pass: within a minute it is escalated and leads are notified |
 | Command palette | Ctrl/⌘ + K, type `41` → jumps to UNT-000041; `c` new ticket, `g d` dashboard |
-| Appearance | palette icon (header, or top-right on login): light / dark / system, ten colour themes, "3D scenes" on/off; the choice survives a reload |
+| Appearance | palette icon (header, or top-right on login): light / dark / system, sixteen colour themes, "3D scenes" on/off (login story + dashboard orbit); the choice survives a reload |
 | Phone | open on a phone (same Wi-Fi: `http://<your-computer-ip>:3000`) or browser dev tools device mode |
 | AI | set `AI_ENABLED=true` and `GROQ_API_KEY=…` in `.env`, `make up`: "Suggest with AI" on create, Summarise / Draft note on a ticket |
 | Metrics | `docker compose --profile observability up -d`, Grafana http://localhost:3001 (admin / `GRAFANA_ADMIN_PASSWORD` from `.env`) |

@@ -104,6 +104,17 @@ describe('demo people', () => {
   });
 });
 
+describe('login story', () => {
+  it('shows the static untangle art, not WebGL, when 3D cannot run', async () => {
+    // jsdom has no WebGL, so canRunScene3d says no: the SVG story and resolved card stand in.
+    const { container } = renderRoutes(routes, ['/login']);
+    expect(await screen.findByText('UNT-000123')).toBeInTheDocument();
+    expect(container.querySelector('canvas')).toBeNull();
+    expect(screen.getByText('RESOLVED')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
+  });
+});
+
 describe('route guards', () => {
   it('sends anonymous visitors to the login page', async () => {
     useSession.getState().clear();

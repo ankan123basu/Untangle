@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 
 const FIELDS = [
-  { color: 'var(--ut-a3)', size: '52vmax', top: '-20vmax', left: '-14vmax', dx: '9vw', dy: '7vh' },
-  { color: 'var(--ut-a1)', size: '40vmax', top: '38vh', left: '60vw', dx: '-8vw', dy: '-9vh' },
-  { color: 'var(--ut-a2)', size: '34vmax', top: '68vh', left: '4vw', dx: '7vw', dy: '-6vh' },
-  { color: 'var(--ut-a3)', size: '26vmax', top: '-6vh', left: '70vw', dx: '-6vw', dy: '8vh' },
-  { color: 'var(--ut-a1)', size: '22vmax', top: '30vh', left: '22vw', dx: '5vw', dy: '6vh' },
+  { color: 'var(--ut-a3)', size: '52vmax', top: '-22vmax', left: '-14vmax', dx: '9vw', dy: '7vh' },
+  { color: 'var(--ut-a1)', size: '42vmax', top: '40vh', left: '62vw', dx: '-8vw', dy: '-9vh' },
+  { color: 'var(--ut-a4)', size: '34vmax', top: '70vh', left: '2vw', dx: '7vw', dy: '-6vh' },
+  { color: 'var(--ut-a2)', size: '28vmax', top: '-8vh', left: '68vw', dx: '-6vw', dy: '8vh' },
+  { color: 'var(--ut-a4)', size: '20vmax', top: '28vh', left: '26vw', dx: '5vw', dy: '6vh' },
 ] as const;
 
 /**
- * The vivid gradient mesh behind the glass panels (§12.3, ADR-025), in the current colour theme.
- * CSS only: no WebGL, no per-frame JavaScript. Paused while the tab is hidden; reduced motion
- * freezes it (globals.css). The optional 3D layer (AmbientLayer) floats above it.
+ * The aurora behind the glass panels (§12.3, ADR-026) in the current colour theme's four hues,
+ * with a starfield at night. CSS only: no WebGL behind content (3D lives in its own stages).
+ * Paused while the tab is hidden; reduced motion freezes it (globals.css).
  */
 export function AppBackdrop() {
   const [hidden, setHidden] = useState(() => typeof document !== 'undefined' && document.hidden);

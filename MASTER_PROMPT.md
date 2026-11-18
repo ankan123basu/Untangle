@@ -41,6 +41,9 @@
 > - Design refresh (ADR-025): §12.2 "Glass-Brutalism" is replaced by frosted glass (soft edges and
 >   shadows, pill controls, accent gradient), ten user-selectable colour themes plus light/dark,
 >   and an ambient 3D layer behind the signed-in screens (deferred to idle, 30 fps, switchable off).
+> - Second design pass (ADR-026): "nebula glass" (gradient-edged panels, aurora + starfield),
+>   sixteen colour themes; the ambient layer is removed and 3D lives only in contained stages:
+>   the login's untangling-tickets story and a live-queue orbit inside the dashboard hero card.
 > - Phase 10: metric `ticket_creations_total` (Prometheus reserves `_created`); actuator on internal
 >   port 8081 in prod, probes at `/livez` `/readyz`; Dependabot + `npm audit` instead of OWASP
 >   dependency-check; `make check-features` adds a live RBAC matrix. AI "reply draft" is a resolution

@@ -8,18 +8,24 @@ import { useCallback, useSyncExternalStore } from 'react';
 
 export type ThemeChoice = 'system' | 'light' | 'dark';
 
-/** The colour themes, in picker order. CSS for each lives in styles/tokens.css. */
+/** The colour themes, in picker order. CSS for each lives in styles/tokens.css. Swatch = a1, a3, a4. */
 export const ACCENTS = [
-  { id: 'violet', label: 'Violet', swatch: ['#6d28d9', '#c084fc'] },
-  { id: 'indigo', label: 'Indigo', swatch: ['#4338ca', '#818cf8'] },
-  { id: 'ocean', label: 'Ocean', swatch: ['#1d4ed8', '#38bdf8'] },
-  { id: 'teal', label: 'Teal', swatch: ['#0f766e', '#2dd4bf'] },
-  { id: 'emerald', label: 'Emerald', swatch: ['#047857', '#34d399'] },
-  { id: 'amber', label: 'Amber', swatch: ['#b45309', '#fbbf24'] },
-  { id: 'sunset', label: 'Sunset', swatch: ['#c2410c', '#fb923c'] },
-  { id: 'rose', label: 'Rose', swatch: ['#be123c', '#fb7185'] },
-  { id: 'fuchsia', label: 'Fuchsia', swatch: ['#a21caf', '#e879f9'] },
-  { id: 'graphite', label: 'Graphite', swatch: ['#334155', '#94a3b8'] },
+  { id: 'violet', label: 'Violet', swatch: ['#6d28d9', '#c084fc', '#22d3ee'] },
+  { id: 'aurora', label: 'Aurora', swatch: ['#6d28d9', '#22d3ee', '#a78bfa'] },
+  { id: 'nebula', label: 'Nebula', swatch: ['#4338ca', '#f0abfc', '#818cf8'] },
+  { id: 'indigo', label: 'Indigo', swatch: ['#4338ca', '#818cf8', '#38bdf8'] },
+  { id: 'ocean', label: 'Ocean', swatch: ['#1d4ed8', '#38bdf8', '#818cf8'] },
+  { id: 'arctic', label: 'Arctic', swatch: ['#0369a1', '#7dd3fc', '#a5f3fc'] },
+  { id: 'teal', label: 'Teal', swatch: ['#0f766e', '#2dd4bf', '#60a5fa'] },
+  { id: 'emerald', label: 'Emerald', swatch: ['#047857', '#34d399', '#22d3ee'] },
+  { id: 'jungle', label: 'Jungle', swatch: ['#15803d', '#86efac', '#fde047'] },
+  { id: 'amber', label: 'Amber', swatch: ['#b45309', '#fbbf24', '#f472b6'] },
+  { id: 'sunset', label: 'Sunset', swatch: ['#c2410c', '#fb923c', '#c084fc'] },
+  { id: 'lava', label: 'Lava', swatch: ['#b91c1c', '#fb923c', '#f43f5e'] },
+  { id: 'rose', label: 'Rose', swatch: ['#be123c', '#fb7185', '#fbbf24'] },
+  { id: 'sakura', label: 'Sakura', swatch: ['#be185d', '#f9a8d4', '#c4b5fd'] },
+  { id: 'fuchsia', label: 'Fuchsia', swatch: ['#a21caf', '#e879f9', '#38bdf8'] },
+  { id: 'graphite', label: 'Graphite', swatch: ['#334155', '#94a3b8', '#c4b5fd'] },
 ] as const;
 export type AccentId = (typeof ACCENTS)[number]['id'];
 export const DEFAULT_ACCENT: AccentId = 'violet';

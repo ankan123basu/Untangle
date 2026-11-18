@@ -1,17 +1,23 @@
-# Frontend design system (frosted glass)
+# Frontend design system (nebula glass)
 
-> Tokens and primitives: Phase 7. Motion, 3D and the app background: Phase 9. Frosted glass,
-> colour themes and the ambient 3D layer: [ADR-025](decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md)
-> (replaced the original Glass-Brutalism look).
+> Tokens and primitives: Phase 7. Motion, 3D and the app background: Phase 9. Frosted glass and
+> colour themes: [ADR-025](decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md).
+> Nebula glass, sixteen themes and contained 3D stages:
+> [ADR-026](decisions/ADR-026-nebula-glass-and-contained-3d-stages.md).
 
 ## Simple explanation
 
-Untangle looks like frosted glass floating over a colourful background. Every panel blurs what
-is behind it, has a bright edge and a soft coloured shadow; buttons are pills, and the main
-action uses a colour gradient. On desktops, glossy 3D shapes (a tangled knot, a checkmark, ticket
-cards) drift slowly behind the glass. The Appearance menu (palette icon) lets each person pick
-light, dark or system mode, one of ten colour themes, and turn the 3D off. Everything works with
-the keyboard and with "reduce motion" switched on.
+Untangle looks like frosted glass floating over a slowly moving aurora: pearl white by day, deep
+space with stars by night. Every panel blurs what is behind it, has a thin gradient edge and a
+soft coloured glow; buttons are pills, and the main action is a glowing colour gradient.
+
+3D appears only in its own boxes, never behind content. The login page tells the product's story:
+tangled priority threads are pulled straight into a ticket that gets resolved. The dashboard shows
+the live queue as tickets orbiting a glass core.
+
+The Appearance menu (palette icon) lets each person pick light, dark or system mode, one of
+sixteen colour themes, and turn the 3D off. Everything works with the keyboard and with "reduce
+motion" switched on.
 
 ## Technical details
 
@@ -20,7 +26,7 @@ the keyboard and with "reduce motion" switched on.
 | Path | Contents |
 |---|---|
 | `src/styles/tokens.css` | every design value as a CSS variable (`--ut-*`), light + dark |
-| `src/styles/globals.css` | Tailwind v4 import, `@theme inline` mapping, base styles, `.glass-panel`, `.solid-panel` |
+| `src/styles/globals.css` | Tailwind v4 import, `@theme inline` mapping, base styles, `.glass-panel`, `.solid-panel` (gradient edge), `.app-backdrop`, `.login-stage`, `.btn-glow`, `.nav-active`, `.text-gradient`, `.text-aurora` |
 | `src/components/ui/` | first-party primitives (below) |
 | `src/components/reactbits/` | vendored React Bits (ADR-023) |
 | `src/components/layout/` | app shell, command palette, offline banner, splash |
@@ -34,9 +40,9 @@ Components never use raw hex values; they use Tailwind utilities generated from 
 
 | Group | Tokens | Notes |
 |---|---|---|
-| Colour theme | `--ut-a1`, `--ut-a2` (gradient), `--ut-a3` (glow), `--ut-ink-l` / `--ut-ink-d` (accent text) | ten themes on `<html data-accent>`; white text ≥ 4.5:1 on a1 and a2 |
+| Colour theme | `--ut-a1`, `--ut-a2` (gradient), `--ut-a3` (glow), `--ut-a4` (second aurora hue), `--ut-ink-l` / `--ut-ink-d` (accent text) | sixteen themes on `<html data-accent>`; white text ≥ 5:1 on a1 and a2 |
 | Brand | `brand`, `brand-2`, `glow`, `on-brand` (white), `accent`, `on-accent`; utility `bg-brand-gradient` | gradient = primary action/selection; accent = links and focus |
-| Surfaces | `paper` (tinted by the theme), `paper-2`, `surface` (86 %), `glass` (72 % / 68 % dark), `glass-strong` (86 % / 84 %), `glass-edge` | text only on glass ≥ 72 % opaque |
+| Surfaces | `paper`, `bg-base` (backdrop), `paper-2`, `surface` (86 %), `glass` (70 % / 62 % dark), `glass-strong` (86 % / 80 %), `glass-edge`, `edge` (gradient hairline), `star-opacity` (dark only) | long text sits on `solid-panel` (`glass-strong`) |
 | Ink | `ink`, `muted`, `line`, `line-soft`, `field-line` | `field-line` gives form controls ≥ 3:1 (WCAG 1.4.11) |
 | Feedback | `danger`, `success`, `warning` (+ `on-*`) | |
 | Priority / status / SLA | `prio-{low,medium,high,critical}-{fg,bg}`, `status-*-{fg,bg}`, `sla-{ok,risk,breached}` | fg/bg pairs ≥ 4.5:1 in both themes |
@@ -44,7 +50,7 @@ Components never use raw hex values; they use Tailwind utilities generated from 
 | Motion | 120/200/360 ms, `ease-smooth` cubic-bezier(0.2, 0.8, 0.2, 1) | all disabled under reduced motion |
 
 Appearance (`AppearanceMenu`, in the app header and on the login page): mode light / dark /
-system, ten colour themes, and a "3D scenes" switch. Dark applies when the OS prefers it, unless
+system, sixteen colour themes, and a "3D scenes" switch (login story + dashboard orbit). Dark applies when the OS prefers it, unless
 the user forced light (`data-theme="light"`), or when forced (`data-theme="dark"`).
 `public/theme-init.js` sets `data-theme` and `data-accent` from `localStorage` before first paint
 (a file, not inline, because the CSP forbids inline scripts). Hooks: `useTheme`, `useAccent`,
@@ -64,7 +70,7 @@ the user forced light (`data-theme="light"`), or when forced (`data-theme="dark"
 
 ### React Bits in use
 
-CountUp (dashboard numbers), SpotlightCard (KPI cards), ShinyText (login tagline). Each local
+CountUp (dashboard numbers), SpotlightCard (KPI cards). ShinyText was removed in ADR-026. Each local
 change is marked `// untangle:`. Aurora and ClickSpark: decided in Phase 9.
 
 ### Accessibility rules
@@ -101,9 +107,9 @@ A thin brand-coloured bar shows while a lazy route chunk loads.
 
 | Where | What | Reduced motion / fallback |
 |---|---|---|
-| Login (desktop) | R3F scene on a deep gradient panel in the theme colours: the glossy strand untangles into the checkmark (right end first, like pulling a string), one soft ring pulses out, then the four frosted ticket cards are resolved one by one (stripe turns green, a check pops on); soft shadows; cursor parallax | static brand panel (also without WebGL, on < 4 cores, Save-Data or < 1024 px) |
-| Every page | `.app-backdrop`: a gradient mesh in the theme colours (five blurred fields drifting, transform only, plus film grain), paused when the tab is hidden | frozen |
-| Every signed-in page (≥ 768 px) | `AmbientLayer` (ADR-025): lazy R3F scene behind the glass (iridescent torus knot, glowing checkmark, frosted ticket cards, orbs, a ring) in the theme colours, with cursor and scroll parallax; studio reflections generated on the GPU; 30 fps on demand, paused when hidden, mounted after load + idle and faded in | not loaded (reduced motion, no WebGL, < 4 cores, Save-Data, < 768 px, or "3D scenes" off) |
+| Login (≥ 1024 px) | `untangle-scene.tsx` in its own stage (ADR-026): four priority threads (instanced glowing beads) turn in a tangle, are pulled straight right-end-first into lanes feeding a frosted ticket card; it flips to RESOLVED, a check badge pops and a ring pulses; loops with the next ticket number; stars, outline ghost tickets, cursor parallax | the same story as SVG + a CSS glass card (reduced motion, no WebGL, < 4 cores, Save-Data, or "3D scenes" off) |
+| Dashboard hero (≥ 1024 px) | `queue-orbit-scene.tsx` inside the card: each unresolved ticket is a glowing card on its priority's ring around an iridescent core (critical innermost, fastest); mounted when visible, after the numbers | static CSS orbit |
+| Every page | `.app-backdrop`: an aurora in a1–a4 (five blurred fields drifting, transform only), a starfield at night, film grain; paused when the tab is hidden | frozen |
 | Route change | page fades and rises 6 px (`animate-rise`) | none |
 | Ticket list → detail | the ticket number morphs into the header (`<ViewTransition name="ticket-…">`) | instant |
 | Lists (tickets, timeline) | staggered rise, first 10 items only (`stagger()`) | none |
@@ -118,8 +124,9 @@ waits on an animation.
 
 - Every route is its own chunk; three.js, Recharts, cmdk (palette) and Motion are never in the
   main bundle.
-- The ambient 3D scene mounts only after `load` + idle + 1.2 s. Mounting it during start-up
-  dropped desktop Lighthouse to 69 (TBT 940 ms, three.js parse + shader compile); deferred, it is 99.
+- No WebGL behind content (ADR-026). The dashboard orbit mounts via `WhenVisible` after the
+  numbers; an earlier global 3D layer mounted during start-up dropped desktop Lighthouse to 69
+  (TBT 940 ms), which is why every scene waits for the first paint.
 - Dashboard frames render at once with placeholder numbers (no layout shift); the chart and the
   queue load after the key numbers, when visible.
 - `make lighthouse` measures the signed-in dashboard (mobile + desktop).

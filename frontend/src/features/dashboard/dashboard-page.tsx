@@ -15,6 +15,7 @@ import { cn, humanize, timeAgo } from '@/lib/utils';
 import { useCan, useSession } from '@/features/auth/session-store';
 import { TicketBrowser } from '@/features/tickets/ticket-browser';
 import { useWorkload } from '@/features/tickets/ticket-api';
+import { QueueOrbit } from './queue-orbit';
 
 // Recharts is the heaviest dependency on this screen; load it after the numbers are on screen.
 const TrendChart = lazy(() => import('./trend-chart'));
@@ -46,62 +47,75 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) 
   return (
     <section
       aria-labelledby="unresolved-title"
-      className="solid-panel flex flex-col gap-5 p-6 md:flex-row md:items-end md:justify-between"
+      className="solid-panel grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]"
     >
-      <div>
-        <h2 id="unresolved-title" className="text-sm font-bold tracking-wider text-muted uppercase">
-          Unresolved tickets
-        </h2>
-        <p className="font-display text-7xl leading-none font-bold tabular-nums md:text-8xl">
-          {summary ? (
-            <>
-              <span className="sr-only">{summary.unresolved}</span>
-              <span aria-hidden="true">
-                <CountUp to={summary.unresolved} duration={1.2} separator="," trigger="load" />
-              </span>
-            </>
-          ) : (
-            <Placeholder className="inline-block h-[0.85em] w-[1.6em] align-baseline" />
-          )}
-        </p>
-        <p className="mt-2 text-sm text-muted">
-          {summary ? `Updated ${timeAgo(summary.generatedAt)}` : 'Loading'} · refreshes every minute
-        </p>
-      </div>
-      <div className="w-full md:max-w-md">
-        <p className="mb-2 text-sm font-semibold">By priority</p>
-        <div className="flex h-4 overflow-hidden rounded-sm border border-line" aria-hidden="true">
-          {PRIORITIES.map((p) => {
-            const n = summary?.unresolvedByPriority[p] ?? 0;
-            return n > 0 ? (
-              <div
-                key={p}
-                className={cn(PRIORITY_BAR[p], 'border-r border-line last:border-r-0')}
-                style={{ flexGrow: n }}
-              />
-            ) : null;
-          })}
-        </div>
-        <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {PRIORITIES.map((p) => (
-            <li key={p}>
-              <Link
-                to={`/tickets?priority=${p}&status=OPEN&status=IN_PROGRESS`}
-                className="flex flex-col rounded-md border border-line-soft px-2 py-1 hover:border-line"
-              >
-                <span className="text-xs font-bold text-muted uppercase">{humanize(p)}</span>
-                <span className="font-display text-xl font-bold tabular-nums">
-                  {summary ? (
-                    (summary.unresolvedByPriority[p] ?? 0)
-                  ) : (
-                    <Placeholder className="inline-block h-5 w-6" />
-                  )}
+      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between lg:flex-col lg:items-stretch xl:flex-row xl:items-end">
+        <div>
+          <h2
+            id="unresolved-title"
+            className="text-sm font-bold tracking-wider text-muted uppercase"
+          >
+            Unresolved tickets
+          </h2>
+          <p className="text-gradient mt-1 w-fit font-display text-7xl leading-none font-bold tabular-nums md:text-8xl">
+            {summary ? (
+              <>
+                <span className="sr-only">{summary.unresolved}</span>
+                <span aria-hidden="true">
+                  <CountUp to={summary.unresolved} duration={1.2} separator="," trigger="load" />
                 </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+              </>
+            ) : (
+              <Placeholder className="inline-block h-[0.85em] w-[1.6em] align-baseline" />
+            )}
+          </p>
+          <p className="mt-2 text-sm text-muted">
+            {summary ? `Updated ${timeAgo(summary.generatedAt)}` : 'Loading'} · refreshes every
+            minute
+          </p>
+        </div>
+        <div className="w-full md:max-w-md">
+          <p className="mb-2 text-sm font-semibold">By priority</p>
+          <div
+            className="flex h-4 overflow-hidden rounded-sm border border-line"
+            aria-hidden="true"
+          >
+            {PRIORITIES.map((p) => {
+              const n = summary?.unresolvedByPriority[p] ?? 0;
+              return n > 0 ? (
+                <div
+                  key={p}
+                  className={cn(PRIORITY_BAR[p], 'border-r border-line last:border-r-0')}
+                  style={{ flexGrow: n }}
+                />
+              ) : null;
+            })}
+          </div>
+          <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {PRIORITIES.map((p) => (
+              <li key={p}>
+                <Link
+                  to={`/tickets?priority=${p}&status=OPEN&status=IN_PROGRESS`}
+                  className="flex flex-col rounded-md border border-line-soft px-2 py-1 hover:border-line"
+                >
+                  <span className="text-xs font-bold text-muted uppercase">{humanize(p)}</span>
+                  <span className="font-display text-xl font-bold tabular-nums">
+                    {summary ? (
+                      (summary.unresolvedByPriority[p] ?? 0)
+                    ) : (
+                      <Placeholder className="inline-block h-5 w-6" />
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
+      <QueueOrbit
+        counts={summary?.unresolvedByPriority}
+        className="hidden min-h-[220px] lg:block"
+      />
     </section>
   );
 }
@@ -121,13 +135,13 @@ function Kpi({
 }) {
   return (
     <TiltCard>
-      <Link to={to} className="block rounded-[12px] focus-visible:outline-offset-4">
+      <Link to={to} className="block rounded-[20px] focus-visible:outline-offset-4">
         <SpotlightCard
-          className="!rounded-[12px] border border-line !p-4"
+          className="!rounded-[20px] border border-glass-edge !p-4 backdrop-blur-xl"
           spotlightColor="var(--ut-brand)"
           style={
             {
-              '--spotlight-card-surface': 'var(--ut-surface)',
+              '--spotlight-card-surface': 'var(--ut-glass-strong)',
               '--spotlight-card-border': 'transparent',
               '--spotlight-card-shadow': 'var(--ut-shadow-soft)',
             } as React.CSSProperties
@@ -137,8 +151,10 @@ function Kpi({
             <p className="text-sm font-semibold text-muted">{label}</p>
             <span
               className={cn(
-                'rounded-sm border border-line p-1',
-                tone === 'danger' && (value ?? 0) > 0 ? 'bg-danger text-on-danger' : 'bg-paper-2',
+                'rounded-full border p-1.5 shadow-soft-sm',
+                tone === 'danger' && (value ?? 0) > 0
+                  ? 'bg-danger text-on-danger'
+                  : 'border-white/25 bg-brand-gradient text-on-brand',
               )}
             >
               {icon}
@@ -264,15 +280,16 @@ export default function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-muted">{today()}</p>
-          <h1 className="font-display text-3xl font-bold tracking-tight">
+          <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
             {greeting()}
-            {firstName ? `, ${firstName}` : ''}
+            {firstName ? ', ' : ''}
+            {firstName && <span className="text-gradient">{firstName}</span>}
           </h1>
         </div>
         {canCreate && (
           <Link
             to="/tickets/new"
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-brand-gradient px-4 text-sm font-semibold text-on-brand shadow-soft-sm transition-transform hover:-translate-y-0.5"
+            className="btn-glow inline-flex h-10 items-center gap-2 rounded-full border border-white/25 bg-brand-gradient px-5 text-sm font-semibold text-on-brand transition-transform hover:-translate-y-0.5"
           >
             <Plus aria-hidden="true" className="size-4" /> New ticket
           </Link>

@@ -11,10 +11,17 @@ const MODES: { value: ThemeChoice; label: string; icon: ReactNode }[] = [
 ];
 
 /**
- * Appearance: light/dark mode, ten colour themes and the 3D scenes switch (ADR-025). Used in the
+ * Appearance: light/dark mode, sixteen colour themes and the 3D scenes switch (ADR-025). Used in the
  * app header and on the login page. Choices are remembered per browser.
  */
-export function AppearanceMenu({ className }: { className?: string }) {
+export function AppearanceMenu({
+  className,
+  triggerClassName,
+}: {
+  className?: string;
+  /** Extra classes for the palette button, e.g. light-on-dark on the login stage. */
+  triggerClassName?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useTheme();
   const [accent, setAccent] = useAccent();
@@ -51,6 +58,7 @@ export function AppearanceMenu({ className }: { className?: string }) {
         ref={trigger}
         variant="ghost"
         size="icon"
+        className={triggerClassName}
         aria-label="Appearance"
         aria-expanded={open}
         aria-controls={panelId}
@@ -95,7 +103,7 @@ export function AppearanceMenu({ className }: { className?: string }) {
             <legend className="text-xs font-bold tracking-wider text-muted uppercase">
               Colour theme · <span className="text-ink normal-case">{current.label}</span>
             </legend>
-            <div className="mt-2 grid grid-cols-5 gap-2.5">
+            <div className="mt-2 grid grid-cols-8 gap-2">
               {ACCENTS.map((a) => (
                 <label key={a.id} className="group relative flex justify-center" title={a.label}>
                   <input
@@ -112,10 +120,10 @@ export function AppearanceMenu({ className }: { className?: string }) {
                   <span
                     aria-hidden="true"
                     style={{
-                      backgroundImage: `linear-gradient(135deg, ${a.swatch[0]}, ${a.swatch[1]})`,
+                      backgroundImage: `linear-gradient(135deg, ${a.swatch[0]} 15%, ${a.swatch[1]} 60%, ${a.swatch[2]})`,
                     }}
                     className={cn(
-                      'flex size-10 cursor-pointer items-center justify-center rounded-full text-white shadow-soft-sm ring-offset-2 ring-offset-surface transition-transform group-hover:scale-110',
+                      'flex size-8 cursor-pointer items-center justify-center rounded-full text-white shadow-soft-sm ring-offset-2 ring-offset-surface transition-transform group-hover:scale-110',
                       'peer-focus-visible:ring-2 peer-focus-visible:ring-accent',
                       accent === a.id && 'ring-2 ring-ink',
                     )}
@@ -154,7 +162,8 @@ export function AppearanceMenu({ className }: { className?: string }) {
             </button>
           </div>
           <p className="mt-1.5 text-xs text-muted">
-            Runs only on capable devices, and never with reduced motion.
+            The login scene and the dashboard orbit. Only on capable devices, never with reduced
+            motion.
           </p>
         </div>
       )}

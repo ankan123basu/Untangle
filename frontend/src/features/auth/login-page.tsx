@@ -5,14 +5,12 @@ import { z } from 'zod';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { Eye, EyeOff, Lock, LogIn } from 'lucide-react';
 import { LogoMark } from '@/components/brand/LogoMark';
-import ShinyText from '@/components/reactbits/ShinyText';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
 import { type ApiError, messageFor, toApiError } from '@/lib/api/problem';
 import { formatDateTime } from '@/lib/utils';
 import { login } from './auth-api';
 import { useSession } from './session-store';
-import { AppBackdrop } from '@/components/layout/app-backdrop';
 import { AppearanceMenu } from '@/components/layout/appearance-menu';
 import { LoginHero } from './login-hero';
 
@@ -93,26 +91,24 @@ export default function LoginPage() {
     failure?.code === 'AUTH_ACCOUNT_LOCKED' ? failure.extra.lockedUntil : undefined;
 
   return (
-    <main className="relative isolate grid min-h-dvh overflow-hidden lg:grid-cols-[1.15fr_1fr]">
-      <AppBackdrop />
+    // The stage is deep space in both modes (white text on it); the form card follows the mode.
+    // Two columns from lg: the 3D story on the left, the card on the right, never overlapping.
+    <main className="login-stage grain grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
+      <div aria-hidden="true" className="starfield" />
       <LoginHero />
-      <section className="relative z-10 flex items-center justify-center p-6 sm:p-10">
-        <AppearanceMenu className="absolute top-4 right-4" />
+      <section className="relative flex items-center justify-center px-4 py-16 sm:p-10">
+        <AppearanceMenu
+          className="absolute top-4 right-4"
+          triggerClassName="border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20"
+        />
         <div className="w-full max-w-md">
-          <div className="glass-panel p-8 shadow-soft-lg sm:p-10">
+          <div className="solid-panel login-card p-7 text-ink sm:p-9">
             {/* On small screens the hero is hidden, so the brand lives here instead. */}
             <div className="mb-6 flex items-center gap-3 lg:hidden">
               <LogoMark size={40} title="" />
               <div>
                 <p className="font-display text-2xl font-bold tracking-tight">Untangle</p>
-                <p className="text-sm text-muted">
-                  <ShinyText
-                    text="Every complaint, untangled."
-                    speed={3}
-                    color="var(--ut-muted)"
-                    shineColor="var(--ut-ink)"
-                  />
-                </p>
+                <p className="text-gradient text-sm font-semibold">Every complaint, untangled.</p>
               </div>
             </div>
             <h1 className="font-display text-3xl font-bold tracking-tight">
@@ -249,7 +245,7 @@ export default function LoginPage() {
               </section>
             )}
           </div>
-          <p className="mt-5 text-center text-sm text-muted">
+          <p className="mt-5 text-center text-sm text-white/70">
             No public sign-up. Your admin creates your account.
           </p>
         </div>

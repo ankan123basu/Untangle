@@ -14,7 +14,7 @@ sent it through an **HMAC-signed webhook**.
 | **Backend** | Java 21 · Spring Boot 4.1 · Spring Security (JWT) · PostgreSQL 18 · Flyway · Micrometer |
 | **Frontend** | React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · TanStack Query · React Three Fiber |
 | **Infra** | Docker Compose · nginx · GitHub Actions · Prometheus + Grafana · optional Redis |
-| **Quality** | 407 backend tests · 62 frontend tests · 9 Playwright E2E · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
+| **Quality** | 407 backend tests · 63 frontend tests · 9 Playwright E2E · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
 
 ---
 
@@ -119,7 +119,7 @@ Local development with hot reload (JDK 21 + Node 26): `make setup`, then `make b
 - Suggestions only: the model can never change data. Personal data is redacted before sending.
 
 **Experience**
-- Frosted-glass design over a living gradient mesh, with ten colour themes, light and dark mode, and an ambient 3D scene behind the screens (switchable off; never on phones or with reduced motion).
+- Nebula-glass design (gradient-edged frosted panels over a moving aurora, starfield at night) with sixteen colour themes and light/dark mode; 3D only in its own stages: an untangling-tickets story on the login and a live-queue orbit on the dashboard (switchable off; never on phones or with reduced motion).
 - 3D login scene (a knot untangling into the checkmark logo), page and shared-element transitions.
 - Works on phones; reduced-motion and low-power devices get a calm static version.
 - WCAG-minded: keyboard navigation, focus rings, screen-reader labels, automated axe checks.
@@ -316,7 +316,8 @@ Every significant choice has an Architecture Decision Record in [docs/decisions/
 | [022](docs/decisions/ADR-022-ai-suggestion-only.md) | AI optional and suggestion-only |
 | [023](docs/decisions/ADR-023-exact-api-contract-and-vendored-react-bits.md) | Exact OpenAPI contract for generated types; vendored React Bits |
 | [024](docs/decisions/ADR-024-motion-and-3d-budget.md) | 3D and motion built cheaply, within a performance budget |
-| [025](docs/decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md) | Frosted glass, ten colour themes and an ambient 3D layer |
+| [025](docs/decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md) | Frosted glass, ten colour themes and an ambient 3D layer (amended by 026) |
+| [026](docs/decisions/ADR-026-nebula-glass-and-contained-3d-stages.md) | Nebula glass, sixteen colour themes, 3D only in contained stages |
 
 Agreed deviations from the original brief are listed at the top of
 [MASTER_PROMPT.md](MASTER_PROMPT.md); open questions and assumptions in
@@ -380,7 +381,7 @@ dashboard cache and cluster-wide rate limits, constant-query list endpoints (N+1
 |---|---|---|
 | Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 407 |
 | Architecture rules | ArchUnit | included above |
-| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 62 |
+| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 63 |
 | Every feature through the API + live RBAC matrix | `make check-features` | 103 checks |
 | End-to-end in a real browser | Playwright | 9 |
 | Partner webhook scenarios | Node simulator | 13 |
