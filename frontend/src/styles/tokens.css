@@ -18,6 +18,11 @@
 
   /* ---- Surfaces & ink ---- */
   --ut-paper: #f5f1e8;
+  /* Login hero panel: brand yellow by day, deep charcoal with yellow accents by night. */
+  --ut-hero: #ffd23f;
+  --ut-hero-ink: #111111;
+  --ut-hero-muted: rgb(17 17 17 / 0.78);
+  --ut-hero-circle: rgb(245 241 232 / 0.4);
   --ut-paper-2: #ebe4d3;
   --ut-surface: #ffffff;
   --ut-glass: rgb(255 255 255 / 0.8);
@@ -64,9 +69,11 @@
   --ut-radius-sm: 8px;
   --ut-radius: 10px;
   --ut-radius-card: 12px;
-  --ut-shadow-hard-sm: 2px 2px 0 0 var(--ut-line);
-  --ut-shadow-hard: 4px 4px 0 0 var(--ut-line);
-  --ut-shadow-hard-lg: 6px 6px 0 0 var(--ut-line);
+  /* Hard offset shadows: ink by day; a muted brand yellow by night (cream would glare). */
+  --ut-shadow-color: var(--ut-line);
+  --ut-shadow-hard-sm: 2px 2px 0 0 var(--ut-shadow-color);
+  --ut-shadow-hard: 4px 4px 0 0 var(--ut-shadow-color);
+  --ut-shadow-hard-lg: 6px 6px 0 0 var(--ut-shadow-color);
   --ut-blur: 14px;
 
   /* ---- Motion ---- */
@@ -80,6 +87,12 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
+    --ut-hero: #15140f;
+    --ut-hero-ink: #f3efe6;
+    --ut-hero-muted: #c9c1b1;
+    --ut-hero-circle: rgb(255 210 63 / 0.07);
+    --ut-shadow-color: rgb(255 210 63 / 0.42);
+    --ut-shadow-color: rgb(255 210 63 / 0.42);
     --ut-accent: #9aa6ff;
     --ut-on-accent: #0b0d24;
     --ut-paper: #121212;
@@ -120,6 +133,10 @@
 /* ...or when the user explicitly picked dark (ThemeToggle sets data-theme). */
 :root[data-theme='dark'] {
   color-scheme: dark;
+  --ut-hero: #15140f;
+  --ut-hero-ink: #f3efe6;
+  --ut-hero-muted: #c9c1b1;
+  --ut-hero-circle: rgb(255 210 63 / 0.07);
   --ut-accent: #9aa6ff;
   --ut-on-accent: #0b0d24;
   --ut-paper: #121212;

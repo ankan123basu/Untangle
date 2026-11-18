@@ -115,7 +115,7 @@ Local development with hot reload (JDK 21 + Node 26): `make setup`, then `make b
 - Admin screens for agents (deactivation moves their open tickets first) and partners.
 
 **AI assistance (optional)**
-- With a Groq API key: suggested category/priority on intake, ticket summaries and reply drafts.
+- With a Groq API key: suggested category/priority on intake, ticket summaries and draft resolution notes.
 - Suggestions only: the model can never change data. Personal data is redacted before sending.
 
 **Experience**

@@ -28,6 +28,11 @@
   --color-success: var(--ut-success);
   --color-warning: var(--ut-warning);
 
+  --color-hero: var(--ut-hero);
+  --color-hero-ink: var(--ut-hero-ink);
+  --color-hero-muted: var(--ut-hero-muted);
+  --color-hero-circle: var(--ut-hero-circle);
+
   --color-prio-low: var(--ut-prio-low-fg);
   --color-prio-low-fg: var(--ut-prio-low-fg);
   --color-prio-low-bg: var(--ut-prio-low-bg);

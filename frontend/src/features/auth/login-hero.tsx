@@ -1,6 +1,7 @@
-import { Component, lazy, Suspense, useState, type ReactNode } from 'react';
+import { Component, lazy, memo, Suspense, useState, type ReactNode } from 'react';
 import { Clock, ShieldCheck, Webhook } from 'lucide-react';
 import { LogoMark } from '@/components/brand/LogoMark';
+import { useIsDark } from '@/hooks/use-theme';
 import { canRunHeroScene } from './hero-support';
 
 const HeroScene = lazy(() => import('./hero-scene'));
@@ -17,21 +18,22 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
 }
 
 /** Left half of the login screen: brand, headline, and (when possible) the 3D scene. */
-export function LoginHero() {
+export const LoginHero = memo(function LoginHero() {
   const [show3d] = useState(canRunHeroScene);
+  const dark = useIsDark();
   return (
     <section
       aria-hidden="true"
-      className="relative hidden flex-col justify-between overflow-hidden border-r-2 border-line bg-brand p-12 lg:flex"
+      className="relative hidden flex-col justify-between overflow-hidden border-r-2 border-line bg-hero p-12 text-hero-ink transition-colors duration-300 lg:flex"
     >
       {/* Static art: the fallback, and what shows while the 3D chunk loads. */}
-      <div className="absolute -top-24 -right-24 size-96 rounded-full border-2 border-line bg-paper/40" />
+      <div className="absolute -top-24 -right-24 size-96 rounded-full border-2 border-line bg-hero-circle" />
       {show3d && (
         <SceneBoundary>
           {/* The scene owns the band between the logo and the headline, so they never overlap. */}
           <div className="absolute inset-x-0 top-[8%] h-[50%]">
             <Suspense fallback={null}>
-              <HeroScene />
+              <HeroScene dark={dark} />
             </Suspense>
           </div>
         </SceneBoundary>
@@ -41,12 +43,12 @@ export function LoginHero() {
         <span className="font-display text-xl font-bold">Untangle</span>
       </div>
       <div className="pointer-events-none relative max-w-lg">
-        <p className="font-display text-6xl leading-[0.95] font-bold tracking-tight text-on-brand">
+        <p className="font-display text-6xl leading-[0.95] font-bold tracking-tight">
           Every complaint,
           <br />
           untangled.
         </p>
-        <p className="mt-6 max-w-sm text-lg text-on-brand/80">
+        <p className="mt-6 max-w-sm text-lg text-hero-muted">
           Every customer complaint, from your agents or your partners, gets an owner, a deadline and
           an escalation path, so nothing slips through.
         </p>
@@ -68,4 +70,4 @@ export function LoginHero() {
       </div>
     </section>
   );
-}
+});

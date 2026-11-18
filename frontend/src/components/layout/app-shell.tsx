@@ -8,11 +8,8 @@ import {
   LayoutDashboard,
   ListChecks,
   LogOut,
-  Monitor,
-  Moon,
   PlusCircle,
   Search,
-  Sun,
   Users,
   Webhook,
 } from 'lucide-react';
@@ -22,10 +19,10 @@ import { Kbd } from '@/components/ui/feedback';
 import { logout } from '@/features/auth/auth-api';
 import { useCan, useSession } from '@/features/auth/session-store';
 import { useGlobalShortcuts } from '@/hooks/use-global-shortcuts';
-import { useTheme, type ThemeChoice } from '@/hooks/use-theme';
 import { cn, humanize } from '@/lib/utils';
 import { NotificationBell } from '@/features/notifications/notification-bell';
 import { AppBackdrop } from './app-backdrop';
+import { ThemeToggle } from './theme-toggle';
 
 const CommandPalette = lazy(() => import('./command-palette'));
 import { OfflineBanner } from './offline-banner';
@@ -57,33 +54,6 @@ function NavItem({
       {icon}
       <span>{children}</span>
     </NavLink>
-  );
-}
-
-const THEMES: { value: ThemeChoice; icon: ReactNode; label: string }[] = [
-  { value: 'light', icon: <Sun className="size-4" />, label: 'Light theme' },
-  { value: 'dark', icon: <Moon className="size-4" />, label: 'Dark theme' },
-  { value: 'system', icon: <Monitor className="size-4" />, label: 'Follow system theme' },
-];
-
-function ThemeToggle() {
-  const [theme, setTheme] = useTheme();
-  const index = THEMES.findIndex((t) => t.value === theme);
-  const current = THEMES[index] ?? THEMES[2];
-  const next = THEMES[(index + 1) % THEMES.length] ?? THEMES[0];
-  if (!current || !next) return null;
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label={`${current.label}. Switch to ${next.label.toLowerCase()}`}
-      title={current.label}
-      onClick={() => {
-        setTheme(next.value);
-      }}
-    >
-      {current.icon}
-    </Button>
   );
 }
 

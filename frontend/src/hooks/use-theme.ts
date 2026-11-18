@@ -42,6 +42,25 @@ export function useTheme(): [ThemeChoice, (next: ThemeChoice) => void] {
   return [theme, setTheme];
 }
 
+const DARK_QUERY = '(prefers-color-scheme: dark)';
+
+/** The theme actually on screen: the user's choice, or the OS setting for "system". */
+export function useIsDark(): boolean {
+  const [theme] = useTheme();
+  const systemDark = useSyncExternalStore(
+    (onChange) => {
+      const query = window.matchMedia(DARK_QUERY);
+      query.addEventListener('change', onChange);
+      return () => {
+        query.removeEventListener('change', onChange);
+      };
+    },
+    () => window.matchMedia(DARK_QUERY).matches,
+    () => false,
+  );
+  return theme === 'dark' || (theme === 'system' && systemDark);
+}
+
 /** True when the user asked the OS for less motion (we also honour it in CSS). */
 export function prefersReducedMotion(): boolean {
   return (

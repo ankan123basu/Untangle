@@ -12,6 +12,7 @@ import { type ApiError, messageFor, toApiError } from '@/lib/api/problem';
 import { formatDateTime } from '@/lib/utils';
 import { login } from './auth-api';
 import { useSession } from './session-store';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { LoginHero } from './login-hero';
 
 /** Demo seed accounts (db/seed-demo). Hide the panel with VITE_SHOW_DEMO_ACCOUNTS=false. */
@@ -74,6 +75,7 @@ export default function LoginPage() {
     <main className="relative grid min-h-dvh overflow-hidden bg-paper lg:grid-cols-[1.15fr_1fr]">
       <LoginHero />
       <section className="relative z-10 flex items-center justify-center p-6 sm:p-10">
+        <ThemeToggle className="absolute top-4 right-4" />
         <div className="w-full max-w-md">
           <div className="glass-panel p-8">
             {/* On small screens the hero is hidden, so the brand lives here instead. */}

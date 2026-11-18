@@ -135,7 +135,7 @@ their ticket. In the ticket list those tickets carry a "Partner" badge.
 | Command palette | Ctrl/⌘ + K, type `41` → jumps to UNT-000041; `c` new ticket, `g d` dashboard |
 | Theme | header button cycles light / dark / system |
 | Phone | open on a phone (same Wi-Fi: `http://<your-computer-ip>:3000`) or browser dev tools device mode |
-| AI | set `AI_ENABLED=true` and `GROQ_API_KEY=…` in `.env`, `make up`: "Suggest with AI" on create, Summarise / Draft reply on a ticket |
+| AI | set `AI_ENABLED=true` and `GROQ_API_KEY=…` in `.env`, `make up`: "Suggest with AI" on create, Summarise / Draft note on a ticket |
 | Metrics | `docker compose --profile observability up -d`, Grafana http://localhost:3001 (admin / `GRAFANA_ADMIN_PASSWORD` from `.env`) |
 
 ### CRUD summary

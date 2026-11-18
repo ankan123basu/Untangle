@@ -37,7 +37,7 @@ Components never use raw hex values; they use Tailwind utilities generated from 
 | Shape | borders 2/3 px, radius 8/10/12 px, `shadow-hard-sm/hard/hard-lg` (2/4/6 px offsets) | |
 | Motion | 120/200/360 ms, `ease-brutal` cubic-bezier(0.2, 0.8, 0.2, 1) | all disabled under reduced motion |
 
-Theme: dark applies when the OS prefers it, unless the user forced light (`data-theme="light"`), or
+Theme: a toggle in the app header and on the login page cycles light → dark → system. Dark applies when the OS prefers it, unless the user forced light (`data-theme="light"`), or
 when forced (`data-theme="dark"`). `public/theme-init.js` sets the attribute from `localStorage`
 before first paint (a file, not inline, because the CSP forbids inline scripts). `useTheme` cycles
 system → light → dark.
@@ -93,7 +93,7 @@ A thin brand-coloured bar shows while a lazy route chunk loads.
 
 | Where | What | Reduced motion / fallback |
 |---|---|---|
-| Login (desktop) | R3F scene: the knot untangles into the checkmark (right end first, like pulling a string), four floating glass ticket cards, cursor parallax | static brand panel (also without WebGL, on < 4 cores, Save-Data or < 1024 px) |
+| Login (desktop) | R3F scene: the knot untangles into the checkmark (right end first, like pulling a string), one soft ring pulses out, then the four floating ticket cards are resolved one by one (stripe turns green, a check pops on); soft shadows on the panel; cursor parallax. Dark theme: charcoal panel, glowing yellow strand, dark glass cards | static brand panel (also without WebGL, on < 4 cores, Save-Data or < 1024 px) |
 | Every signed-in page | `.app-backdrop`: three blurred colour fields drifting (transform only), paused when the tab is hidden; header and nav are glass over it | frozen |
 | Route change | page fades and rises 6 px (`animate-rise`) | none |
 | Ticket list → detail | the ticket number morphs into the header (`<ViewTransition name="ticket-…">`) | instant |

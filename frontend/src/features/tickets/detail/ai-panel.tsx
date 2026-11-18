@@ -70,7 +70,7 @@ export function AiPanel({
               draft.mutate();
             }}
           >
-            Draft reply
+            Draft note
           </Button>
         </div>
 
@@ -108,7 +108,7 @@ export function AiPanel({
         )}
         {draft.data && (
           <section
-            aria-label="AI reply draft"
+            aria-label="AI note draft"
             className="flex flex-col gap-2 rounded-md border-2 border-line-soft bg-surface p-3"
           >
             <p className="whitespace-pre-wrap">{draft.data.draft}</p>
