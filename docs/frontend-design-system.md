@@ -1,13 +1,17 @@
-# Frontend design system (Glass-Brutalism)
+# Frontend design system (frosted glass)
 
-> Tokens and primitives: Phase 7. Motion, 3D and the app background: Phase 9 (sections marked).
+> Tokens and primitives: Phase 7. Motion, 3D and the app background: Phase 9. Frosted glass,
+> colour themes and the ambient 3D layer: [ADR-025](decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md)
+> (replaced the original Glass-Brutalism look).
 
 ## Simple explanation
 
-Untangle looks like paper and ink: warm off-white background, thick black outlines, hard offset
-shadows (no blur) and one bold "untangled" yellow. Floating layers (header, dialogs, palette) are
-frosted glass so content stays visible behind them. Everything works in light and dark mode, with
-the keyboard, and with "reduce motion" switched on.
+Untangle looks like frosted glass floating over a colourful background. Every panel blurs what
+is behind it, has a bright edge and a soft coloured shadow; buttons are pills, and the main
+action uses a colour gradient. On desktops, glossy 3D shapes (a tangled knot, a checkmark, ticket
+cards) drift slowly behind the glass. The Appearance menu (palette icon) lets each person pick
+light, dark or system mode, one of ten colour themes, and turn the 3D off. Everything works with
+the keyboard and with "reduce motion" switched on.
 
 ## Technical details
 
@@ -23,30 +27,34 @@ the keyboard, and with "reduce motion" switched on.
 | `src/components/brand/` | logo |
 
 Components never use raw hex values; they use Tailwind utilities generated from the tokens
-(`bg-paper`, `text-ink`, `border-line`, `shadow-hard`, `bg-prio-critical-bg`, `ease-brutal`, ...).
+(`bg-paper`, `text-ink`, `border-line`, `shadow-soft`, `bg-brand-gradient`, `bg-prio-critical-bg`,
+`ease-smooth`, ...).
 
 ### Tokens
 
 | Group | Tokens | Notes |
 |---|---|---|
-| Brand | `brand` #ffd23f, `on-brand`, `accent` #3442c4, `on-accent` | yellow = primary action/selection; blue = links and focus |
-| Surfaces | `paper`, `paper-2`, `surface`, `glass` (80%), `glass-strong` (92%) | text only on glass ≥ 78% opaque |
-| Ink | `ink`, `muted`, `line`, `line-soft` | `line` is the brutalist outline colour |
+| Colour theme | `--ut-a1`, `--ut-a2` (gradient), `--ut-a3` (glow), `--ut-ink-l` / `--ut-ink-d` (accent text) | ten themes on `<html data-accent>`; white text ≥ 4.5:1 on a1 and a2 |
+| Brand | `brand`, `brand-2`, `glow`, `on-brand` (white), `accent`, `on-accent`; utility `bg-brand-gradient` | gradient = primary action/selection; accent = links and focus |
+| Surfaces | `paper` (tinted by the theme), `paper-2`, `surface` (86 %), `glass` (72 % / 68 % dark), `glass-strong` (86 % / 84 %), `glass-edge` | text only on glass ≥ 72 % opaque |
+| Ink | `ink`, `muted`, `line`, `line-soft`, `field-line` | `field-line` gives form controls ≥ 3:1 (WCAG 1.4.11) |
 | Feedback | `danger`, `success`, `warning` (+ `on-*`) | |
 | Priority / status / SLA | `prio-{low,medium,high,critical}-{fg,bg}`, `status-*-{fg,bg}`, `sla-{ok,risk,breached}` | fg/bg pairs ≥ 4.5:1 in both themes |
-| Shape | borders 2/3 px, radius 8/10/12 px, `shadow-hard-sm/hard/hard-lg` (2/4/6 px offsets) | |
-| Motion | 120/200/360 ms, `ease-brutal` cubic-bezier(0.2, 0.8, 0.2, 1) | all disabled under reduced motion |
+| Shape | 1 px edges, radius 8/14/22 px, `shadow-soft-sm/soft/soft-lg` (blurred, accent-tinted) | pills for buttons, nav and chips |
+| Motion | 120/200/360 ms, `ease-smooth` cubic-bezier(0.2, 0.8, 0.2, 1) | all disabled under reduced motion |
 
-Theme: a toggle in the app header and on the login page cycles light → dark → system. Dark applies when the OS prefers it, unless the user forced light (`data-theme="light"`), or
-when forced (`data-theme="dark"`). `public/theme-init.js` sets the attribute from `localStorage`
-before first paint (a file, not inline, because the CSP forbids inline scripts). `useTheme` cycles
-system → light → dark.
+Appearance (`AppearanceMenu`, in the app header and on the login page): mode light / dark /
+system, ten colour themes, and a "3D scenes" switch. Dark applies when the OS prefers it, unless
+the user forced light (`data-theme="light"`), or when forced (`data-theme="dark"`).
+`public/theme-init.js` sets `data-theme` and `data-accent` from `localStorage` before first paint
+(a file, not inline, because the CSP forbids inline scripts). Hooks: `useTheme`, `useAccent`,
+`useScene3d` in `hooks/use-theme.ts`.
 
 ### Primitives (`components/ui`)
 
 | Component | Notes |
 |---|---|
-| `Button` | variants primary/secondary/ghost/danger, sizes; `loading` → disabled + `aria-busy`; defaults to `type="button"`; press = shadow collapse |
+| `Button` | pill; variants primary (gradient)/secondary (frosted)/ghost/danger, sizes; `loading` → disabled + `aria-busy`; defaults to `type="button"`; lifts on hover, sinks on press |
 | `Card` (+ Header/Title/Body) | `tone="solid"` or `"glass"` |
 | `Field`, `Input`, `Textarea`, `Select` | `Field` is a render prop that wires `id`, `aria-invalid`, `aria-describedby` (hint + error) |
 | `Badge` | priority/status/SLA tones |
@@ -93,8 +101,9 @@ A thin brand-coloured bar shows while a lazy route chunk loads.
 
 | Where | What | Reduced motion / fallback |
 |---|---|---|
-| Login (desktop) | R3F scene: the knot untangles into the checkmark (right end first, like pulling a string), one soft ring pulses out, then the four floating ticket cards are resolved one by one (stripe turns green, a check pops on); soft shadows on the panel; cursor parallax. Dark theme: charcoal panel, glowing yellow strand, dark glass cards | static brand panel (also without WebGL, on < 4 cores, Save-Data or < 1024 px) |
-| Every signed-in page | `.app-backdrop`: three blurred colour fields drifting (transform only), paused when the tab is hidden; header and nav are glass over it | frozen |
+| Login (desktop) | R3F scene on a deep gradient panel in the theme colours: the glossy strand untangles into the checkmark (right end first, like pulling a string), one soft ring pulses out, then the four frosted ticket cards are resolved one by one (stripe turns green, a check pops on); soft shadows; cursor parallax | static brand panel (also without WebGL, on < 4 cores, Save-Data or < 1024 px) |
+| Every page | `.app-backdrop`: a gradient mesh in the theme colours (five blurred fields drifting, transform only, plus film grain), paused when the tab is hidden | frozen |
+| Every signed-in page (≥ 768 px) | `AmbientLayer` (ADR-025): lazy R3F scene behind the glass (iridescent torus knot, glowing checkmark, frosted ticket cards, orbs, a ring) in the theme colours, with cursor and scroll parallax; studio reflections generated on the GPU; 30 fps on demand, paused when hidden, mounted after load + idle and faded in | not loaded (reduced motion, no WebGL, < 4 cores, Save-Data, < 768 px, or "3D scenes" off) |
 | Route change | page fades and rises 6 px (`animate-rise`) | none |
 | Ticket list → detail | the ticket number morphs into the header (`<ViewTransition name="ticket-…">`) | instant |
 | Lists (tickets, timeline) | staggered rise, first 10 items only (`stagger()`) | none |
@@ -109,6 +118,8 @@ waits on an animation.
 
 - Every route is its own chunk; three.js, Recharts, cmdk (palette) and Motion are never in the
   main bundle.
+- The ambient 3D scene mounts only after `load` + idle + 1.2 s. Mounting it during start-up
+  dropped desktop Lighthouse to 69 (TBT 940 ms, three.js parse + shader compile); deferred, it is 99.
 - Dashboard frames render at once with placeholder numbers (no layout shift); the chart and the
   queue load after the key numbers, when visible.
 - `make lighthouse` measures the signed-in dashboard (mobile + desktop).

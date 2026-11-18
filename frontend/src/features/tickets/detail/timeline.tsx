@@ -66,13 +66,13 @@ function EntryItem({ entry, index }: { entry: TimelineEntry; index: number }) {
     <li className={cn('flex animate-rise gap-3', pending && 'opacity-60')} style={stagger(index)}>
       <span
         aria-hidden="true"
-        className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-line bg-paper-2 text-xs font-bold"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full border border-line bg-paper-2 text-xs font-bold"
       >
         {entry.author ? initials(entry.author.fullName) : '?'}
       </span>
       <article
         className={cn(
-          'min-w-0 flex-1 rounded-md border-2 border-line p-3',
+          'min-w-0 flex-1 rounded-md border border-line p-3',
           note ? 'bg-status-resolved-bg text-status-resolved-fg' : 'bg-surface',
         )}
       >

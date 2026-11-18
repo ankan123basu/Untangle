@@ -36,9 +36,9 @@ export function StatusStepper({ status }: { status: TicketStatus }) {
               initial={false}
               animate={{ scale: active && !reduce ? 1.12 : 1 }}
               className={cn(
-                'flex size-9 items-center justify-center rounded-full border-2 border-line text-sm font-bold',
+                'flex size-9 items-center justify-center rounded-full border border-line text-sm font-bold',
                 done && 'bg-ink text-paper',
-                active && 'bg-brand text-on-brand shadow-hard-sm',
+                active && 'bg-brand-gradient text-on-brand shadow-soft-sm',
                 !done && !active && 'bg-surface text-muted',
               )}
             >

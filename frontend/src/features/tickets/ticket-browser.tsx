@@ -38,9 +38,9 @@ function Chip({
       aria-pressed={pressed}
       onClick={onToggle}
       className={cn(
-        'h-8 rounded-md border-2 px-2.5 text-xs font-bold whitespace-nowrap transition-colors',
+        'h-8 rounded-md border px-2.5 text-xs font-bold whitespace-nowrap transition-colors',
         pressed
-          ? 'border-line bg-ink text-paper shadow-hard-sm'
+          ? 'border-line bg-ink text-paper shadow-soft-sm'
           : 'border-line-soft bg-surface text-ink hover:border-line',
       )}
     >
@@ -96,7 +96,7 @@ function SearchBox({ value, onChange }: { value: string; onChange: (q: string) =
 function TicketRow({ ticket, index }: { ticket: TicketSummary; index: number }) {
   return (
     <tr
-      className="group animate-rise border-t-2 border-line-soft transition-colors hover:bg-paper-2/60"
+      className="group animate-rise border-t border-line-soft transition-colors hover:bg-paper-2/60"
       style={stagger(index)}
     >
       <td className="py-3 pr-3 pl-4 align-top">
@@ -213,7 +213,7 @@ export function TicketBrowser({
 
   return (
     <section aria-labelledby="ticket-browser-title" className="solid-panel overflow-hidden">
-      <div className="flex flex-col gap-3 border-b-2 border-line p-4">
+      <div className="flex flex-col gap-3 border-b border-line p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="ticket-browser-title" className="font-display text-xl font-bold">
             {title}
@@ -225,9 +225,9 @@ export function TicketBrowser({
                 to={{ search: view.search }}
                 aria-current={quickView === view.id ? 'page' : undefined}
                 className={cn(
-                  'rounded-md border-2 px-2.5 py-1 text-xs font-bold',
+                  'rounded-md border px-2.5 py-1 text-xs font-bold',
                   quickView === view.id
-                    ? 'border-line bg-brand text-on-brand shadow-hard-sm'
+                    ? 'border-line bg-brand-gradient text-on-brand shadow-soft-sm'
                     : 'border-transparent text-muted hover:border-line-soft hover:text-ink',
                 )}
               >
@@ -462,7 +462,7 @@ export function TicketBrowser({
       )}
 
       {data && data.totalElements > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t-2 border-line px-4 py-3 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3 text-sm">
           <p aria-live="polite">
             <span className="font-semibold">
               {from}–{to}

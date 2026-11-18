@@ -57,9 +57,9 @@ export default function TrendChart() {
                 <ChartTooltip
                   contentStyle={{
                     background: 'var(--ut-surface)',
-                    border: '2px solid var(--ut-line)',
-                    borderRadius: 8,
-                    boxShadow: 'var(--ut-shadow-hard-sm)',
+                    border: '1px solid var(--ut-glass-edge)',
+                    borderRadius: 14,
+                    boxShadow: 'var(--ut-shadow-soft-sm)',
                     color: 'var(--ut-ink)',
                   }}
                 />

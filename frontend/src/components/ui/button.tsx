@@ -13,10 +13,12 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-brand text-on-brand border-line shadow-hard-sm',
-  secondary: 'bg-surface text-ink border-line shadow-hard-sm',
+  primary:
+    'bg-brand-gradient text-on-brand border-white/25 shadow-soft-sm enabled:hover:shadow-soft enabled:hover:brightness-110',
+  secondary:
+    'bg-surface text-ink border-glass-edge shadow-soft-sm backdrop-blur-md enabled:hover:bg-glass-strong',
   ghost: 'bg-transparent text-ink border-transparent hover:bg-paper-2 shadow-none',
-  danger: 'bg-danger text-on-danger border-line shadow-hard-sm',
+  danger: 'bg-danger text-on-danger border-transparent shadow-soft-sm enabled:hover:brightness-110',
 };
 
 const sizes: Record<Size, string> = {
@@ -27,8 +29,8 @@ const sizes: Record<Size, string> = {
 };
 
 /**
- * The brutalist button: a hard border and offset shadow that "presses" flat when clicked (the
- * shadow collapses while the button moves into its place).
+ * The glass pill button. Primary actions use the accent gradient; the rest are frosted. It lifts
+ * slightly on hover and sinks a little when pressed (transform only, so it stays cheap).
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
@@ -51,9 +53,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled ?? loading}
       aria-busy={loading || undefined}
       className={cn(
-        'inline-flex items-center gap-2 rounded-md border-2 font-semibold whitespace-nowrap select-none',
-        'transition-[transform,box-shadow,background-color] duration-150 ease-brutal',
-        'enabled:active:translate-x-[2px] enabled:active:translate-y-[2px] enabled:active:shadow-none',
+        'inline-flex items-center gap-2 rounded-full border font-semibold whitespace-nowrap select-none',
+        'transition-[transform,box-shadow,background-color,filter] duration-150 ease-smooth',
+        'enabled:hover:-translate-y-px enabled:active:translate-y-0 enabled:active:scale-[0.98]',
         'disabled:cursor-not-allowed disabled:opacity-50',
         variants[variant],
         sizes[size],

@@ -58,14 +58,14 @@ function SecretDialog({ issued, onClose }: { issued: IssuedSecret | null; onClos
       }
     >
       <div className="flex flex-col gap-3">
-        <p className="flex items-start gap-2 rounded-md border-2 border-line bg-prio-high-bg p-3 text-sm text-prio-high-fg">
+        <p className="flex items-start gap-2 rounded-md border border-line bg-prio-high-bg p-3 text-sm text-prio-high-fg">
           <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           This is the only time the secret is shown. Send it to the partner over a secure channel.
         </p>
         <div className="flex items-stretch gap-2">
           <code
             aria-label="Signing secret"
-            className="min-w-0 flex-1 rounded-md border-2 border-line bg-paper-2 px-3 py-2 font-mono text-sm break-all select-all"
+            className="min-w-0 flex-1 rounded-md border border-line bg-paper-2 px-3 py-2 font-mono text-sm break-all select-all"
           >
             {issued?.secret}
           </code>
@@ -265,7 +265,7 @@ export default function PartnersPage() {
             </thead>
             <tbody>
               {partners.data.map((p) => (
-                <tr key={p.id} className="border-t-2 border-line-soft">
+                <tr key={p.id} className="border-t border-line-soft">
                   <th scope="row" className="px-4 py-3 font-semibold">
                     {p.name}
                     <span className="block font-mono text-xs font-normal text-muted">{p.code}</span>

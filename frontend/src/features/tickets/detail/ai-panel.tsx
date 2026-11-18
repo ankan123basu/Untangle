@@ -82,7 +82,7 @@ export function AiPanel({
         {summary.data && (
           <section
             aria-label="AI summary"
-            className="flex flex-col gap-2 rounded-md border-2 border-line-soft bg-surface p-3"
+            className="flex flex-col gap-2 rounded-md border border-line-soft bg-surface p-3"
           >
             <p className="whitespace-pre-wrap">{summary.data.summary}</p>
             {summary.data.keyPoints.length > 0 && (
@@ -109,7 +109,7 @@ export function AiPanel({
         {draft.data && (
           <section
             aria-label="AI note draft"
-            className="flex flex-col gap-2 rounded-md border-2 border-line-soft bg-surface p-3"
+            className="flex flex-col gap-2 rounded-md border border-line-soft bg-surface p-3"
           >
             <p className="whitespace-pre-wrap">{draft.data.draft}</p>
             <div className="flex gap-2">

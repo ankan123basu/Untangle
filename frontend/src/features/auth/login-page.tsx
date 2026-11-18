@@ -12,7 +12,8 @@ import { type ApiError, messageFor, toApiError } from '@/lib/api/problem';
 import { formatDateTime } from '@/lib/utils';
 import { login } from './auth-api';
 import { useSession } from './session-store';
-import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { AppBackdrop } from '@/components/layout/app-backdrop';
+import { AppearanceMenu } from '@/components/layout/appearance-menu';
 import { LoginHero } from './login-hero';
 
 /** Demo seed accounts (db/seed-demo). Hide the panel with VITE_SHOW_DEMO_ACCOUNTS=false. */
@@ -92,12 +93,13 @@ export default function LoginPage() {
     failure?.code === 'AUTH_ACCOUNT_LOCKED' ? failure.extra.lockedUntil : undefined;
 
   return (
-    <main className="relative grid min-h-dvh overflow-hidden bg-paper lg:grid-cols-[1.15fr_1fr]">
+    <main className="relative isolate grid min-h-dvh overflow-hidden lg:grid-cols-[1.15fr_1fr]">
+      <AppBackdrop />
       <LoginHero />
       <section className="relative z-10 flex items-center justify-center p-6 sm:p-10">
-        <ThemeToggle className="absolute top-4 right-4" />
+        <AppearanceMenu className="absolute top-4 right-4" />
         <div className="w-full max-w-md">
-          <div className="glass-panel p-8">
+          <div className="glass-panel p-8 shadow-soft-lg sm:p-10">
             {/* On small screens the hero is hidden, so the brand lives here instead. */}
             <div className="mb-6 flex items-center gap-3 lg:hidden">
               <LogoMark size={40} title="" />
@@ -113,7 +115,9 @@ export default function LoginPage() {
                 </p>
               </div>
             </div>
-            <h1 className="font-display text-3xl font-bold tracking-tight">Welcome back</h1>
+            <h1 className="font-display text-3xl font-bold tracking-tight">
+              Welcome <span className="text-gradient">back</span>
+            </h1>
             <p className="mt-1 mb-6 text-muted">Sign in with your work account.</p>
 
             <form
@@ -126,7 +130,7 @@ export default function LoginPage() {
                 <div
                   id="login-error"
                   role="alert"
-                  className="flex items-start gap-2 rounded-md border-2 border-danger bg-surface p-3 text-sm font-medium text-danger"
+                  className="flex items-start gap-2 rounded-md border border-danger bg-surface p-3 text-sm font-medium text-danger"
                 >
                   <Lock aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
                   <span>
@@ -193,7 +197,7 @@ export default function LoginPage() {
             {SHOW_DEMO && (
               <section
                 aria-labelledby="demo-title"
-                className="mt-6 rounded-md border-2 border-dashed border-line-soft bg-paper/60 p-4"
+                className="mt-6 rounded-2xl border border-line-soft bg-paper-2 p-4"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                   <h2 id="demo-title" className="text-sm font-bold">
@@ -212,7 +216,7 @@ export default function LoginPage() {
                       onClick={() => {
                         pick(account.email);
                       }}
-                      className="flex flex-col items-start rounded-md border-2 border-line bg-surface px-3 py-2 text-left shadow-hard-sm transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none"
+                      className="flex flex-col items-start rounded-xl border border-glass-edge bg-surface px-3 py-2 text-left shadow-soft-sm transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:border-accent hover:shadow-soft active:translate-y-0"
                     >
                       <span className="text-sm font-bold">{account.role}</span>
                       <span className="text-[11px] leading-tight text-muted">{account.hint}</span>

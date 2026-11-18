@@ -2,35 +2,129 @@
  * Untangle design tokens: the single source of truth for colour, shape, depth and motion.
  * globals.css maps them into Tailwind utilities with @theme. Components never use raw hex values.
  *
- * Contrast: every *-fg / ink colour was chosen for WCAG AA (≥ 4.5:1) on its paired background in
- * both themes. Glass surfaces are at least 78% opaque wherever text sits on them.
+ * Look: frosted glass (ADR-025). Translucent panels with a bright edge and soft, colour-tinted
+ * shadows float over a vivid gradient mesh (and, where the device allows, a 3D scene).
+ *
+ * Two independent choices, both set on <html> (theme-init.js applies them before first paint):
+ *   data-theme  = light | dark            (absent: follow the OS)
+ *   data-accent = violet | indigo | ...   (absent: violet)
+ *
+ * Contrast: every *-fg / ink colour meets WCAG AA (≥ 4.5:1) on its paired background in both
+ * modes. Both stops of every accent gradient (--ut-a1, --ut-a2) carry white text at ≥ 4.5:1, so a
+ * primary button is readable in any colour theme. Text panels are ≥ 72 % opaque.
  * See docs/frontend-design-system.md.
  */
 
+/* ------------------------------------------------------------------------------------------ */
+/* Colour themes. a1/a2 = the gradient (white text on both), a3 = a lighter decorative glow,   */
+/* ink-l / ink-d = accent text on light / dark backgrounds.                                    */
+/* ------------------------------------------------------------------------------------------ */
+:root,
+:root[data-accent='violet'] {
+  --ut-a1: #6d28d9;
+  --ut-a2: #9333ea;
+  --ut-a3: #c084fc;
+  --ut-ink-l: #6d28d9;
+  --ut-ink-d: #c4b5fd;
+}
+:root[data-accent='indigo'] {
+  --ut-a1: #4338ca;
+  --ut-a2: #6d28d9;
+  --ut-a3: #818cf8;
+  --ut-ink-l: #4338ca;
+  --ut-ink-d: #a5b4fc;
+}
+:root[data-accent='ocean'] {
+  --ut-a1: #1d4ed8;
+  --ut-a2: #0369a1;
+  --ut-a3: #38bdf8;
+  --ut-ink-l: #1d4ed8;
+  --ut-ink-d: #93c5fd;
+}
+:root[data-accent='teal'] {
+  --ut-a1: #0f766e;
+  --ut-a2: #0e7490;
+  --ut-a3: #2dd4bf;
+  --ut-ink-l: #0f766e;
+  --ut-ink-d: #5eead4;
+}
+:root[data-accent='emerald'] {
+  --ut-a1: #047857;
+  --ut-a2: #15803d;
+  --ut-a3: #34d399;
+  --ut-ink-l: #047857;
+  --ut-ink-d: #6ee7b7;
+}
+:root[data-accent='amber'] {
+  --ut-a1: #b45309;
+  --ut-a2: #c2410c;
+  --ut-a3: #fbbf24;
+  --ut-ink-l: #92400e;
+  --ut-ink-d: #fcd34d;
+}
+:root[data-accent='sunset'] {
+  --ut-a1: #c2410c;
+  --ut-a2: #be123c;
+  --ut-a3: #fb923c;
+  --ut-ink-l: #c2410c;
+  --ut-ink-d: #fdba74;
+}
+:root[data-accent='rose'] {
+  --ut-a1: #be123c;
+  --ut-a2: #be185d;
+  --ut-a3: #fb7185;
+  --ut-ink-l: #be123c;
+  --ut-ink-d: #fda4af;
+}
+:root[data-accent='fuchsia'] {
+  --ut-a1: #a21caf;
+  --ut-a2: #7e22ce;
+  --ut-a3: #e879f9;
+  --ut-ink-l: #a21caf;
+  --ut-ink-d: #f0abfc;
+}
+:root[data-accent='graphite'] {
+  --ut-a1: #334155;
+  --ut-a2: #1f2937;
+  --ut-a3: #94a3b8;
+  --ut-ink-l: #334155;
+  --ut-ink-d: #cbd5e1;
+}
+
+/* ------------------------------------------------------------------------------------------ */
+/* Light mode (default)                                                                         */
+/* ------------------------------------------------------------------------------------------ */
 :root {
   color-scheme: light;
 
-  /* ---- Brand ---- */
-  --ut-brand: #ffd23f; /* "untangled" yellow */
-  --ut-on-brand: #111111;
-  --ut-accent: #3442c4; /* links, focus, selection */
+  /* ---- Brand: the accent gradient; white text on it ---- */
+  --ut-brand: var(--ut-a1);
+  --ut-brand-2: var(--ut-a2);
+  --ut-glow: var(--ut-a3);
+  --ut-on-brand: #ffffff;
+  --ut-accent: var(--ut-ink-l); /* links, focus, selection */
   --ut-on-accent: #ffffff;
 
   /* ---- Surfaces & ink ---- */
-  --ut-paper: #f5f1e8;
-  /* Login hero panel: brand yellow by day, deep charcoal with yellow accents by night. */
-  --ut-hero: #ffd23f;
-  --ut-hero-ink: #111111;
-  --ut-hero-muted: rgb(17 17 17 / 0.78);
-  --ut-hero-circle: rgb(245 241 232 / 0.4);
-  --ut-paper-2: #ebe4d3;
-  --ut-surface: #ffffff;
-  --ut-glass: rgb(255 255 255 / 0.8);
-  --ut-glass-strong: rgb(255 255 255 / 0.92);
-  --ut-ink: #111111;
-  --ut-muted: #4d4840;
-  --ut-line: #111111;
-  --ut-line-soft: #d8d0bf;
+  --ut-paper: color-mix(in oklab, var(--ut-a3) 22%, #f4f3fa);
+  --ut-paper-2: color-mix(in oklab, var(--ut-a3) 16%, rgb(240 239 248 / 0.8));
+  --ut-surface: rgb(255 255 255 / 0.86);
+  --ut-glass: rgb(255 255 255 / 0.72);
+  --ut-glass-strong: rgb(255 255 255 / 0.86);
+  --ut-glass-edge: rgb(255 255 255 / 0.85);
+  --ut-glass-shine: rgb(255 255 255 / 0.9);
+  --ut-ink: #15131f;
+  --ut-muted: #4a4560;
+  --ut-line: rgb(30 22 60 / 0.16); /* dividers and small outlines */
+  --ut-line-soft: rgb(30 22 60 / 0.09);
+  --ut-field-line: rgb(48 40 80 / 0.55); /* form controls: ≥ 3:1 against the panel (WCAG 1.4.11) */
+  --ut-mesh-opacity: 0.72;
+
+  /* Login hero: a deep, saturated panel of the accent colours with white text in both modes. */
+  --ut-hero: color-mix(in oklab, var(--ut-a1) 62%, #0a0718);
+  --ut-hero-ink: #ffffff;
+  --ut-hero-muted: rgb(255 255 255 / 0.84);
+  --ut-hero-circle: color-mix(in oklab, var(--ut-a3) 16%, transparent);
 
   /* ---- Feedback ---- */
   --ut-danger: #b42318;
@@ -63,18 +157,15 @@
   --ut-sla-risk: #a15c07;
   --ut-sla-breached: #b42318;
 
-  /* ---- Shape & depth (brutalist) ---- */
-  --ut-border: 2px;
-  --ut-border-strong: 3px;
+  /* ---- Shape & depth (glass) ---- */
   --ut-radius-sm: 8px;
-  --ut-radius: 10px;
-  --ut-radius-card: 12px;
-  /* Hard offset shadows: ink by day; a muted brand yellow by night (cream would glare). */
-  --ut-shadow-color: var(--ut-line);
-  --ut-shadow-hard-sm: 2px 2px 0 0 var(--ut-shadow-color);
-  --ut-shadow-hard: 4px 4px 0 0 var(--ut-shadow-color);
-  --ut-shadow-hard-lg: 6px 6px 0 0 var(--ut-shadow-color);
-  --ut-blur: 14px;
+  --ut-radius: 14px;
+  --ut-radius-card: 22px;
+  --ut-shadow-tint: color-mix(in srgb, var(--ut-a1) 26%, rgb(20 12 50 / 0.3));
+  --ut-shadow-soft-sm: 0 1px 2px rgb(20 12 50 / 0.08), 0 4px 12px -4px var(--ut-shadow-tint);
+  --ut-shadow-soft: 0 1px 2px rgb(20 12 50 / 0.06), 0 12px 32px -12px var(--ut-shadow-tint);
+  --ut-shadow-soft-lg: 0 2px 4px rgb(20 12 50 / 0.06), 0 28px 64px -20px var(--ut-shadow-tint);
+  --ut-blur: 22px;
 
   /* ---- Motion ---- */
   --ut-dur-fast: 120ms;
@@ -83,27 +174,30 @@
   --ut-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Dark values, used when the OS prefers dark and the user hasn't forced light... */
+/* ------------------------------------------------------------------------------------------ */
+/* Dark mode: when the OS prefers dark and the user hasn't forced light, or when picked.        */
+/* The two blocks must stay identical.                                                         */
+/* ------------------------------------------------------------------------------------------ */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --ut-hero: #15140f;
-    --ut-hero-ink: #f3efe6;
-    --ut-hero-muted: #c9c1b1;
-    --ut-hero-circle: rgb(255 210 63 / 0.07);
-    --ut-shadow-color: rgb(255 210 63 / 0.42);
-    --ut-shadow-color: rgb(255 210 63 / 0.42);
-    --ut-accent: #9aa6ff;
-    --ut-on-accent: #0b0d24;
-    --ut-paper: #121212;
-    --ut-paper-2: #1a1a1a;
-    --ut-surface: #1e1e1e;
-    --ut-glass: rgb(30 30 30 / 0.8);
-    --ut-glass-strong: rgb(30 30 30 / 0.94);
-    --ut-ink: #f3efe6;
-    --ut-muted: #bfb8ab;
-    --ut-line: #f3efe6;
-    --ut-line-soft: #3a3833;
+    --ut-accent: var(--ut-ink-d);
+    --ut-on-accent: #0b0a14;
+    --ut-paper: color-mix(in oklab, var(--ut-a1) 16%, #08070f);
+    --ut-paper-2: rgb(255 255 255 / 0.06);
+    --ut-surface: rgb(30 27 46 / 0.86);
+    --ut-glass: rgb(24 21 38 / 0.68);
+    --ut-glass-strong: rgb(24 21 38 / 0.84);
+    --ut-glass-edge: rgb(255 255 255 / 0.14);
+    --ut-glass-shine: rgb(255 255 255 / 0.12);
+    --ut-ink: #f2f0fa;
+    --ut-muted: #bab5cc;
+    --ut-line: rgb(255 255 255 / 0.16);
+    --ut-line-soft: rgb(255 255 255 / 0.08);
+    --ut-field-line: rgb(255 255 255 / 0.42);
+    --ut-mesh-opacity: 0.5;
+    --ut-hero: color-mix(in oklab, var(--ut-a1) 45%, #06040f);
+    --ut-shadow-tint: color-mix(in srgb, var(--ut-a1) 35%, rgb(0 0 0 / 0.6));
     --ut-danger: #f87171;
     --ut-on-danger: #1a0505;
     --ut-success: #4ade80;
@@ -130,24 +224,25 @@
   }
 }
 
-/* ...or when the user explicitly picked dark (ThemeToggle sets data-theme). */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --ut-hero: #15140f;
-  --ut-hero-ink: #f3efe6;
-  --ut-hero-muted: #c9c1b1;
-  --ut-hero-circle: rgb(255 210 63 / 0.07);
-  --ut-accent: #9aa6ff;
-  --ut-on-accent: #0b0d24;
-  --ut-paper: #121212;
-  --ut-paper-2: #1a1a1a;
-  --ut-surface: #1e1e1e;
-  --ut-glass: rgb(30 30 30 / 0.8);
-  --ut-glass-strong: rgb(30 30 30 / 0.94);
-  --ut-ink: #f3efe6;
-  --ut-muted: #bfb8ab;
-  --ut-line: #f3efe6;
-  --ut-line-soft: #3a3833;
+  --ut-accent: var(--ut-ink-d);
+  --ut-on-accent: #0b0a14;
+  --ut-paper: color-mix(in oklab, var(--ut-a1) 16%, #08070f);
+  --ut-paper-2: rgb(255 255 255 / 0.06);
+  --ut-surface: rgb(30 27 46 / 0.86);
+  --ut-glass: rgb(24 21 38 / 0.68);
+  --ut-glass-strong: rgb(24 21 38 / 0.84);
+  --ut-glass-edge: rgb(255 255 255 / 0.14);
+  --ut-glass-shine: rgb(255 255 255 / 0.12);
+  --ut-ink: #f2f0fa;
+  --ut-muted: #bab5cc;
+  --ut-line: rgb(255 255 255 / 0.16);
+  --ut-line-soft: rgb(255 255 255 / 0.08);
+  --ut-field-line: rgb(255 255 255 / 0.42);
+  --ut-mesh-opacity: 0.5;
+  --ut-hero: color-mix(in oklab, var(--ut-a1) 45%, #06040f);
+  --ut-shadow-tint: color-mix(in srgb, var(--ut-a1) 35%, rgb(0 0 0 / 0.6));
   --ut-danger: #f87171;
   --ut-on-danger: #1a0505;
   --ut-success: #4ade80;

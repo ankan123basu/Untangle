@@ -216,7 +216,7 @@ partner → 401; bad priority → 400; > 64 KB → 413; burst → 429; old secre
 | **React 19 + Vite + TypeScript, server state in TanStack Query** | caching, retries and polling come for free | — |
 | **Types generated from OpenAPI** ([ADR-023](decisions/ADR-023-exact-api-contract-and-vendored-react-bits.md)) | frontend types can't drift from the backend | `@Nullable` must be remembered on new optional fields |
 | **Filters in the URL** | shareable links, Back button works | URL values must be validated |
-| **3D only on the login page; heavy libraries lazy-loaded** ([ADR-024](decisions/ADR-024-motion-and-3d-budget.md)) | work screens stay fast (Lighthouse 91–100), reduced-motion respected | less spectacle inside the app |
+| **Frosted glass, ten colour themes, ambient 3D deferred to idle; heavy libraries lazy-loaded** ([ADR-024](decisions/ADR-024-motion-and-3d-budget.md), [ADR-025](decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md)) | premium, personal look with real depth; work screens stay fast (Lighthouse 99–100), reduced-motion respected, 3D switchable off | GPU cost of blur over a moving canvas on big screens (30 fps cap + off switch) |
 
 ### 10. Scalability
 

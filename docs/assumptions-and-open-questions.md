@@ -42,7 +42,7 @@ When the lead answers, fill in the **Lead's answer** column and link the commit 
 | R8 | Deactivated agent's existing JWT | Active-flag cache TTL ≤ 30 s; evicted immediately on the instance that deactivates. Max exposure documented in security.md | 2 |
 | R9 | `Secure` refresh cookie over plain HTTP in dev | Works on `localhost` in Chrome/Firefox; same origin via nginx/Vite proxy. `AUTH_COOKIE_SECURE` env flag for Safari/plain-HTTP dev | 2 |
 | R10 | Groq receives ticket text (fintech context) | AI **off by default** (`AI_ENABLED=false`), PII redacted before sending. **Open question for the lead:** is sending redacted ticket text to a third-party LLM acceptable? | 6 |
-| R11 | Lighthouse ≥ 90 vs a 3D dashboard | R3F only on the login page. Dashboard uses a lightweight background deferred after LCP and paused when hidden | 9 |
+| R11 | Lighthouse ≥ 90 vs a 3D dashboard | Phase 9: R3F only on the login page. Revised by ADR-025: signed-in pages also get an ambient 3D layer, mounted after load + idle, 30 fps on demand, paused when hidden, off on phones / reduced motion / user switch. Dashboard still 99–100 | 9, ADR-025 |
 | R12 | Dev seed vs A12 (admin from env vars) | First admin created by a Java startup runner from env vars (Phase 2). Demo data is SQL under `db/seed-demo`, enabled by the `demo` profile (included by `dev`, default in `.env.example` for Docker demos), with a pre-computed BCrypt hash. **Done in Phase 1** | 1–2 |
 | R13 | Simulator language | Node.js + TypeScript (closest to a real external partner; built-in `crypto` HMAC). ADR in Phase 4 | 4 |
 | R14 | Comments on RESOLVED tickets? | Allowed. Only CLOSED is frozen | 3 |

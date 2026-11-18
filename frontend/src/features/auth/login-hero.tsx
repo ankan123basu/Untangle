@@ -1,7 +1,7 @@
 import { Component, lazy, memo, Suspense, useState, type ReactNode } from 'react';
 import { Clock, ShieldCheck, Webhook } from 'lucide-react';
 import { LogoMark } from '@/components/brand/LogoMark';
-import { useIsDark } from '@/hooks/use-theme';
+import { useThemeColors } from '@/components/three/theme-colors';
 import { canRunHeroScene } from './hero-support';
 
 const HeroScene = lazy(() => import('./hero-scene'));
@@ -20,20 +20,20 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
 /** Left half of the login screen: brand, headline, and (when possible) the 3D scene. */
 export const LoginHero = memo(function LoginHero() {
   const [show3d] = useState(canRunHeroScene);
-  const dark = useIsDark();
+  const colors = useThemeColors();
   return (
     <section
       aria-hidden="true"
-      className="relative hidden flex-col justify-between overflow-hidden border-r-2 border-line bg-hero p-12 text-hero-ink transition-colors duration-300 lg:flex"
+      className="hero-panel relative m-4 hidden flex-col justify-between overflow-hidden rounded-[28px] p-12 text-hero-ink shadow-soft-lg lg:flex"
     >
       {/* Static art: the fallback, and what shows while the 3D chunk loads. */}
-      <div className="absolute -top-24 -right-24 size-96 rounded-full border-2 border-line bg-hero-circle" />
+      <div className="absolute -top-24 -right-24 size-96 rounded-full border border-white/20 bg-hero-circle blur-[2px]" />
       {show3d && (
         <SceneBoundary>
           {/* The scene owns the band between the logo and the headline, so they never overlap. */}
           <div className="absolute inset-x-0 top-[8%] h-[50%]">
             <Suspense fallback={null}>
-              <HeroScene dark={dark} />
+              <HeroScene colors={colors} />
             </Suspense>
           </div>
         </SceneBoundary>
@@ -60,7 +60,7 @@ export const LoginHero = memo(function LoginHero() {
           ].map((item) => (
             <li
               key={item.text}
-              className="inline-flex items-center gap-2 rounded-md border-2 border-line bg-paper/80 px-3 py-1.5 text-sm font-semibold text-ink shadow-hard-sm"
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3.5 py-1.5 text-sm font-semibold text-hero-ink shadow-soft-sm backdrop-blur-md"
             >
               {item.icon}
               {item.text}

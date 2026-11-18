@@ -6,11 +6,13 @@
 
 /*
  * Tailwind v4 has no tailwind.config.js. @theme maps our tokens into utilities:
- *   --color-ink → bg-ink / text-ink / border-ink ...   --shadow-hard → shadow-hard
+ *   --color-ink → bg-ink / text-ink / border-ink ...   --shadow-soft → shadow-soft
  * `inline` makes utilities reference the CSS variable, so theme switching needs no rebuild.
  */
 @theme inline {
   --color-brand: var(--ut-brand);
+  --color-brand-2: var(--ut-brand-2);
+  --color-glow: var(--ut-glow);
   --color-on-brand: var(--ut-on-brand);
   --color-accent: var(--ut-accent);
   --color-on-accent: var(--ut-on-accent);
@@ -23,6 +25,8 @@
   --color-muted: var(--ut-muted);
   --color-line: var(--ut-line);
   --color-line-soft: var(--ut-line-soft);
+  --color-field-line: var(--ut-field-line);
+  --color-glass-edge: var(--ut-glass-edge);
   --color-danger: var(--ut-danger);
   --color-on-danger: var(--ut-on-danger);
   --color-success: var(--ut-success);
@@ -66,15 +70,15 @@
   --radius-sm: var(--ut-radius-sm);
   --radius-md: var(--ut-radius);
   --radius-card: var(--ut-radius-card);
-  --shadow-hard-sm: var(--ut-shadow-hard-sm);
-  --shadow-hard: var(--ut-shadow-hard);
-  --shadow-hard-lg: var(--ut-shadow-hard-lg);
+  --shadow-soft-sm: var(--ut-shadow-soft-sm);
+  --shadow-soft: var(--ut-shadow-soft);
+  --shadow-soft-lg: var(--ut-shadow-soft-lg);
 
   --font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --ease-brutal: var(--ut-ease);
+  --ease-smooth: var(--ut-ease);
   --animate-pulse-critical: pulse-critical 1.8s var(--ut-ease) infinite;
   --animate-rise: rise 260ms var(--ut-ease) both;
 }
@@ -84,6 +88,12 @@
   from {
     opacity: 0;
     transform: translateY(6px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
   }
 }
 
@@ -148,22 +158,34 @@
 }
 
 @layer components {
-  /* Glass panel with a brutalist frame: translucent fill, hard border, hard shadow. */
-  .glass-panel {
+  /*
+   * Frosted glass (ADR-025): a translucent fill that blurs and saturates whatever is behind it, a
+   * bright 1px edge, a soft top highlight and a colour-tinted shadow.
+   */
+  .glass-panel,
+  .solid-panel {
+    position: relative;
     background: var(--ut-glass);
-    backdrop-filter: blur(var(--ut-blur)) saturate(1.2);
-    -webkit-backdrop-filter: blur(var(--ut-blur)) saturate(1.2);
-    border: var(--ut-border) solid var(--ut-line);
+    backdrop-filter: blur(var(--ut-blur)) saturate(1.7);
+    -webkit-backdrop-filter: blur(var(--ut-blur)) saturate(1.7);
+    border: 1px solid var(--ut-glass-edge);
     border-radius: var(--ut-radius-card);
-    box-shadow: var(--ut-shadow-hard);
+    box-shadow:
+      inset 0 1px 0 var(--ut-glass-shine),
+      var(--ut-shadow-soft);
   }
 
-  /* Solid fallback where glass would hurt contrast or performance. */
+  /* Denser glass for data-heavy panels: still frosted, more opaque for long reading. */
   .solid-panel {
-    background: var(--ut-surface);
-    border: var(--ut-border) solid var(--ut-line);
-    border-radius: var(--ut-radius-card);
-    box-shadow: var(--ut-shadow-hard);
+    background: var(--ut-glass-strong);
+  }
+
+  /* Browsers without backdrop-filter get an opaque panel instead of unreadable see-through. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-panel,
+    .solid-panel {
+      background: var(--ut-surface);
+    }
   }
 
   /* Visually hidden but available to screen readers. */
@@ -177,9 +199,10 @@
   }
 
   /*
-   * The living background behind the glass panels (§12.3): three blurred colour fields drifting
-   * slowly. Only transforms animate (GPU-composited, no repaints); paused while the tab is hidden
-   * and switched off by the reduced-motion rule in base.
+   * The living background behind the glass panels (§12.3): a vivid mesh of the accent colours,
+   * five blurred colour fields drifting slowly, plus a fine grain so the gradients never band.
+   * Only transforms animate (GPU-composited, no repaints); paused while the tab is hidden and
+   * switched off by the reduced-motion rule in base. The optional 3D scene draws on top of it.
    */
   .app-backdrop {
     position: fixed;
@@ -187,18 +210,78 @@
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
+    background:
+      radial-gradient(
+        120% 80% at 0% 0%,
+        color-mix(in oklab, var(--ut-a3) 28%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        90% 70% at 100% 100%,
+        color-mix(in oklab, var(--ut-a2) 22%, transparent),
+        transparent 60%
+      ),
+      var(--ut-paper);
   }
   .app-backdrop > span {
     position: absolute;
     border-radius: 9999px;
-    filter: blur(70px);
-    opacity: 0.32;
-    animation: drift 26s ease-in-out infinite alternate;
+    filter: blur(80px);
+    opacity: var(--ut-mesh-opacity);
+    animation: drift 28s ease-in-out infinite alternate;
     will-change: transform;
   }
   .app-backdrop[data-paused] > span {
     animation-play-state: paused;
   }
+  .app-backdrop::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* The login hero: a deep panel of the theme colours with two soft glows and a glass edge. */
+  .hero-panel {
+    background:
+      radial-gradient(
+        70% 60% at 85% 10%,
+        color-mix(in oklab, var(--ut-a3) 70%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        60% 55% at 0% 100%,
+        color-mix(in oklab, var(--ut-a2) 80%, transparent),
+        transparent 70%
+      ),
+      var(--ut-hero);
+    border: 1px solid rgb(255 255 255 / 0.18);
+  }
+
+  /* The 3D layer fades in over the CSS mesh once it is ready (it mounts after the page is idle). */
+  .ambient-canvas {
+    animation: fade-in 1.4s var(--ut-ease) both;
+  }
+
+  /* Accent text with the theme gradient (headlines, big numbers). */
+  .text-gradient {
+    background: linear-gradient(
+      120deg,
+      var(--ut-accent),
+      color-mix(in oklab, var(--ut-accent) 55%, var(--ut-glow))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* The accent gradient fill for primary actions; white text meets AA on both stops. */
+@utility bg-brand-gradient {
+  background-color: var(--ut-brand);
+  background-image: linear-gradient(135deg, var(--ut-brand), var(--ut-brand-2));
 }
 
 /* Shared-element and page cross-fades via the View Transitions API (Phase 9, ADR-024). */

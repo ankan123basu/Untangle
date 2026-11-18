@@ -21,7 +21,7 @@ function ErrorLayout({
         <div className="mt-3 text-muted">{children}</div>
         <Link
           to="/"
-          className="mt-6 inline-flex h-10 items-center rounded-md border-2 border-line bg-brand px-4 font-semibold text-on-brand shadow-hard-sm"
+          className="mt-6 inline-flex h-10 items-center rounded-md border border-line bg-brand-gradient px-4 font-semibold text-on-brand shadow-soft-sm"
         >
           Back to the dashboard
         </Link>

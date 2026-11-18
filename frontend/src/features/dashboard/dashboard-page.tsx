@@ -70,16 +70,13 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) 
       </div>
       <div className="w-full md:max-w-md">
         <p className="mb-2 text-sm font-semibold">By priority</p>
-        <div
-          className="flex h-4 overflow-hidden rounded-sm border-2 border-line"
-          aria-hidden="true"
-        >
+        <div className="flex h-4 overflow-hidden rounded-sm border border-line" aria-hidden="true">
           {PRIORITIES.map((p) => {
             const n = summary?.unresolvedByPriority[p] ?? 0;
             return n > 0 ? (
               <div
                 key={p}
-                className={cn(PRIORITY_BAR[p], 'border-r-2 border-line last:border-r-0')}
+                className={cn(PRIORITY_BAR[p], 'border-r border-line last:border-r-0')}
                 style={{ flexGrow: n }}
               />
             ) : null;
@@ -90,7 +87,7 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) 
             <li key={p}>
               <Link
                 to={`/tickets?priority=${p}&status=OPEN&status=IN_PROGRESS`}
-                className="flex flex-col rounded-md border-2 border-line-soft px-2 py-1 hover:border-line"
+                className="flex flex-col rounded-md border border-line-soft px-2 py-1 hover:border-line"
               >
                 <span className="text-xs font-bold text-muted uppercase">{humanize(p)}</span>
                 <span className="font-display text-xl font-bold tabular-nums">
@@ -126,13 +123,13 @@ function Kpi({
     <TiltCard>
       <Link to={to} className="block rounded-[12px] focus-visible:outline-offset-4">
         <SpotlightCard
-          className="!rounded-[12px] border-2 border-line !p-4"
+          className="!rounded-[12px] border border-line !p-4"
           spotlightColor="var(--ut-brand)"
           style={
             {
               '--spotlight-card-surface': 'var(--ut-surface)',
               '--spotlight-card-border': 'transparent',
-              '--spotlight-card-shadow': 'var(--ut-shadow-hard)',
+              '--spotlight-card-shadow': 'var(--ut-shadow-soft)',
             } as React.CSSProperties
           }
         >
@@ -140,7 +137,7 @@ function Kpi({
             <p className="text-sm font-semibold text-muted">{label}</p>
             <span
               className={cn(
-                'rounded-sm border-2 border-line p-1',
+                'rounded-sm border border-line p-1',
                 tone === 'danger' && (value ?? 0) > 0 ? 'bg-danger text-on-danger' : 'bg-paper-2',
               )}
             >
@@ -194,7 +191,7 @@ function WorkloadCard() {
               {workload.data.map((w) => {
                 const load = w.open + w.inProgress;
                 return (
-                  <tr key={w.agentId} className="border-t-2 border-line-soft">
+                  <tr key={w.agentId} className="border-t border-line-soft">
                     <th scope="row" className="py-2 pr-2 font-semibold">
                       <Link
                         to={`/tickets?assigneeId=${w.agentId}&status=OPEN&status=IN_PROGRESS`}
@@ -209,7 +206,7 @@ function WorkloadCard() {
                     <td className="w-1/2 py-2 pr-2">
                       <div className="flex items-center gap-2">
                         <div
-                          className="h-3 flex-1 rounded-sm border-2 border-line bg-paper-2"
+                          className="h-3 flex-1 rounded-sm border border-line bg-paper-2"
                           aria-hidden="true"
                         >
                           <div
@@ -275,7 +272,7 @@ export default function DashboardPage() {
         {canCreate && (
           <Link
             to="/tickets/new"
-            className="inline-flex h-10 items-center gap-2 rounded-md border-2 border-line bg-brand px-4 text-sm font-semibold text-on-brand shadow-hard-sm transition-transform hover:-translate-y-0.5"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-brand-gradient px-4 text-sm font-semibold text-on-brand shadow-soft-sm transition-transform hover:-translate-y-0.5"
           >
             <Plus aria-hidden="true" className="size-4" /> New ticket
           </Link>

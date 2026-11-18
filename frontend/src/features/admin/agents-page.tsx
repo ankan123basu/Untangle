@@ -302,7 +302,7 @@ export default function AgentsPage() {
               {agents.data.map((a) => {
                 const self = a.id === me?.id;
                 return (
-                  <tr key={a.id} className="border-t-2 border-line-soft">
+                  <tr key={a.id} className="border-t border-line-soft">
                     <th scope="row" className="px-4 py-3 font-semibold">
                       {a.fullName}{' '}
                       {self && <span className="text-xs font-normal text-muted">(you)</span>}

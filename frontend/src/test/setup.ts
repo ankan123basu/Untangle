@@ -81,3 +81,8 @@ if (typeof window.matchMedia !== 'function') {
 if (typeof Element.prototype.scrollIntoView !== 'function') {
   Element.prototype.scrollIntoView = () => undefined;
 }
+
+// jsdom has no canvas or WebGL. Say so quietly, so the 3D gates (canRunScene3d) answer "no"
+// without jsdom logging "Not implemented" for every app-shell test. Tests can still spy on it.
+HTMLCanvasElement.prototype.getContext = (() =>
+  null) as typeof HTMLCanvasElement.prototype.getContext;

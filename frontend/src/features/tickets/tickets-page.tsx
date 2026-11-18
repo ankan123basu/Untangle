@@ -16,14 +16,14 @@ export default function TicketsPage() {
         <div className="flex gap-2">
           <Link
             to="/board"
-            className="inline-flex h-10 items-center gap-2 rounded-md border-2 border-line bg-surface px-4 text-sm font-semibold shadow-hard-sm"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-surface px-4 text-sm font-semibold shadow-soft-sm"
           >
             <Columns3 aria-hidden="true" className="size-4" /> Board
           </Link>
           {canCreate && (
             <Link
               to="/tickets/new"
-              className="inline-flex h-10 items-center gap-2 rounded-md border-2 border-line bg-brand px-4 text-sm font-semibold text-on-brand shadow-hard-sm"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-brand-gradient px-4 text-sm font-semibold text-on-brand shadow-soft-sm"
             >
               <Plus aria-hidden="true" className="size-4" /> New ticket
             </Link>

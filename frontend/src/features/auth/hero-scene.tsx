@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import { StudioEnvironment } from '@/components/three/studio-environment';
+import type { ThemeColors } from '@/components/three/theme-colors';
 import {
   CatmullRomCurve3,
   Color,
@@ -21,7 +23,7 @@ import {
  *   4. the floating ticket cards are resolved one by one: their priority stripe turns green and a
  *      small check pops on,
  *   5. everything keeps floating gently and follows the cursor.
- * Soft shadows fall on the yellow panel for depth. Reduced motion never reaches this file (the
+ * Soft shadows fall on the hero panel for depth; colours follow the current colour theme. Reduced motion never reaches this file (the
  * static hero is used), but `reduced` still renders the finished state for safety.
  */
 
@@ -33,7 +35,7 @@ const CHECK_VERTEX = new Vector3(-0.45, -1.05, 0.15);
 const INK = '#111111';
 const RESOLVED = new Color('#16733a');
 
-/** Colours per theme: ink on yellow by day, a glowing yellow line on charcoal by night. */
+/** Colours for the scene, from the current colour theme (the hero panel is always deep). */
 interface Palette {
   strand: string;
   glow: string;
@@ -44,26 +46,18 @@ interface Palette {
   shadow: number;
   ground: string;
 }
-const LIGHT: Palette = {
-  strand: INK,
-  glow: '#000000',
-  card: '#ffffff',
-  edge: INK,
-  text: INK,
-  ring: '#ffffff',
-  shadow: 0.12,
-  ground: '#c9a227',
-};
-const DARK: Palette = {
-  strand: '#ffd23f',
-  glow: '#ffb800',
-  card: '#2a2925',
-  edge: '#f3efe6',
-  text: '#f3efe6',
-  ring: '#ffd23f',
-  shadow: 0.45,
-  ground: '#1a1915',
-};
+function paletteFor(colors: ThemeColors): Palette {
+  return {
+    strand: colors.a3,
+    glow: colors.a3,
+    card: '#ffffff',
+    edge: '#ffffff',
+    text: '#ffffff',
+    ring: colors.a3,
+    shadow: 0.4,
+    ground: colors.a1,
+  };
+}
 
 /** Shared timeline: when the checkmark finished (seconds on the R3F clock). */
 type Story = { current: number | null };
@@ -157,24 +151,27 @@ function Strand({
     <group>
       <mesh ref={mesh} castShadow>
         <tubeGeometry args={initialArgs} />
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={palette.strand}
           emissive={palette.glow}
-          emissiveIntensity={0.35}
-          roughness={0.28}
-          metalness={0.15}
+          emissiveIntensity={0.45}
+          roughness={0.15}
+          metalness={0.1}
+          clearcoat={1}
+          iridescence={0.6}
         />
       </mesh>
       {/* Rounded ends: both stay fixed while the middle untangles. */}
       {[START, END].map((p) => (
         <mesh key={p.x} position={p} castShadow>
           <sphereGeometry args={[RADIUS, 16, 16]} />
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             color={palette.strand}
             emissive={palette.glow}
-            emissiveIntensity={0.35}
-            roughness={0.28}
-            metalness={0.15}
+            emissiveIntensity={0.45}
+            roughness={0.15}
+            metalness={0.1}
+            clearcoat={1}
           />
         </mesh>
       ))}
@@ -273,10 +270,16 @@ function TicketCard({
   return (
     <group ref={group} position={[...card.position]} rotation={[0, 0, card.rotation]}>
       <mesh geometry={cardGeometry} castShadow>
-        <meshStandardMaterial color={palette.card} transparent opacity={0.85} roughness={0.2} />
+        <meshPhysicalMaterial
+          color={palette.card}
+          transparent
+          opacity={0.3}
+          roughness={0.1}
+          clearcoat={1}
+        />
       </mesh>
       <lineSegments geometry={cardEdges}>
-        <lineBasicMaterial color={palette.edge} />
+        <lineBasicMaterial color={palette.edge} transparent opacity={0.55} />
       </lineSegments>
       <mesh position={[-0.62, 0, 0.03]}>
         <planeGeometry args={[0.12, 0.68]} />
@@ -325,12 +328,12 @@ function Parallax({ children, reduced }: { children: React.ReactNode; reduced: b
 
 export default function HeroScene({
   reduced = false,
-  dark = false,
+  colors,
 }: {
   reduced?: boolean;
-  dark?: boolean;
+  colors: ThemeColors;
 }) {
-  const palette = dark ? DARK : LIGHT;
+  const palette = useMemo(() => paletteFor(colors), [colors]);
   const doneRef = useRef<number | null>(null);
   return (
     <Canvas
@@ -344,7 +347,8 @@ export default function HeroScene({
       style={{ position: 'absolute', inset: 0 }}
       resize={{ debounce: 100 }}
     >
-      <hemisphereLight args={['#ffffff', palette.ground, dark ? 0.8 : 1.1]} />
+      <StudioEnvironment intensity={0.8} />
+      <hemisphereLight args={['#ffffff', palette.ground, 0.9]} />
       <directionalLight
         position={[2.5, 4, 6]}
         intensity={1.8}
@@ -357,7 +361,7 @@ export default function HeroScene({
         shadow-camera-top={4}
         shadow-camera-bottom={-4}
       />
-      {/* Rim light from behind-left for a crisp edge on the black strand. */}
+      {/* Rim light from behind-left for a crisp edge on the strand. */}
       <directionalLight position={[-5, 2, -3]} intensity={0.8} />
       <Parallax reduced={reduced}>
         {CARDS.map((_, i) => (
@@ -366,7 +370,7 @@ export default function HeroScene({
         <Strand doneRef={doneRef} reduced={reduced} palette={palette} />
         <Pulse doneRef={doneRef} color={palette.ring} />
       </Parallax>
-      {/* Invisible wall that only shows the soft shadows on the yellow panel. */}
+      {/* Invisible wall that only shows the soft shadows on the hero panel. */}
       <mesh position={[0, 0, -3.1]} receiveShadow>
         <planeGeometry args={[40, 24]} />
         <shadowMaterial opacity={palette.shadow} />

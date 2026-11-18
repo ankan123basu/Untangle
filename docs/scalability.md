@@ -91,8 +91,11 @@ answers 503 at once instead of queueing).
 
 | | Performance | Accessibility | Best practices | LCP | CLS |
 |---|---|---|---|---|---|
-| Desktop | 100 | 100 | 100 | 0.8 s | 0 |
-| Mobile (simulated slow 4G, 4× CPU) | 91 | 100 | 100 | 3.5 s | 0 |
+| Desktop | 99 | 100 | 100 | 0.8 s | 0 |
+| Mobile (simulated slow 4G, 4× CPU) | 89–100 | 100 | 100 | 0.9–3.5 s | 0.005 |
+
+Measured after the frosted-glass refresh with the ambient 3D layer (ADR-025). Mobile varies
+between runs with machine load; the 3D layer never loads on mobile.
 
 ### How to scale further (documented, not built)
 

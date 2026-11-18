@@ -1,21 +1,17 @@
 import { useEffect, useState } from 'react';
 
 const FIELDS = [
-  {
-    color: 'var(--ut-brand)',
-    size: '46vmax',
-    top: '-18vmax',
-    left: '-12vmax',
-    dx: '9vw',
-    dy: '7vh',
-  },
-  { color: 'var(--ut-accent)', size: '38vmax', top: '40vh', left: '62vw', dx: '-8vw', dy: '-9vh' },
-  { color: 'var(--ut-success)', size: '30vmax', top: '70vh', left: '8vw', dx: '7vw', dy: '-6vh' },
+  { color: 'var(--ut-a3)', size: '52vmax', top: '-20vmax', left: '-14vmax', dx: '9vw', dy: '7vh' },
+  { color: 'var(--ut-a1)', size: '40vmax', top: '38vh', left: '60vw', dx: '-8vw', dy: '-9vh' },
+  { color: 'var(--ut-a2)', size: '34vmax', top: '68vh', left: '4vw', dx: '7vw', dy: '-6vh' },
+  { color: 'var(--ut-a3)', size: '26vmax', top: '-6vh', left: '70vw', dx: '-6vw', dy: '8vh' },
+  { color: 'var(--ut-a1)', size: '22vmax', top: '30vh', left: '22vw', dx: '5vw', dy: '6vh' },
 ] as const;
 
 /**
- * Subtle animated background behind the app's glass panels (§12.3). CSS only: no WebGL, no
- * per-frame JavaScript. Paused while the tab is hidden; reduced motion freezes it (globals.css).
+ * The vivid gradient mesh behind the glass panels (§12.3, ADR-025), in the current colour theme.
+ * CSS only: no WebGL, no per-frame JavaScript. Paused while the tab is hidden; reduced motion
+ * freezes it (globals.css). The optional 3D layer (AmbientLayer) floats above it.
  */
 export function AppBackdrop() {
   const [hidden, setHidden] = useState(() => typeof document !== 'undefined' && document.hidden);
@@ -32,7 +28,7 @@ export function AppBackdrop() {
     <div aria-hidden="true" className="app-backdrop" data-paused={hidden ? '' : undefined}>
       {FIELDS.map((f) => (
         <span
-          key={f.color}
+          key={`${f.top}-${f.left}`}
           style={
             {
               background: f.color,

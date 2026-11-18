@@ -22,7 +22,8 @@ import { useGlobalShortcuts } from '@/hooks/use-global-shortcuts';
 import { cn, humanize } from '@/lib/utils';
 import { NotificationBell } from '@/features/notifications/notification-bell';
 import { AppBackdrop } from './app-backdrop';
-import { ThemeToggle } from './theme-toggle';
+import { AmbientLayer } from '@/components/three/ambient-layer';
+import { AppearanceMenu } from './appearance-menu';
 
 const CommandPalette = lazy(() => import('./command-palette'));
 import { OfflineBanner } from './offline-banner';
@@ -44,10 +45,10 @@ function NavItem({
       end={end ?? false}
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-3 rounded-md border-2 px-3 py-2 text-sm font-semibold transition-colors',
+          'flex items-center gap-3 rounded-full border px-3.5 py-2 text-sm font-semibold transition-[background-color,box-shadow,transform] duration-150',
           isActive
-            ? 'border-line bg-brand text-on-brand shadow-hard-sm'
-            : 'border-transparent hover:bg-paper-2',
+            ? 'border-white/25 bg-brand-gradient text-on-brand shadow-soft-sm'
+            : 'border-transparent hover:translate-x-0.5 hover:bg-paper-2',
         )
       }
     >
@@ -97,11 +98,12 @@ export function AppShell() {
 
   return (
     // `isolate` makes this a stacking context so the backdrop (z -1) paints above our background.
-    <div className="relative isolate min-h-dvh bg-paper">
+    <div className="relative isolate min-h-dvh">
       <AppBackdrop />
+      <AmbientLayer />
       <a
         href="#main"
-        className="sr-only-focusable absolute top-2 left-2 z-50 rounded-md bg-brand px-3 py-2 font-semibold"
+        className="sr-only-focusable absolute top-2 left-2 z-50 rounded-md bg-brand-gradient px-3 py-2 font-semibold"
       >
         Skip to content
       </a>
@@ -110,7 +112,7 @@ export function AppShell() {
         <div
           role="progressbar"
           aria-label="Loading page"
-          className="fixed inset-x-0 top-0 z-[70] h-1 origin-left animate-pulse bg-brand"
+          className="fixed inset-x-0 top-0 z-[70] h-1 origin-left animate-pulse bg-brand-gradient"
         />
       )}
       <OfflineBanner />
@@ -127,7 +129,7 @@ export function AppShell() {
         <aside
           id="main-nav"
           className={cn(
-            'fixed inset-y-0 left-0 z-50 w-[260px] p-3 transition-transform duration-200 ease-brutal lg:sticky lg:top-6 lg:z-auto lg:h-[calc(100dvh-3rem)] lg:w-auto lg:translate-x-0 lg:p-0',
+            'fixed inset-y-0 left-0 z-50 w-[260px] p-3 transition-transform duration-200 ease-smooth lg:sticky lg:top-6 lg:z-auto lg:h-[calc(100dvh-3rem)] lg:w-auto lg:translate-x-0 lg:p-0',
             navOpen ? 'translate-x-0' : '-translate-x-[110%]',
           )}
         >
@@ -171,7 +173,7 @@ export function AppShell() {
                 </NavItem>
               </>
             )}
-            <div className="mt-auto border-t-2 border-line-soft pt-3">
+            <div className="mt-auto border-t border-line-soft pt-3">
               <p className="truncate px-3 text-sm font-semibold">{agent?.fullName}</p>
               <p className="px-3 text-xs text-muted">{agent ? humanize(agent.role) : ''}</p>
               <Button
@@ -189,7 +191,7 @@ export function AppShell() {
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6">
-          <header className="glass-panel flex items-center gap-2 px-2 py-2 sm:gap-3 sm:px-4">
+          <header className="glass-panel z-30 flex items-center gap-2 px-2 py-2 sm:gap-3 sm:px-4">
             <Button
               variant="ghost"
               size="icon"
@@ -208,7 +210,7 @@ export function AppShell() {
               onClick={() => {
                 setPaletteOpen(true);
               }}
-              className="flex h-10 flex-1 items-center gap-2 rounded-md border-2 border-line-soft bg-paper px-3 text-left text-sm text-muted hover:border-line"
+              className="flex h-10 flex-1 items-center gap-2 rounded-full border border-field-line/60 bg-surface px-4 text-left text-sm text-muted transition-colors hover:border-accent"
             >
               <Search aria-hidden="true" className="size-4" />
               <span className="flex-1 truncate">
@@ -220,7 +222,7 @@ export function AppShell() {
               </span>
             </button>
             <NotificationBell />
-            <ThemeToggle />
+            <AppearanceMenu />
           </header>
           <main id="main" tabIndex={-1} className="min-w-0 outline-none">
             {/* Each page enters with a short fade-and-rise (§12.3); keyed so it replays per route.

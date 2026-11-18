@@ -86,7 +86,7 @@ export default function WebhookLogsPage() {
         </p>
       </div>
       <section className="solid-panel overflow-hidden">
-        <div className="grid gap-2 border-b-2 border-line p-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-2 border-b border-line p-4 sm:grid-cols-2 lg:grid-cols-4">
           <Select
             aria-label="Partner"
             value={partnerId}
@@ -177,7 +177,7 @@ export default function WebhookLogsPage() {
               </thead>
               <tbody>
                 {data.content.map((d) => (
-                  <tr key={d.id} className="border-t-2 border-line-soft align-top">
+                  <tr key={d.id} className="border-t border-line-soft align-top">
                     <td data-label="Received" className="px-4 py-2 whitespace-nowrap tabular-nums">
                       {formatDateTime(d.receivedAt)}
                     </td>
@@ -219,7 +219,7 @@ export default function WebhookLogsPage() {
           </div>
         )}
         {data && data.totalPages > 1 && (
-          <div className="flex items-center justify-end gap-2 border-t-2 border-line px-4 py-3 text-sm">
+          <div className="flex items-center justify-end gap-2 border-t border-line px-4 py-3 text-sm">
             <Button
               size="sm"
               aria-label="Previous page"

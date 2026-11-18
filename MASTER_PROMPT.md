@@ -38,6 +38,9 @@
 > - Phase 9 (ADR-024): no drei; app background is CSS (not Aurora); resolve sparks stay first-party
 >   (not ClickSpark); shared element via React `<ViewTransition>` instead of Motion `layoutId`; route
 >   transition in CSS; Motion only in the ticket-detail chunk. Lighthouse: desktop 100/100, mobile 91/100.
+> - Design refresh (ADR-025): §12.2 "Glass-Brutalism" is replaced by frosted glass (soft edges and
+>   shadows, pill controls, accent gradient), ten user-selectable colour themes plus light/dark,
+>   and an ambient 3D layer behind the signed-in screens (deferred to idle, 30 fps, switchable off).
 > - Phase 10: metric `ticket_creations_total` (Prometheus reserves `_created`); actuator on internal
 >   port 8081 in prod, probes at `/livez` `/readyz`; Dependabot + `npm audit` instead of OWASP
 >   dependency-check; `make check-features` adds a live RBAC matrix. AI "reply draft" is a resolution

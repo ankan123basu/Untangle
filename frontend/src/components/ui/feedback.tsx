@@ -71,7 +71,7 @@ export function ErrorState({
 
 export function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="rounded-sm border-2 border-line bg-surface px-1.5 font-mono text-[11px] leading-5 font-bold shadow-hard-sm">
+    <kbd className="rounded-sm border border-line bg-surface px-1.5 font-mono text-[11px] leading-5 font-bold shadow-soft-sm">
       {children}
     </kbd>
   );
