@@ -236,7 +236,7 @@ ShedLock's lock table (Phase 5), so only one backend instance runs the SLA sched
 | `ix_tickets_assignee_status` | "My open tickets", workload, "agent has open tickets?" | equality on assignee, then status |
 | `ix_tickets_created_at` (DESC) | default sort, 14-day trends | newest-first scans without a sort step |
 | `ix_tickets_sla_due_unresolved` (**partial**) | SLA scheduler every minute | only `OPEN`/`IN_PROGRESS` rows can breach, so the index stays tiny as closed tickets pile up |
-| `ix_tickets_subject_trgm`, `ix_tickets_description_trgm` (GIN, `pg_trgm`) | `q` search | lets `ILIKE '%refund%'` use an index |
+| `ix_tickets_subject_trgm`, `ix_tickets_description_trgm` (V1), `ix_tickets_number_trgm`, `ix_tickets_customer_trgm` (V3) (GIN, `pg_trgm`) | `q` search | lets `ILIKE '%term%'` use an index. Search ORs **all four** columns, so all four must be indexed: with only two, the OR fell back to a full scan (found by the stress test, fixed in V3) |
 | `ix_comments_ticket_created` | timeline | equality on ticket, ordered by time |
 | `ix_deliveries_received_at`, `ix_deliveries_partner` | webhook logs, retention | newest first, optionally per partner |
 | `ix_refresh_tokens_family`, `ix_refresh_tokens_agent_live` (partial) | reuse detection, logout/deactivation | revoke-by-family and revoke-live-by-agent |
@@ -265,7 +265,7 @@ planner rightly prefers sequential scans, so the numbers only mean something at 
 | Default list: unresolved, newest first, `LIMIT 20` | Index Scan `ix_tickets_created_at` + incremental sort; stops after 21 rows | **0.10 ms** |
 | "My open tickets" (assignee + status, newest first) | Index Scan `ix_tickets_created_at`, filter on assignee/status | **0.59 ms** |
 | SLA breached / scheduler (`status IN unresolved AND sla_due_at < now()`) | Index Scan on **partial** `ix_tickets_sla_due_unresolved`, with no filter step at all | **0.08 ms** |
-| Search `q=refund` (`ILIKE '%refund%'` on subject OR description) | BitmapOr of the two **pg_trgm GIN** indexes | **1.12 ms** |
+| Search `q=…` (`ILIKE` on number OR subject OR customer OR description) | BitmapOr of the four **pg_trgm GIN** indexes (V3) | **8 ms** for a selective term; a term matching ~12 % of all rows still scans, which is correct |
 | Severity queue (`status_rank, priority_rank DESC, created_at`) | Index Scan `ix_tickets_queue`, index order = result order | **0.05 ms** |
 
 How to reproduce: the SQL used is in `docs/how-it-works/phase-3.md` §6.

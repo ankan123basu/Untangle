@@ -34,6 +34,59 @@ Docker stack on a laptop (Apple Silicon), through nginx, demo data:
 
 Prometheus confirmed the same counts (`webhook_requests_total{outcome}`).
 
+### Stress test: where does one server break? (`make stress`)
+
+**Setup.** A separate copy of the stack (its own database, so real data is never touched) filled
+with **200,000 tickets, 600,000 timeline entries and 50 agents** (328 MB). k6 sends a realistic mix
+at a fixed rate for 30 s per step: bell 30 %, ticket list with filters/search 25 %, ticket detail
+20 %, timeline 10 %, dashboard 8 %, add comment 5 %, create ticket 2 %. Everything (k6, nginx, one
+backend limited to 768 MB, Postgres) runs on one Apple Silicon laptop, so the numbers are a lower
+bound.
+
+**First run: it broke between 200 and 400 req/s.**
+
+| Rate | p95 | Errors | Postgres CPU |
+|---|---|---|---|
+| 100/s | 110 ms | 0 % | 192 % |
+| 200/s | 304 ms | 0 % | **525 %** |
+| 400/s | 26 s | **50 %** | 602 % |
+
+Three problems were found and fixed:
+
+1. **Search did a full table scan.** `q` matches number, subject, customer name and description,
+   but only two of those had trigram indexes, so the OR read all 200k rows (about 100 ms on 3 cores)
+   on every search. It was the top database cost despite being about 3 % of traffic.
+   **Fix:** migration V3 indexes the other two columns, so search uses a BitmapOr (about 8 ms).
+2. **Dashboard cache stampede.** Creating a ticket clears the dashboard cache (correct), but then
+   every waiting dashboard request recomputed the same counts at once.
+   **Fix:** only one request recomputes; the others wait and reuse it (`DashboardCounts`).
+   The first attempt, `@Cacheable(sync = true)`, **froze the server at 0 % CPU** at 300 req/s:
+   Caffeine computes inside `ConcurrentHashMap.compute`, which holds a monitor during the database
+   call and pins Java 21 virtual threads. `-Djdk.tracePinnedThreads=full` proved it. The fix uses a
+   `ReentrantLock`, which does not pin (`DashboardCountsStampedeTest`: 20 concurrent virtual threads
+   → one computation).
+3. **Overload showed as generic 500s** after a 5 s wait for a database connection.
+   **Fix:** answered as **503 `SERVICE_BUSY`** with `Retry-After: 2`, so clients back off
+   (`OverloadHandlingTest`).
+
+**After the fixes:**
+
+| Rate | Achieved | p50 | p95 | p99 | Errors | Postgres CPU |
+|---|---|---|---|---|---|---|
+| 100/s | 94/s | 3.6 ms | 63 ms | 159 ms | 0 % | 139 % |
+| 200/s | 188/s | 4.3 ms | 96 ms | 289 ms | 0 % | 166 % |
+| 300/s | 283/s | 5.5 ms | 127 ms | 282 ms | 0 % | 270 % |
+| 400/s | 376/s | 50 ms | 279 ms | 973 ms | **0 %** | 596 % |
+| 500/s | 365/s | 1.2 s | 12.8 s | 26.9 s | 1.3 % | 574 % |
+| 600/s | 363/s | 3.4 s | 15.4 s | 30.7 s | 20 % | 394 % |
+
+**Verdict.** One backend on a laptop sustains about **375 requests/second with no errors** on
+200k tickets. The frontend's polling makes about 0.2 requests/second per signed-in person, so that
+is roughly **1,800 people online at once**. Past that, Postgres CPU is the limit (about 600 %).
+More backend copies would not help on their own. Next steps, in order of value: a read replica for
+lists and the dashboard, a bigger database machine, then load shedding (a concurrency limit that
+answers 503 at once instead of queueing).
+
 ### Lighthouse (signed-in dashboard, `make lighthouse`)
 
 | | Performance | Accessibility | Best practices | LCP | CLS |

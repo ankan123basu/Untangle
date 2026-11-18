@@ -70,6 +70,7 @@ Rejected values are never echoed.
 | `PAYLOAD_TOO_LARGE` | 413 | webhook body > 64 KB |
 | `PARTNER_NOT_FOUND` / `PARTNER_CODE_TAKEN` | 404 / 409 | partner admin |
 | `AI_UNAVAILABLE` | 503 | Phase 6 |
+| `SERVICE_BUSY` | 503 | overloaded: no database connection free within 5 s; `Retry-After: 2` |
 | `INTERNAL_ERROR` | 500 | unexpected; quote `traceId` |
 
 Source of truth: `ErrorCode.java`.

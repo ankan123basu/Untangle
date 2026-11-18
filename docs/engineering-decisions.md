@@ -236,6 +236,8 @@ partner → 401; bad priority → 400; > 64 KB → 413; burst → 429; old secre
 | **Metrics** (Micrometer → Prometheus → Grafana), `/livez` and `/readyz` | see load and health; orchestrators know when a copy is ready |
 | **Static frontend from nginx**, immutable caching, code splitting | cheap to serve, CDN-ready |
 
+**Stress-tested** (`make stress`, 200k tickets, realistic mix): one backend sustains about **375 req/s with 0 % errors** (about 1,800 people online); the database CPU is the limit. The test found and fixed a search full-scan, a dashboard cache stampede and a virtual-thread pinning freeze ([scalability.md](scalability.md#stress-test-where-does-one-server-break-make-stress)).
+
 **Measured** (k6 on a laptop, through nginx): ticket list at 50 req/s → p95 **5.3 ms**, 0 % errors;
 webhook at 4 req/s → p95 21 ms; a burst of 50 req/s from one IP → limiter returns 429 cleanly.
 

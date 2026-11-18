@@ -52,6 +52,9 @@ public enum ErrorCode {
   PARTNER_CODE_TAKEN(HttpStatus.CONFLICT, "Partner code already in use"),
   AI_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI assistance is unavailable"),
 
+  // ---- Capacity ----
+  SERVICE_BUSY(HttpStatus.SERVICE_UNAVAILABLE, "Service is busy"),
+
   // ---- Fallback ----
   INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
 

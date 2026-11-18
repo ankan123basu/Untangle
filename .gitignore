@@ -28,3 +28,9 @@ partner-simulator/dist/
 
 # --- Claude Code local state ---
 .claude/settings.local.json
+
+# Local database backups (may contain personal data)
+backups/
+
+# k6 stress-test output
+load/results/

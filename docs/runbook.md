@@ -117,6 +117,7 @@ ciphertexts no longer decrypt, so their webhooks fail until rotated).
 | AI assistance | `AI_ENABLED=true` and `GROQ_API_KEY=<key from console.groq.com>` in `.env`, then `make up` |
 | Browser end-to-end tests | `make up`, then `make e2e` (first time: `cd frontend && npx playwright install chromium`) |
 | Load test | `make load` (k6 in Docker against the running stack; creates ~500 low-priority demo tickets) |
+| Stress test | `make stress` (separate stack on ports 3100/8180/5435 with 200k tickets; your data is untouched; `RATES="100 300"` to change the steps); `make stress-down` removes it |
 | Lighthouse | `make lighthouse` (needs Google Chrome) |
 | Fresh demo data | `make nuke` (deletes the local database, asks first), then `make up` |
 | Open on a phone | same Wi-Fi, `http://<your-computer-ip>:3000`; set `AUTH_COOKIE_SECURE=false` if reloads sign you out (plain HTTP) |

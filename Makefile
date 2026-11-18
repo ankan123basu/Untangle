@@ -154,6 +154,13 @@ load: ## k6 load tests (ticket list + webhook) against the running stack, in Doc
 	docker run --rm --network untangle_default -v "$(CURDIR)/load/k6:/scripts:ro" \
 	  grafana/k6:1.8.2 run /scripts/webhook.js -e BASE_URL=http://frontend:8080
 
+.PHONY: stress stress-down
+stress: ## Stress test on a separate stack with 200k tickets (your data is untouched); RATES="..." to change
+	./scripts/stress.sh
+
+stress-down: ## Remove the stress-test stack and its data
+	docker compose -p untangle-stress down -v
+
 .PHONY: simulate
 simulate: .env ## Run every partner webhook scenario against the running stack (in Docker)
 	$(COMPOSE) --profile simulator run --rm --build partner-simulator --scenario $(or $(SCENARIO),all)

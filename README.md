@@ -14,7 +14,7 @@ sent it through an **HMAC-signed webhook**.
 | **Backend** | Java 21 · Spring Boot 4.1 · Spring Security (JWT) · PostgreSQL 18 · Flyway · Micrometer |
 | **Frontend** | React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · TanStack Query · React Three Fiber |
 | **Infra** | Docker Compose · nginx · GitHub Actions · Prometheus + Grafana · optional Redis |
-| **Quality** | 404 backend tests · 59 frontend tests · 9 Playwright E2E · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
+| **Quality** | 407 backend tests · 59 frontend tests · 9 Playwright E2E · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
 
 ---
 
@@ -346,6 +346,7 @@ Measured on the Docker stack (details in [docs/scalability.md](docs/scalability.
 
 | What | Result |
 |---|---|
+| **Stress test** (`make stress`): realistic mix on 200k tickets, one backend | **~375 req/s with 0 % errors** (about 1,800 people online); database CPU is the limit. Found and fixed a search full-scan, a cache stampede and a virtual-thread freeze ([details](docs/scalability.md#stress-test-where-does-one-server-break-make-stress)) |
 | Ticket list with filters, 50 req/s (k6) | p95 **5.3 ms**, 0 % errors |
 | Webhook, steady 4 req/s | p95 **21 ms**, all accepted |
 | Webhook, 50 req/s burst from one IP | limiter returns clean 429s, p95 6.5 ms |
@@ -376,7 +377,7 @@ dashboard cache and cluster-wide rate limits, constant-query list endpoints (N+1
 
 | Layer | Tool | Count |
 |---|---|---|
-| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 404 |
+| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 407 |
 | Architecture rules | ArchUnit | included above |
 | Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 59 |
 | Every feature through the API + live RBAC matrix | `make check-features` | 103 checks |

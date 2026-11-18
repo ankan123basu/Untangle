@@ -17,6 +17,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -193,6 +194,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         };
     decorate(problem, code);
     return new ResponseEntity<>(problem, headers, status);
+  }
+
+  // ---- Overload ---------------------------------------------------------------------------
+
+  /**
+   * No database connection became free within Hikari's {@code connection-timeout}: the server is
+   * overloaded (or the database is down). Answer 503 with {@code Retry-After} so clients back off,
+   * instead of a generic 500 with a stack trace per request.
+   */
+  @ExceptionHandler(CannotCreateTransactionException.class)
+  ResponseEntity<ProblemDetail> handleNoConnection(CannotCreateTransactionException ex) {
+    log.warn("No database connection available: {}", ex.getMostSpecificCause().getMessage());
+    return ResponseEntity.status(ErrorCode.SERVICE_BUSY.status())
+        .header(HttpHeaders.RETRY_AFTER, "2")
+        .body(problem(ErrorCode.SERVICE_BUSY, "The service is busy. Please try again shortly."));
   }
 
   // ---- Last resort ------------------------------------------------------------------------

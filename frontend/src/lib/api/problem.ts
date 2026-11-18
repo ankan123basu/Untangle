@@ -64,6 +64,7 @@ const MESSAGES: Record<string, string> = {
   AGENT_HAS_OPEN_TICKETS: 'Reassign this agent’s open tickets first.',
   PARTNER_CODE_TAKEN: 'A partner with that code already exists.',
   AI_UNAVAILABLE: 'AI assistance is unavailable right now.',
+  SERVICE_BUSY: 'Untangle is very busy right now. Please try again in a few seconds.',
   INTERNAL_ERROR: 'Something went wrong on our side.',
 };
 

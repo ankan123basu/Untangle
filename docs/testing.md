@@ -26,12 +26,13 @@ journeys. Every edge case from the brief gets a named test, listed in
 
 | Suite | Command | Count | Needs |
 |---|---|---|---|
-| Backend unit + integration (incl. ArchUnit, coverage gate) | `make test-backend` | **404** | Docker (Testcontainers) |
+| Backend unit + integration (incl. ArchUnit, coverage gate) | `make test-backend` | **407** | Docker (Testcontainers) |
 | Frontend components, logic, accessibility (axe) | `make test-frontend` | **59** | — |
 | Browser end-to-end (Playwright) | `make e2e` | **9** | `make up` |
 | Feature walkthrough + RBAC matrix | `make check-features` | **103** checks | `make up` (demo data) |
 | Partner webhook scenarios | `make simulate` | **13** | `make up` |
 | Load | `make load` | 2 scripts | `make up` |
+| Stress (find the breaking point) | `make stress` | 1 script, 6 rate steps | Docker; builds its own 200k-ticket stack |
 | Lighthouse | `make lighthouse` | dashboard, mobile + desktop | `make up`, Chrome |
 
 ### Test data
@@ -76,7 +77,7 @@ make ci              # lint + typecheck + test + build, exactly like CI (minus D
 
 ### Phase 10 additions
 
-- Backend (404): `MetricsIntegrationTest` (scrape, counters, probes), `DashboardCacheIntegrationTest`,
+- Backend (407): `DashboardCountsStampedeTest` (one computation for 20 concurrent virtual threads; no stale caching), `OverloadHandlingTest` (503 `SERVICE_BUSY`), `MetricsIntegrationTest` (scrape, counters, probes), `DashboardCacheIntegrationTest`,
   `RedisProfileIntegrationTest` (real Redis), `QueryCountIntegrationTest` (N+1 guard),
   `SlaEscalationSchedulerTest`.
 - Frontend (56): `command-palette.test.tsx` (Ctrl+K focuses the search box, number jump) — added
