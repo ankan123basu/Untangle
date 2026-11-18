@@ -60,4 +60,5 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [023](decisions/ADR-023-exact-api-contract-and-vendored-react-bits.md) | Exact OpenAPI contract for generated types; vendored React Bits |
 | [024](decisions/ADR-024-motion-and-3d-budget.md) | 3D and motion built cheaply, within a performance budget |
 | [025](decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md) | Frosted glass, ten colour themes and an ambient 3D layer (amended by 026) |
-| [026](decisions/ADR-026-nebula-glass-and-contained-3d-stages.md) | Nebula glass, sixteen colour themes, 3D only in contained stages |
+| [026](decisions/ADR-026-nebula-glass-and-contained-3d-stages.md) | Nebula glass, sixteen colour themes, 3D only in contained stages (superseded) |
+| [027](decisions/ADR-027-loud-neo-brutalism-and-toon-3d.md) | Loud neo-brutalism, twelve palettes, toon 3D about the product |

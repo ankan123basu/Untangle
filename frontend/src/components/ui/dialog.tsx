@@ -59,11 +59,11 @@ export function Dialog({
         if (event.target === ref.current) onClose(); // backdrop click
       }}
       className={cn(
-        'solid-panel m-auto w-[min(92vw,32rem)] p-0 text-ink backdrop:bg-black/35 backdrop:backdrop-blur-md',
+        'glass-panel m-auto w-[min(92vw,32rem)] p-0 text-ink backdrop:bg-black/40 backdrop:backdrop-blur-sm',
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
+      <div className="flex items-start justify-between gap-4 border-b-2 border-line px-5 py-4">
         <div>
           <h2 id={titleId} className="font-display text-xl font-bold">
             {title}
@@ -80,7 +80,7 @@ export function Dialog({
       </div>
       <div className="px-5 py-4">{children}</div>
       {footer && (
-        <div className="flex justify-end gap-2 border-t border-line px-5 py-3">{footer}</div>
+        <div className="flex justify-end gap-2 border-t-2 border-line px-5 py-3">{footer}</div>
       )}
     </dialog>
   );

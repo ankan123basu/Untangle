@@ -12,15 +12,21 @@ import { formatDateTime } from '@/lib/utils';
 import { login } from './auth-api';
 import { useSession } from './session-store';
 import { AppearanceMenu } from '@/components/layout/appearance-menu';
+import { AppBackdrop } from '@/components/layout/app-backdrop';
 import { LoginHero } from './login-hero';
 
 /** Demo seed accounts (db/seed-demo). Hide the panel with VITE_SHOW_DEMO_ACCOUNTS=false. */
 const SHOW_DEMO = import.meta.env.VITE_SHOW_DEMO_ACCOUNTS !== 'false';
 const DEMO_PASSWORD = 'Untangle@2026';
 const DEMO_ACCOUNTS = [
-  { role: 'Admin', email: 'admin@untangle.local', hint: 'Full access' },
-  { role: 'Lead', email: 'leela.thomas@untangle.local', hint: 'Team & workload' },
-  { role: 'Agent', email: 'riya.sen@untangle.local', hint: 'Own tickets' },
+  { role: 'Admin', email: 'admin@untangle.local', hint: 'Full access', tone: 'bg-stk-pink' },
+  {
+    role: 'Lead',
+    email: 'leela.thomas@untangle.local',
+    hint: 'Team & workload',
+    tone: 'bg-stk-mint',
+  },
+  { role: 'Agent', email: 'riya.sen@untangle.local', hint: 'Own tickets', tone: 'bg-stk-sky' },
 ] as const;
 
 /** Everyone in the demo team, for trying notifications and permissions between two people. */
@@ -91,28 +97,23 @@ export default function LoginPage() {
     failure?.code === 'AUTH_ACCOUNT_LOCKED' ? failure.extra.lockedUntil : undefined;
 
   return (
-    // The stage is deep space in both modes (white text on it); the form card follows the mode.
-    // Two columns from lg: the 3D story on the left, the card on the right, never overlapping.
-    <main className="login-stage grain grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
-      <div aria-hidden="true" className="starfield" />
+    <main className="relative isolate grid min-h-dvh overflow-hidden lg:grid-cols-[1.15fr_1fr]">
+      <AppBackdrop />
       <LoginHero />
-      <section className="relative flex items-center justify-center px-4 py-16 sm:p-10">
-        <AppearanceMenu
-          className="absolute top-4 right-4"
-          triggerClassName="border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20"
-        />
+      <section className="relative z-10 flex items-center justify-center p-6 sm:p-10">
+        <AppearanceMenu className="absolute top-4 right-4 z-20" />
         <div className="w-full max-w-md">
-          <div className="solid-panel login-card p-7 text-ink sm:p-9">
+          <div className="solid-panel p-8 shadow-hard-lg">
             {/* On small screens the hero is hidden, so the brand lives here instead. */}
             <div className="mb-6 flex items-center gap-3 lg:hidden">
               <LogoMark size={40} title="" />
               <div>
                 <p className="font-display text-2xl font-bold tracking-tight">Untangle</p>
-                <p className="text-gradient text-sm font-semibold">Every complaint, untangled.</p>
+                <p className="text-sm font-semibold text-muted">Every complaint, untangled.</p>
               </div>
             </div>
-            <h1 className="font-display text-3xl font-bold tracking-tight">
-              Welcome <span className="text-gradient">back</span>
+            <h1 className="font-display text-4xl font-bold tracking-tight">
+              Welcome <span className="highlight">back</span>
             </h1>
             <p className="mt-1 mb-6 text-muted">Sign in with your work account.</p>
 
@@ -126,7 +127,7 @@ export default function LoginPage() {
                 <div
                   id="login-error"
                   role="alert"
-                  className="flex items-start gap-2 rounded-md border border-danger bg-surface p-3 text-sm font-medium text-danger"
+                  className="flex items-start gap-2 rounded-md border-2 border-danger bg-surface p-3 text-sm font-medium text-danger"
                 >
                   <Lock aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
                   <span>
@@ -193,7 +194,7 @@ export default function LoginPage() {
             {SHOW_DEMO && (
               <section
                 aria-labelledby="demo-title"
-                className="mt-6 rounded-2xl border border-line-soft bg-paper-2 p-4"
+                className="mt-6 rounded-md border-2 border-dashed border-line bg-paper-2 p-4"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                   <h2 id="demo-title" className="text-sm font-bold">
@@ -212,7 +213,7 @@ export default function LoginPage() {
                       onClick={() => {
                         pick(account.email);
                       }}
-                      className="flex flex-col items-start rounded-xl border border-glass-edge bg-surface px-3 py-2 text-left shadow-soft-sm transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:border-accent hover:shadow-soft active:translate-y-0"
+                      className={`sticker press flex flex-col items-start rounded-md border-2 border-[#111] px-3 py-2 text-left shadow-[3px_3px_0_0_#111] ${account.tone}`}
                     >
                       <span className="text-sm font-bold">{account.role}</span>
                       <span className="text-[11px] leading-tight text-muted">{account.hint}</span>
@@ -245,7 +246,7 @@ export default function LoginPage() {
               </section>
             )}
           </div>
-          <p className="mt-5 text-center text-sm text-white/70">
+          <p className="mt-5 text-center text-sm text-muted">
             No public sign-up. Your admin creates your account.
           </p>
         </div>

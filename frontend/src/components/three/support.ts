@@ -1,4 +1,5 @@
-import { prefersReducedMotion } from '@/hooks/use-theme';
+import { useMemo } from 'react';
+import { prefersReducedMotion, useAccent, useIsDark } from '@/hooks/use-theme';
 
 /**
  * Can this device run a 3D scene? Not without WebGL, not on low-power or data-saving devices, not
@@ -17,4 +18,20 @@ export function canRunScene3d(minWidth: number): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * The colour 3D hard shadows should use, matching the 2D ones: ink by day, the theme's pop colour
+ * by night (black on near-black would vanish). Re-read when the theme or mode changes.
+ */
+export function useShadowColor(): string {
+  const [accent] = useAccent();
+  const dark = useIsDark();
+  return useMemo(() => {
+    if (!dark || typeof document === 'undefined') return '#111111';
+    const pop = getComputedStyle(document.documentElement).getPropertyValue('--ut-pop').trim();
+    return /^#[0-9a-f]{6}$/i.test(pop) ? pop : '#ffd23f';
+    // accent is a dependency on purpose: the CSS variable changes with it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accent, dark]);
 }

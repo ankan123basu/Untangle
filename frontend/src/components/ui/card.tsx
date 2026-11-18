@@ -16,7 +16,7 @@ export function CardHeader({ className, ...rest }: HTMLAttributes<HTMLDivElement
   return (
     <div
       className={cn(
-        'flex items-center justify-between gap-3 border-b border-line-soft px-5 py-3.5',
+        'flex items-center justify-between gap-3 border-b-2 border-line px-5 py-3',
         className,
       )}
       {...rest}

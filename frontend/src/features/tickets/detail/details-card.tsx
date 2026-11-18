@@ -99,7 +99,7 @@ export function DetailsCard({
             </Button>
           )}
         </div>
-        <dl className="border-t border-line-soft pt-2 text-sm">
+        <dl className="border-t-2 border-line-soft pt-2 text-sm">
           <Row label="Customer">
             {ticket.customerName}
             {ticket.customerEmail && (

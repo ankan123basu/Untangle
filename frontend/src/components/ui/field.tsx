@@ -9,10 +9,9 @@ import {
 import { cn } from '@/lib/utils';
 
 const control =
-  'w-full rounded-md border border-field-line bg-surface px-3 text-ink placeholder:text-muted ' +
-  'shadow-[inset_0_1px_2px_rgb(0_0_0/0.06)] backdrop-blur-md transition-[box-shadow,border-color] ' +
-  'duration-150 hover:border-accent focus-visible:border-accent focus-visible:outline-none ' +
-  'focus-visible:ring-4 focus-visible:ring-accent/25 aria-[invalid=true]:border-danger ' +
+  'w-full rounded-md border-2 border-line bg-surface px-3 text-ink placeholder:text-muted ' +
+  'transition-shadow duration-150 focus-visible:shadow-hard-sm focus-visible:outline-none ' +
+  'focus-visible:ring-2 focus-visible:ring-accent aria-[invalid=true]:border-danger ' +
   'disabled:cursor-not-allowed disabled:opacity-60';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(

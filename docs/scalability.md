@@ -95,8 +95,7 @@ answers 503 at once instead of queueing).
 | Mobile (simulated slow 4G, 4× CPU) | 89–100 | 100 | 100 | 0.9–3.5 s | 0.005 |
 
 Measured after the frosted-glass refresh (ADR-025); re-measure with `make lighthouse` after the
-nebula-glass pass (ADR-026), which removed the global 3D layer and added a dashboard orbit that
-mounts when visible. Mobile varies between runs with machine load; no 3D loads on mobile.
+neo-brutalist pass (ADR-027): no global 3D layer; the dashboard ticket stacks mount when visible. Mobile varies between runs with machine load; no 3D loads on mobile.
 
 ### How to scale further (documented, not built)
 

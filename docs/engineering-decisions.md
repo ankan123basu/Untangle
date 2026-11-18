@@ -216,7 +216,7 @@ partner → 401; bad priority → 400; > 64 KB → 413; burst → 429; old secre
 | **React 19 + Vite + TypeScript, server state in TanStack Query** | caching, retries and polling come for free | — |
 | **Types generated from OpenAPI** ([ADR-023](decisions/ADR-023-exact-api-contract-and-vendored-react-bits.md)) | frontend types can't drift from the backend | `@Nullable` must be remembered on new optional fields |
 | **Filters in the URL** | shareable links, Back button works | URL values must be validated |
-| **Nebula glass, sixteen colour themes; 3D only in contained stages (login story, dashboard orbit); heavy libraries lazy-loaded** ([ADR-024](decisions/ADR-024-motion-and-3d-budget.md), [ADR-025](decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md), [ADR-026](decisions/ADR-026-nebula-glass-and-contained-3d-stages.md)) | premium, personal look; 3D tells the product story without ever covering content; work screens carry no WebGL; reduced motion respected, 3D switchable off | two scenes to maintain, each with a static fallback; backdrop blur still costs GPU on large screens |
+| **Loud neo-brutalism, twelve palettes; toon 3D about the product only in contained stages (login desk, dashboard ticket stacks); heavy libraries lazy-loaded** ([ADR-024](decisions/ADR-024-motion-and-3d-budget.md), [ADR-027](decisions/ADR-027-loud-neo-brutalism-and-toon-3d.md)) | a distinctive identity; 3D explains tickets, SLA, escalation and signed webhooks; work screens carry no WebGL; reduced motion respected, 3D switchable off | two scenes to maintain, each with a static fallback |
 
 ### 10. Scalability
 

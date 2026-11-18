@@ -104,14 +104,13 @@ describe('demo people', () => {
   });
 });
 
-describe('login story', () => {
-  it('shows the static untangle art, not WebGL, when 3D cannot run', async () => {
-    // jsdom has no WebGL, so canRunScene3d says no: the SVG story and resolved card stand in.
+describe('login desk', () => {
+  it('shows the static support desk, not WebGL, when 3D cannot run', async () => {
+    // jsdom has no WebGL, so canRunScene3d says no: the stamped paper ticket stands in.
     const { container } = renderRoutes(routes, ['/login']);
     expect(await screen.findByText('UNT-000123')).toBeInTheDocument();
-    expect(container.querySelector('canvas')).toBeNull();
     expect(screen.getByText('RESOLVED')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
+    expect(container.querySelector('canvas')).toBeNull();
   });
 });
 

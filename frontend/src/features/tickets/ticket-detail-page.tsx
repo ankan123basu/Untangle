@@ -202,7 +202,7 @@ function TicketWorkspace({ ticket }: { ticket: TicketDetail }) {
       {closed && (
         <div
           role="status"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-line bg-status-closed-bg px-4 py-3 text-status-closed-fg"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-md border-2 border-line bg-status-closed-bg px-4 py-3 text-status-closed-fg"
         >
           <p className="flex items-center gap-2 font-semibold">
             <Lock aria-hidden="true" className="size-4" /> This ticket is closed and read-only.
@@ -253,7 +253,7 @@ function TicketWorkspace({ ticket }: { ticket: TicketDetail }) {
         {!closed && !allowed('EDIT') && (
           <p
             role="note"
-            className="flex items-center gap-2 rounded-md border border-line-soft bg-paper-2 px-3 py-2 text-sm"
+            className="flex items-center gap-2 rounded-md border-2 border-line-soft bg-paper-2 px-3 py-2 text-sm"
           >
             <Lock aria-hidden="true" className="size-4 shrink-0" />
             {ticket.assignee
@@ -266,7 +266,7 @@ function TicketWorkspace({ ticket }: { ticket: TicketDetail }) {
           <div
             role="toolbar"
             aria-label="Ticket actions"
-            className="flex flex-wrap gap-2 border-t border-line-soft pt-4"
+            className="flex flex-wrap gap-2 border-t-2 border-line-soft pt-4"
           >
             {BAR.map((action) => {
               const can = allowed(action);

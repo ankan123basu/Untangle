@@ -99,7 +99,7 @@ export function NotificationBell() {
       >
         <Bell className="size-5" />
         {count > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-5 rounded-full border border-line bg-danger px-1 text-center text-[11px] leading-4 font-bold text-on-danger">
+          <span className="absolute -top-1 -right-1 min-w-5 rounded-full border-2 border-line bg-danger px-1 text-center text-[11px] leading-4 font-bold text-on-danger">
             {count > 99 ? '99+' : count}
           </span>
         )}
@@ -141,7 +141,7 @@ export function NotificationBell() {
                     openTicket(n);
                   }}
                   className={cn(
-                    'w-full rounded-md border px-3 py-2 text-left text-sm transition-colors hover:bg-paper-2',
+                    'w-full rounded-md border-2 px-3 py-2 text-left text-sm transition-colors hover:bg-paper-2',
                     n.read ? 'border-line-soft text-muted' : 'border-line bg-surface font-medium',
                   )}
                 >

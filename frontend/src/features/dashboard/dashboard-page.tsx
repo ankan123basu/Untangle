@@ -3,9 +3,7 @@ import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { AlertOctagon, Flame, Inbox, Plus, UserRound } from 'lucide-react';
 import CountUp from '@/components/reactbits/CountUp';
-import SpotlightCard from '@/components/reactbits/SpotlightCard';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card';
-import { TiltCard } from '@/components/ui/tilt-card';
 import { WhenVisible } from '@/components/ui/when-visible';
 import { ErrorState, Skeleton } from '@/components/ui/feedback';
 import { api } from '@/lib/api/client';
@@ -15,7 +13,7 @@ import { cn, humanize, timeAgo } from '@/lib/utils';
 import { useCan, useSession } from '@/features/auth/session-store';
 import { TicketBrowser } from '@/features/tickets/ticket-browser';
 import { useWorkload } from '@/features/tickets/ticket-api';
-import { QueueOrbit } from './queue-orbit';
+import { TicketStacks } from './ticket-stacks';
 
 // Recharts is the heaviest dependency on this screen; load it after the numbers are on screen.
 const TrendChart = lazy(() => import('./trend-chart'));
@@ -47,17 +45,17 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) 
   return (
     <section
       aria-labelledby="unresolved-title"
-      className="solid-panel grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]"
+      className="solid-panel grid gap-6 bg-brand p-6 text-on-brand lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_360px]"
     >
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between lg:flex-col lg:items-stretch xl:flex-row xl:items-end">
         <div>
           <h2
             id="unresolved-title"
-            className="text-sm font-bold tracking-wider text-muted uppercase"
+            className="inline-block rounded-md border-2 border-line bg-surface px-2 py-0.5 text-sm font-extrabold tracking-wider text-ink uppercase shadow-hard-sm"
           >
             Unresolved tickets
           </h2>
-          <p className="text-gradient mt-1 w-fit font-display text-7xl leading-none font-bold tabular-nums md:text-8xl">
+          <p className="mt-3 font-display text-8xl leading-none font-bold tabular-nums md:text-9xl">
             {summary ? (
               <>
                 <span className="sr-only">{summary.unresolved}</span>
@@ -69,15 +67,15 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) 
               <Placeholder className="inline-block h-[0.85em] w-[1.6em] align-baseline" />
             )}
           </p>
-          <p className="mt-2 text-sm text-muted">
+          <p className="mt-3 text-sm font-semibold text-on-brand/80">
             {summary ? `Updated ${timeAgo(summary.generatedAt)}` : 'Loading'} · refreshes every
             minute
           </p>
         </div>
         <div className="w-full md:max-w-md">
-          <p className="mb-2 text-sm font-semibold">By priority</p>
+          <p className="mb-2 text-sm font-extrabold tracking-wide uppercase">By priority</p>
           <div
-            className="flex h-4 overflow-hidden rounded-sm border border-line"
+            className="flex h-5 overflow-hidden rounded-sm border-2 border-[#111] bg-white shadow-[3px_3px_0_0_#111]"
             aria-hidden="true"
           >
             {PRIORITIES.map((p) => {
@@ -85,7 +83,7 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) 
               return n > 0 ? (
                 <div
                   key={p}
-                  className={cn(PRIORITY_BAR[p], 'border-r border-line last:border-r-0')}
+                  className={cn(PRIORITY_BAR[p], 'border-r-2 border-[#111] last:border-r-0')}
                   style={{ flexGrow: n }}
                 />
               ) : null;
@@ -96,7 +94,7 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) 
               <li key={p}>
                 <Link
                   to={`/tickets?priority=${p}&status=OPEN&status=IN_PROGRESS`}
-                  className="flex flex-col rounded-md border border-line-soft px-2 py-1 hover:border-line"
+                  className="press flex flex-col rounded-md border-2 border-line bg-surface px-2 py-1 text-ink shadow-hard-sm"
                 >
                   <span className="text-xs font-bold text-muted uppercase">{humanize(p)}</span>
                   <span className="font-display text-xl font-bold tabular-nums">
@@ -112,9 +110,9 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) 
           </ul>
         </div>
       </div>
-      <QueueOrbit
+      <TicketStacks
         counts={summary?.unresolvedByPriority}
-        className="hidden min-h-[220px] lg:block"
+        className="hidden min-h-[230px] lg:block"
       />
     </section>
   );
@@ -126,51 +124,38 @@ function Kpi({
   to,
   icon,
   tone,
+  sticker,
 }: {
   label: string;
   value: number | undefined;
   to: string;
   icon: ReactNode;
   tone?: 'danger';
+  /** Flat card fill (a sticker colour from the tokens). */
+  sticker: string;
 }) {
+  const alarm = tone === 'danger' && (value ?? 0) > 0;
   return (
-    <TiltCard>
-      <Link to={to} className="block rounded-[20px] focus-visible:outline-offset-4">
-        <SpotlightCard
-          className="!rounded-[20px] border border-glass-edge !p-4 backdrop-blur-xl"
-          spotlightColor="var(--ut-brand)"
-          style={
-            {
-              '--spotlight-card-surface': 'var(--ut-glass-strong)',
-              '--spotlight-card-border': 'transparent',
-              '--spotlight-card-shadow': 'var(--ut-shadow-soft)',
-            } as React.CSSProperties
-          }
+    <Link
+      to={to}
+      className={cn(
+        'sticker press block rounded-[14px] border-[3px] border-[#111] p-4 shadow-[5px_5px_0_0_#111] focus-visible:outline-offset-4',
+        sticker,
+      )}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-extrabold tracking-wide uppercase">{label}</p>
+        <span
+          className={cn(
+            'rounded-md border-2 border-[#111] p-1.5',
+            alarm ? 'animate-wiggle bg-[#c81e1e] text-white' : 'bg-white text-[#111]',
+          )}
         >
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-semibold text-muted">{label}</p>
-            <span
-              className={cn(
-                'rounded-full border p-1.5 shadow-soft-sm',
-                tone === 'danger' && (value ?? 0) > 0
-                  ? 'bg-danger text-on-danger'
-                  : 'border-white/25 bg-brand-gradient text-on-brand',
-              )}
-            >
-              {icon}
-            </span>
-          </div>
-          <p
-            className={cn(
-              'font-display text-4xl font-bold tabular-nums',
-              tone === 'danger' && (value ?? 0) > 0 && 'text-danger',
-            )}
-          >
-            {value}
-          </p>
-        </SpotlightCard>
-      </Link>
-    </TiltCard>
+          {icon}
+        </span>
+      </div>
+      <p className="mt-1 font-display text-5xl font-bold tabular-nums">{value ?? '–'}</p>
+    </Link>
   );
 }
 
@@ -207,7 +192,7 @@ function WorkloadCard() {
               {workload.data.map((w) => {
                 const load = w.open + w.inProgress;
                 return (
-                  <tr key={w.agentId} className="border-t border-line-soft">
+                  <tr key={w.agentId} className="border-t-2 border-line-soft">
                     <th scope="row" className="py-2 pr-2 font-semibold">
                       <Link
                         to={`/tickets?assigneeId=${w.agentId}&status=OPEN&status=IN_PROGRESS`}
@@ -222,7 +207,7 @@ function WorkloadCard() {
                     <td className="w-1/2 py-2 pr-2">
                       <div className="flex items-center gap-2">
                         <div
-                          className="h-3 flex-1 rounded-sm border border-line bg-paper-2"
+                          className="h-3 flex-1 rounded-sm border-2 border-line bg-paper-2"
                           aria-hidden="true"
                         >
                           <div
@@ -280,16 +265,16 @@ export default function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-muted">{today()}</p>
-          <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+          <h1 className="font-display text-4xl font-bold tracking-tight">
             {greeting()}
             {firstName ? ', ' : ''}
-            {firstName && <span className="text-gradient">{firstName}</span>}
+            {firstName && <span className="highlight">{firstName}</span>}
           </h1>
         </div>
         {canCreate && (
           <Link
             to="/tickets/new"
-            className="btn-glow inline-flex h-10 items-center gap-2 rounded-full border border-white/25 bg-brand-gradient px-5 text-sm font-semibold text-on-brand transition-transform hover:-translate-y-0.5"
+            className="inline-flex h-10 items-center gap-2 rounded-md border-2 border-line bg-brand px-4 text-sm font-semibold text-on-brand shadow-hard-sm transition-transform hover:-translate-y-0.5"
           >
             <Plus aria-hidden="true" className="size-4" /> New ticket
           </Link>
@@ -308,6 +293,7 @@ export default function DashboardPage() {
           <section aria-label="Key numbers" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <Kpi
               label="SLA breached"
+              sticker="bg-stk-pink"
               value={summary.data?.slaBreached}
               to="/tickets?slaBreached=true&sort=slaDueAt%2Casc"
               icon={<AlertOctagon className="size-4" />}
@@ -315,6 +301,7 @@ export default function DashboardPage() {
             />
             <Kpi
               label="Escalated"
+              sticker="bg-stk-peach"
               value={summary.data?.escalated}
               to="/tickets?escalated=true"
               icon={<Flame className="size-4" />}
@@ -322,12 +309,14 @@ export default function DashboardPage() {
             />
             <Kpi
               label="Unassigned"
+              sticker="bg-stk-sky"
               value={summary.data?.unassigned}
               to="/tickets?unassigned=true"
               icon={<Inbox className="size-4" />}
             />
             <Kpi
               label="My open tickets"
+              sticker="bg-stk-mint"
               value={summary.data?.myOpen}
               to="/tickets?mine=true&status=OPEN&status=IN_PROGRESS"
               icon={<UserRound className="size-4" />}

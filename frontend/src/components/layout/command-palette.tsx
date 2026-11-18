@@ -79,14 +79,14 @@ export default function CommandPalette({
       onClick={(e) => {
         if (e.target === dialogRef.current) onOpenChange(false);
       }}
-      className="solid-panel m-auto mt-[12vh] w-[min(92vw,38rem)] p-0 text-ink backdrop:bg-black/35 backdrop:backdrop-blur-md"
+      className="glass-panel m-auto mt-[12vh] w-[min(92vw,38rem)] p-0 text-ink backdrop:bg-black/40 backdrop:backdrop-blur-sm"
     >
       <Command label="Command palette" shouldFilter={false} className="flex flex-col">
         <Command.Input
           value={search}
           onValueChange={setSearch}
           placeholder="Type a ticket number, search, or a command…"
-          className="h-14 border-b border-line bg-transparent px-4 text-base outline-none placeholder:text-muted"
+          className="h-14 border-b-2 border-line bg-transparent px-4 text-base outline-none placeholder:text-muted"
         />
         <Command.List className="max-h-[50vh] overflow-y-auto p-2">
           <Command.Empty className="px-3 py-6 text-center text-sm text-muted">
@@ -184,7 +184,7 @@ function Item({
   return (
     <Command.Item
       onSelect={onSelect}
-      className="flex cursor-pointer items-center gap-3 rounded-md border border-transparent px-3 py-2 text-sm aria-selected:border-line aria-selected:bg-brand-gradient aria-selected:text-on-brand"
+      className="flex cursor-pointer items-center gap-3 rounded-md border-2 border-transparent px-3 py-2 text-sm aria-selected:border-line aria-selected:bg-brand aria-selected:text-on-brand"
     >
       {icon}
       <span className="flex-1 truncate">{children}</span>

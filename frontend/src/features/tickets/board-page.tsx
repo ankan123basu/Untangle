@@ -64,16 +64,16 @@ function Column({
         onDropTicket(status);
       }}
       className={cn(
-        'flex min-h-64 w-[82vw] max-w-80 shrink-0 snap-start flex-col rounded-card border border-glass-edge bg-glass shadow-soft backdrop-blur-2xl backdrop-saturate-150 transition-colors md:w-auto md:max-w-none md:shrink',
-        over && 'bg-glass-strong ring-2 ring-accent',
+        'flex min-h-64 w-[82vw] max-w-80 shrink-0 snap-start flex-col rounded-[12px] border-2 border-line bg-paper-2 transition-colors md:w-auto md:max-w-none md:shrink',
+        over && 'bg-brand/30',
       )}
     >
       <h2
         id={`col-${status}`}
-        className="flex items-center justify-between border-b border-line-soft px-4 py-3 font-display font-bold"
+        className="flex items-center justify-between border-b-2 border-line px-3 py-2 font-display font-bold"
       >
         {humanize(status)}
-        <span className="rounded-full border border-line-soft bg-surface px-2 text-xs tabular-nums">
+        <span className="rounded-sm border-2 border-line bg-surface px-1.5 text-xs tabular-nums">
           {list.data?.totalElements ?? '…'}
         </span>
       </h2>
@@ -113,7 +113,7 @@ function BoardCard({
       onDragEnd={() => {
         onDragChange(null);
       }}
-      className="cursor-grab rounded-xl border border-glass-edge bg-surface p-3 shadow-soft-sm transition-transform hover:-translate-y-0.5 active:cursor-grabbing"
+      className="cursor-grab rounded-md border-2 border-line bg-surface p-3 shadow-hard-sm active:cursor-grabbing"
     >
       <div className="flex items-center justify-between gap-2">
         <Link
@@ -233,7 +233,9 @@ export default function BoardPage() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="font-display text-3xl font-bold">Board</h1>
+        <h1 className="font-display text-4xl font-bold tracking-tight">
+          <span className="highlight">Board</span>
+        </h1>
         <p className="text-muted">
           <span className="hidden md:inline">
             Drag a card to change its status, or use “Move to…”.

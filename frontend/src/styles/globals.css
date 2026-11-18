@@ -6,13 +6,11 @@
 
 /*
  * Tailwind v4 has no tailwind.config.js. @theme maps our tokens into utilities:
- *   --color-ink → bg-ink / text-ink / border-ink ...   --shadow-soft → shadow-soft
+ *   --color-ink → bg-ink / text-ink / border-ink ...   --shadow-hard → shadow-hard
  * `inline` makes utilities reference the CSS variable, so theme switching needs no rebuild.
  */
 @theme inline {
   --color-brand: var(--ut-brand);
-  --color-brand-2: var(--ut-brand-2);
-  --color-glow: var(--ut-glow);
   --color-on-brand: var(--ut-on-brand);
   --color-accent: var(--ut-accent);
   --color-on-accent: var(--ut-on-accent);
@@ -25,8 +23,6 @@
   --color-muted: var(--ut-muted);
   --color-line: var(--ut-line);
   --color-line-soft: var(--ut-line-soft);
-  --color-field-line: var(--ut-field-line);
-  --color-glass-edge: var(--ut-glass-edge);
   --color-danger: var(--ut-danger);
   --color-on-danger: var(--ut-on-danger);
   --color-success: var(--ut-success);
@@ -35,7 +31,14 @@
   --color-hero: var(--ut-hero);
   --color-hero-ink: var(--ut-hero-ink);
   --color-hero-muted: var(--ut-hero-muted);
-  --color-hero-circle: var(--ut-hero-circle);
+  --color-pop: var(--ut-pop);
+  --color-on-pop: var(--ut-on-pop);
+  --color-stk-pink: var(--ut-stk-pink);
+  --color-stk-mint: var(--ut-stk-mint);
+  --color-stk-sky: var(--ut-stk-sky);
+  --color-stk-lilac: var(--ut-stk-lilac);
+  --color-stk-peach: var(--ut-stk-peach);
+  --color-stk-lemon: var(--ut-stk-lemon);
 
   --color-prio-low: var(--ut-prio-low-fg);
   --color-prio-low-fg: var(--ut-prio-low-fg);
@@ -70,17 +73,18 @@
   --radius-sm: var(--ut-radius-sm);
   --radius-md: var(--ut-radius);
   --radius-card: var(--ut-radius-card);
-  --shadow-soft-sm: var(--ut-shadow-soft-sm);
-  --shadow-soft: var(--ut-shadow-soft);
-  --shadow-soft-lg: var(--ut-shadow-soft-lg);
+  --shadow-hard-sm: var(--ut-shadow-hard-sm);
+  --shadow-hard: var(--ut-shadow-hard);
+  --shadow-hard-lg: var(--ut-shadow-hard-lg);
 
   --font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --ease-smooth: var(--ut-ease);
+  --ease-brutal: var(--ut-ease);
   --animate-pulse-critical: pulse-critical 1.8s var(--ut-ease) infinite;
   --animate-rise: rise 260ms var(--ut-ease) both;
+  --animate-wiggle: wiggle 3.2s ease-in-out infinite;
 }
 
 /* List items enter with a short rise; delays are set inline and capped (see stagger()). */
@@ -91,21 +95,26 @@
   }
 }
 
-@keyframes fade-in {
+@keyframes marquee {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes pop-in {
   from {
     opacity: 0;
+    transform: scale(0.92);
   }
 }
 
-@keyframes twinkle {
-  to {
-    opacity: calc(var(--ut-star-opacity) * 0.45);
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(var(--r, -3deg));
   }
-}
-
-@keyframes drift {
-  to {
-    transform: translate3d(var(--dx), var(--dy), 0) scale(1.18);
+  50% {
+    transform: rotate(calc(var(--r, -3deg) * -1));
   }
 }
 
@@ -136,7 +145,7 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 
   ::selection {
@@ -164,52 +173,68 @@
 }
 
 @layer components {
-  /*
-   * Nebula glass (ADR-025, ADR-026): a translucent fill that blurs and saturates the aurora behind
-   * it, a gradient hairline edge (bright top-left, theme tint bottom-right), a soft top highlight
-   * and a colour-tinted shadow. The edge is a masked pseudo-element so it can follow the radius.
-   */
+  /* The brutalist panel: flat fill, thick ink outline, hard offset shadow (ADR-027). */
   .glass-panel,
   .solid-panel {
-    position: relative;
-    background: var(--ut-glass);
-    backdrop-filter: blur(var(--ut-blur)) saturate(1.8);
-    -webkit-backdrop-filter: blur(var(--ut-blur)) saturate(1.8);
-    border: 1px solid transparent;
+    background: var(--ut-surface);
+    border: var(--ut-border-strong) solid var(--ut-line);
     border-radius: var(--ut-radius-card);
-    box-shadow:
-      inset 0 1px 0 var(--ut-glass-shine),
-      var(--ut-shadow-soft);
+    box-shadow: var(--ut-shadow-hard);
   }
-  .glass-panel::before,
-  .solid-panel::before {
+  /* glass-panel keeps a hint of translucency for chrome (nav, header) over the dotted wash. */
+  .glass-panel {
+    background: var(--ut-glass);
+    backdrop-filter: blur(var(--ut-blur));
+    -webkit-backdrop-filter: blur(var(--ut-blur));
+  }
+
+  /* Pressable: lifts toward the light on hover (shadow grows), slams flat when pressed. */
+  .press {
+    transition:
+      transform var(--ut-dur-fast) var(--ut-ease),
+      box-shadow var(--ut-dur-fast) var(--ut-ease);
+  }
+  .press:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--ut-shadow-hard-lg);
+  }
+  .press:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--ut-shadow-color);
+  }
+
+  /* A sticker card: flat pastel fill that always carries dark ink, in both modes. */
+  .sticker {
+    color: #111111;
+    --ut-muted: rgb(17 17 17 / 0.72);
+  }
+
+  /* Highlighter stroke behind a word, in the pop colour, slightly crooked. */
+  .highlight {
+    position: relative;
+    z-index: 0;
+    white-space: nowrap;
+  }
+  .highlight::before {
     content: '';
     position: absolute;
-    inset: -1px;
-    padding: 1px;
-    border-radius: inherit;
-    background: var(--ut-edge);
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#000 0 0) content-box exclude,
-      linear-gradient(#000 0 0);
-    pointer-events: none;
+    z-index: -1;
+    inset: 52% -0.18em 4% -0.18em;
+    background: var(--ut-pop);
+    border-radius: 3px;
+    transform: rotate(-1.5deg);
   }
 
-  /* Denser glass for data-heavy panels: still frosted, more opaque for long reading. */
-  .solid-panel {
-    background: var(--ut-glass-strong);
+  /* Endless ticker band (login). Content is duplicated once so the loop is seamless. */
+  .marquee {
+    display: flex;
+    overflow: hidden;
+    white-space: nowrap;
   }
-
-  /* Browsers without backdrop-filter get an opaque panel instead of unreadable see-through. */
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass-panel,
-    .solid-panel {
-      background: var(--ut-surface);
-    }
+  .marquee > div {
+    display: flex;
+    flex-shrink: 0;
+    animation: marquee 28s linear infinite;
   }
 
   /* Visually hidden but available to screen readers. */
@@ -222,187 +247,21 @@
     white-space: nowrap;
   }
 
-  /*
-   * The living background (§12.3): an aurora of the four theme hues drifting slowly, a starfield
-   * that only shows at night, and a fine grain so gradients never band. CSS only: no WebGL behind
-   * content. Only transforms animate (GPU-composited); paused while the tab is hidden and frozen
-   * by the reduced-motion rule in base.
-   */
+  /* The page wash: the theme tint with a dot grid, like engineering paper. Static, CSS only. */
   .app-backdrop {
     position: fixed;
     inset: 0;
     z-index: -1;
-    overflow: hidden;
     pointer-events: none;
-    background:
-      radial-gradient(
-        120% 80% at 0% 0%,
-        color-mix(in oklab, var(--ut-a3) 26%, transparent),
-        transparent 60%
-      ),
-      radial-gradient(
-        90% 70% at 100% 100%,
-        color-mix(in oklab, var(--ut-a4) 22%, transparent),
-        transparent 60%
-      ),
-      var(--ut-bg-base);
-  }
-  .app-backdrop > span {
-    position: absolute;
-    border-radius: 9999px;
-    filter: blur(90px);
-    opacity: var(--ut-mesh-opacity);
-    animation: drift 30s ease-in-out infinite alternate;
-    will-change: transform;
-  }
-  .app-backdrop[data-paused] > span {
-    animation-play-state: paused;
-  }
-  .app-backdrop::before,
-  .starfield::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: var(--ut-star-opacity);
-    background-image:
-      radial-gradient(1px 1px at 20px 30px, rgb(255 255 255 / 0.9), transparent),
-      radial-gradient(1px 1px at 140px 90px, rgb(255 255 255 / 0.7), transparent),
-      radial-gradient(1.5px 1.5px at 260px 160px, rgb(255 255 255 / 0.85), transparent),
-      radial-gradient(1px 1px at 90px 220px, rgb(255 255 255 / 0.6), transparent),
-      radial-gradient(1px 1px at 330px 40px, rgb(255 255 255 / 0.75), transparent),
-      radial-gradient(1.5px 1.5px at 200px 300px, rgb(255 255 255 / 0.5), transparent);
-    background-size: 380px 340px;
-    mask-image: radial-gradient(120% 90% at 50% 30%, #000 40%, transparent 100%);
-  }
-  .app-backdrop::after,
-  .grain::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0.05;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-color: var(--ut-paper);
+    background-image: radial-gradient(var(--ut-dot) 1.3px, transparent 1.5px);
+    background-size: 22px 22px;
   }
 
-  /*
-   * The login stage: deep space tinted by the theme in both modes (white text on it), with an
-   * aurora at the horizon. The 3D scene sits in its own box inside it (login-hero.tsx).
-   */
-  .login-stage {
-    --ut-star-opacity: 0.9;
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    color: #ffffff;
-    background:
-      radial-gradient(
-        60% 50% at 18% 85%,
-        color-mix(in oklab, var(--ut-a2) 60%, transparent),
-        transparent 70%
-      ),
-      radial-gradient(
-        55% 45% at 85% 15%,
-        color-mix(in oklab, var(--ut-a3) 45%, transparent),
-        transparent 70%
-      ),
-      radial-gradient(
-        70% 60% at 60% 110%,
-        color-mix(in oklab, var(--ut-a4) 45%, transparent),
-        transparent 70%
-      ),
-      color-mix(in oklab, var(--ut-a1) 22%, #03020a);
+  /* A 3D stage pops in once its chunk has loaded. */
+  .scene-pop-in {
+    animation: pop-in 600ms var(--ut-bounce) both;
   }
-  .starfield {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-  }
-  .starfield::before {
-    animation: twinkle 6s ease-in-out infinite alternate;
-  }
-
-  /* The login form card: a deep, theme-coloured glow so it floats above the stage. */
-  .login-card {
-    box-shadow:
-      inset 0 1px 0 var(--ut-glass-shine),
-      0 40px 120px -30px color-mix(in oklab, var(--ut-a1) 75%, transparent),
-      0 18px 40px -20px rgb(0 0 0 / 0.5);
-  }
-
-  /* A 3D stage fades in once its chunk has loaded and the first frame is drawn. */
-  .scene-fade-in {
-    animation: fade-in 1.2s var(--ut-ease) both;
-  }
-
-  /* Accent text with the theme gradient (headlines, big numbers). */
-  .text-gradient {
-    background: linear-gradient(
-      120deg,
-      var(--ut-accent),
-      color-mix(in oklab, var(--ut-accent) 50%, var(--ut-glow)) 60%,
-      color-mix(in oklab, var(--ut-accent) 60%, var(--ut-a4))
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Headline gradient on the always-dark login stage. */
-  .text-aurora {
-    background: linear-gradient(
-      100deg,
-      #ffffff 10%,
-      color-mix(in oklab, var(--ut-a3) 70%, #ffffff) 45%,
-      color-mix(in oklab, var(--ut-a4) 70%, #ffffff) 90%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Primary actions glow in the theme colour and catch a light sweep on hover. */
-  .btn-glow {
-    position: relative;
-    overflow: hidden;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.35),
-      0 10px 28px -10px var(--ut-a1),
-      0 4px 14px -6px color-mix(in oklab, var(--ut-a2) 70%, transparent);
-  }
-  .btn-glow::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      110deg,
-      transparent 30%,
-      rgb(255 255 255 / 0.35) 50%,
-      transparent 70%
-    );
-    transform: translateX(-120%);
-    transition: transform 700ms var(--ut-ease);
-    pointer-events: none;
-  }
-  .btn-glow:hover::after {
-    transform: translateX(120%);
-  }
-
-  /* The active navigation pill. */
-  .nav-active {
-    background-image: linear-gradient(135deg, var(--ut-brand), var(--ut-brand-2));
-    color: var(--ut-on-brand);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.3),
-      0 8px 22px -10px var(--ut-a1);
-  }
-}
-
-/* The accent gradient fill for primary actions; white text meets AA on both stops. */
-@utility bg-brand-gradient {
-  background-color: var(--ut-brand);
-  background-image: linear-gradient(135deg, var(--ut-brand), var(--ut-brand-2));
 }
 
 /* Shared-element and page cross-fades via the View Transitions API (Phase 9, ADR-024). */

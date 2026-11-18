@@ -11,7 +11,7 @@ const MODES: { value: ThemeChoice; label: string; icon: ReactNode }[] = [
 ];
 
 /**
- * Appearance: light/dark mode, sixteen colour themes and the 3D scenes switch (ADR-025). Used in the
+ * Appearance: light/dark mode, sixteen colour themes and the 3D scenes switch (ADR-027). Used in the
  * app header and on the login page. Choices are remembered per browser.
  */
 export function AppearanceMenu({
@@ -77,7 +77,7 @@ export function AppearanceMenu({
           className="solid-panel absolute top-full right-0 z-50 mt-2 w-[min(88vw,20rem)] animate-rise p-4 text-ink"
         >
           <p className="text-xs font-bold tracking-wider text-muted uppercase">Mode</p>
-          <div className="mt-2 grid grid-cols-3 gap-1 rounded-full bg-paper-2 p-1">
+          <div className="mt-2 grid grid-cols-3 gap-1 rounded-md border-2 border-line bg-paper-2 p-1">
             {MODES.map((m) => (
               <button
                 key={m.value}
@@ -87,10 +87,10 @@ export function AppearanceMenu({
                   setTheme(m.value);
                 }}
                 className={cn(
-                  'flex items-center justify-center gap-1.5 rounded-full px-2 py-1.5 text-sm font-semibold transition-colors',
+                  'flex items-center justify-center gap-1.5 rounded-sm border-2 px-2 py-1.5 text-sm font-bold transition-colors',
                   theme === m.value
-                    ? 'bg-brand-gradient text-on-brand shadow-soft-sm'
-                    : 'text-muted hover:text-ink',
+                    ? 'border-line bg-brand text-on-brand shadow-hard-sm'
+                    : 'border-transparent text-muted hover:text-ink',
                 )}
               >
                 {m.icon}
@@ -103,7 +103,7 @@ export function AppearanceMenu({
             <legend className="text-xs font-bold tracking-wider text-muted uppercase">
               Colour theme · <span className="text-ink normal-case">{current.label}</span>
             </legend>
-            <div className="mt-2 grid grid-cols-8 gap-2">
+            <div className="mt-2 grid grid-cols-6 gap-2.5">
               {ACCENTS.map((a) => (
                 <label key={a.id} className="group relative flex justify-center" title={a.label}>
                   <input
@@ -119,13 +119,11 @@ export function AppearanceMenu({
                   />
                   <span
                     aria-hidden="true"
-                    style={{
-                      backgroundImage: `linear-gradient(135deg, ${a.swatch[0]} 15%, ${a.swatch[1]} 60%, ${a.swatch[2]})`,
-                    }}
+                    style={{ backgroundColor: a.swatch }}
                     className={cn(
-                      'flex size-8 cursor-pointer items-center justify-center rounded-full text-white shadow-soft-sm ring-offset-2 ring-offset-surface transition-transform group-hover:scale-110',
-                      'peer-focus-visible:ring-2 peer-focus-visible:ring-accent',
-                      accent === a.id && 'ring-2 ring-ink',
+                      'flex size-10 cursor-pointer items-center justify-center rounded-md border-2 border-[#111] text-[#111] shadow-[3px_3px_0_0_#111] transition-transform group-hover:-translate-y-0.5 group-hover:rotate-[-4deg]',
+                      'peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent',
+                      accent === a.id && 'translate-x-[2px] translate-y-[2px] shadow-none',
                     )}
                   >
                     {accent === a.id && <Check className="size-4" strokeWidth={3} />}
@@ -135,7 +133,7 @@ export function AppearanceMenu({
             </div>
           </fieldset>
 
-          <div className="mt-5 flex items-center justify-between gap-3 border-t border-line-soft pt-4">
+          <div className="mt-5 flex items-center justify-between gap-3 border-t-2 border-line-soft pt-4">
             <span className="flex items-center gap-2 text-sm font-semibold">
               <Box aria-hidden="true" className="size-4" />
               3D scenes
@@ -149,21 +147,21 @@ export function AppearanceMenu({
                 setScene(scene === 'auto' ? 'off' : 'auto');
               }}
               className={cn(
-                'relative h-6 w-11 rounded-full border border-field-line transition-colors',
-                scene === 'auto' ? 'bg-brand-gradient' : 'bg-paper-2',
+                'relative h-7 w-12 rounded-full border-2 border-line transition-colors',
+                scene === 'auto' ? 'bg-brand' : 'bg-paper-2',
               )}
             >
               <span
                 className={cn(
-                  'absolute top-0.5 left-0.5 size-[18px] rounded-full bg-white shadow-soft-sm transition-transform',
+                  'absolute top-0.5 left-0.5 size-5 rounded-full border-2 border-line bg-white transition-transform',
                   scene === 'auto' && 'translate-x-5',
                 )}
               />
             </button>
           </div>
           <p className="mt-1.5 text-xs text-muted">
-            The login scene and the dashboard orbit. Only on capable devices, never with reduced
-            motion.
+            The login scene and the dashboard ticket stacks. Only on capable devices, never with
+            reduced motion.
           </p>
         </div>
       )}

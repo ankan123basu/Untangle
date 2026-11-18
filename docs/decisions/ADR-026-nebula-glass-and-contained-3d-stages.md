@@ -1,6 +1,6 @@
 # ADR-026: Nebula glass, sixteen colour themes and contained 3D stages
 
-- **Status:** Accepted (amends ADR-025: the ambient 3D layer behind signed-in pages is removed)
+- **Status:** Superseded by [ADR-027](ADR-027-loud-neo-brutalism-and-toon-3d.md) (the owner rejected the glass look and its abstract 3D)
 - **Date:** 2026-11-18
 - **Phase:** post-12 (second design pass requested by the owner)
 

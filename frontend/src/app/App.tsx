@@ -20,7 +20,7 @@ export function App() {
         position="bottom-right"
         toastOptions={{
           className:
-            'rounded-card! border! border-glass-edge! bg-glass-strong! backdrop-blur-xl! text-ink! shadow-soft! font-sans!',
+            'rounded-md! border-2! border-line! bg-surface! text-ink! shadow-hard-sm! font-sans!',
         }}
       />
     </QueryClientProvider>

@@ -119,7 +119,7 @@ Local development with hot reload (JDK 21 + Node 26): `make setup`, then `make b
 - Suggestions only: the model can never change data. Personal data is redacted before sending.
 
 **Experience**
-- Nebula-glass design (gradient-edged frosted panels over a moving aurora, starfield at night) with sixteen colour themes and light/dark mode; 3D only in its own stages: an untangling-tickets story on the login and a live-queue orbit on the dashboard (switchable off; never on phones or with reduced motion).
+- Loud neo-brutalist design (thick outlines, hard shadows, sticker cards, dotted wash) with twelve pop-colour themes and light/dark mode; toon-style 3D about the product: a support desk on the login (ticket stamped RESOLVED, SLA stopwatch, escalation levels, HMAC padlock) and real per-priority ticket stacks on the dashboard (switchable off; never on phones or with reduced motion).
 - 3D login scene (a knot untangling into the checkmark logo), page and shared-element transitions.
 - Works on phones; reduced-motion and low-power devices get a calm static version.
 - WCAG-minded: keyboard navigation, focus rings, screen-reader labels, automated axe checks.
@@ -317,7 +317,8 @@ Every significant choice has an Architecture Decision Record in [docs/decisions/
 | [023](docs/decisions/ADR-023-exact-api-contract-and-vendored-react-bits.md) | Exact OpenAPI contract for generated types; vendored React Bits |
 | [024](docs/decisions/ADR-024-motion-and-3d-budget.md) | 3D and motion built cheaply, within a performance budget |
 | [025](docs/decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md) | Frosted glass, ten colour themes and an ambient 3D layer (amended by 026) |
-| [026](docs/decisions/ADR-026-nebula-glass-and-contained-3d-stages.md) | Nebula glass, sixteen colour themes, 3D only in contained stages |
+| [026](docs/decisions/ADR-026-nebula-glass-and-contained-3d-stages.md) | Nebula glass, sixteen colour themes, 3D only in contained stages (superseded) |
+| [027](docs/decisions/ADR-027-loud-neo-brutalism-and-toon-3d.md) | Loud neo-brutalism, twelve palettes, toon 3D about the product |
 
 Agreed deviations from the original brief are listed at the top of
 [MASTER_PROMPT.md](MASTER_PROMPT.md); open questions and assumptions in

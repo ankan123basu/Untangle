@@ -10,20 +10,22 @@ export default function TicketsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold">Tickets</h1>
+          <h1 className="font-display text-4xl font-bold tracking-tight">
+            <span className="highlight">Tickets</span>
+          </h1>
           <p className="text-muted">Filter, search and share the exact view with a link.</p>
         </div>
         <div className="flex gap-2">
           <Link
             to="/board"
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-surface px-4 text-sm font-semibold shadow-soft-sm"
+            className="inline-flex h-10 items-center gap-2 rounded-md border-2 border-line bg-surface px-4 text-sm font-semibold shadow-hard-sm"
           >
             <Columns3 aria-hidden="true" className="size-4" /> Board
           </Link>
           {canCreate && (
             <Link
               to="/tickets/new"
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-brand-gradient px-4 text-sm font-semibold text-on-brand shadow-soft-sm"
+              className="inline-flex h-10 items-center gap-2 rounded-md border-2 border-line bg-brand px-4 text-sm font-semibold text-on-brand shadow-hard-sm"
             >
               <Plus aria-hidden="true" className="size-4" /> New ticket
             </Link>

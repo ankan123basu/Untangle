@@ -1,6 +1,6 @@
 # ADR-025: Frosted glass, ten colour themes and an ambient 3D layer
 
-- **Status:** Accepted, amended by [ADR-026](ADR-026-nebula-glass-and-contained-3d-stages.md) (the ambient 3D layer was removed; themes grew to sixteen). Supersedes the "Glass-Brutalism" look of MASTER_PROMPT §12.2; extends ADR-024
+- **Status:** Superseded by [ADR-027](ADR-027-loud-neo-brutalism-and-toon-3d.md); earlier amended by [ADR-026](ADR-026-nebula-glass-and-contained-3d-stages.md) (the ambient 3D layer was removed; themes grew to sixteen). Supersedes the "Glass-Brutalism" look of MASTER_PROMPT §12.2; extends ADR-024
 - **Date:** 2026-11-18
 - **Phase:** post-12 (design refresh requested by the owner)
 

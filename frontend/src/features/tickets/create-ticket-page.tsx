@@ -128,7 +128,9 @@ export default function CreateTicketPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
       <div>
-        <h1 className="font-display text-3xl font-bold">New ticket</h1>
+        <h1 className="font-display text-4xl font-bold tracking-tight">
+          <span className="highlight">New ticket</span>
+        </h1>
         <p className="text-muted">Log a complaint that came in by phone, email or chat.</p>
       </div>
       <Card>
@@ -157,7 +159,7 @@ export default function CreateTicketPage() {
             {aiReady && (
               <section
                 aria-label="AI triage"
-                className="flex flex-col gap-3 rounded-md border border-dashed border-line-soft p-3"
+                className="flex flex-col gap-3 rounded-md border-2 border-dashed border-line-soft p-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm text-muted">
@@ -299,7 +301,7 @@ export default function CreateTicketPage() {
               )
             )}
 
-            <div className="flex justify-end gap-2 border-t border-line-soft pt-4">
+            <div className="flex justify-end gap-2 border-t-2 border-line-soft pt-4">
               <Button
                 variant="ghost"
                 onClick={() => {
@@ -329,7 +331,7 @@ function SuggestionChip({
   onIgnore: () => void;
 }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-line bg-brand/30 py-0.5 pr-0.5 pl-2 text-sm font-semibold">
+    <span className="inline-flex items-center gap-1 rounded-md border-2 border-line bg-brand/30 py-0.5 pr-0.5 pl-2 text-sm font-semibold">
       {label}
       <Button
         variant="ghost"

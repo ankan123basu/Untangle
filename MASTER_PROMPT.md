@@ -44,6 +44,10 @@
 > - Second design pass (ADR-026): "nebula glass" (gradient-edged panels, aurora + starfield),
 >   sixteen colour themes; the ambient layer is removed and 3D lives only in contained stages:
 >   the login's untangling-tickets story and a live-queue orbit inside the dashboard hero card.
+> - Third design pass (ADR-027, current): back to neo-brutalism, made louder (sticker cards, dotted
+>   wash, highlighter titles, marquee), twelve pop-colour themes, and toon-shaded 3D about the
+>   product: a login support desk (ticket stamped RESOLVED, SLA stopwatch, escalation, HMAC lock)
+>   and per-priority ticket stacks on the dashboard.
 > - Phase 10: metric `ticket_creations_total` (Prometheus reserves `_created`); actuator on internal
 >   port 8081 in prod, probes at `/livez` `/readyz`; Dependabot + `npm audit` instead of OWASP
 >   dependency-check; `make check-features` adds a live RBAC matrix. AI "reply draft" is a resolution

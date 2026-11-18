@@ -252,7 +252,9 @@ export default function AgentsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold">Agents</h1>
+          <h1 className="font-display text-4xl font-bold tracking-tight">
+            <span className="highlight">Agents</span>
+          </h1>
           <p className="text-muted">Who can sign in, and what they can do.</p>
         </div>
         <Button
@@ -302,7 +304,7 @@ export default function AgentsPage() {
               {agents.data.map((a) => {
                 const self = a.id === me?.id;
                 return (
-                  <tr key={a.id} className="border-t border-line-soft">
+                  <tr key={a.id} className="border-t-2 border-line-soft">
                     <th scope="row" className="px-4 py-3 font-semibold">
                       {a.fullName}{' '}
                       {self && <span className="text-xs font-normal text-muted">(you)</span>}

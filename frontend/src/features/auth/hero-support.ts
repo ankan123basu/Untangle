@@ -1,9 +1,19 @@
-import { canRunScene3d } from '@/components/three/support';
+import { prefersReducedMotion } from '@/hooks/use-theme';
 
 /**
- * Should the login 3D scene run? Same rules as every 3D scene (see canRunScene3d); the hero panel
- * only shows from the lg breakpoint, so smaller screens never load it.
+ * Should the 3D scene run? Not without WebGL, not on low-power or data-saving devices, and not
+ * when the user asked for reduced motion (§12.3). Then the static artwork below is the hero.
  */
 export function canRunHeroScene(): boolean {
-  return canRunScene3d(1024);
+  if (typeof window === 'undefined' || prefersReducedMotion()) return false;
+  const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
+  if (nav.connection?.saveData) return false;
+  if (nav.hardwareConcurrency > 0 && nav.hardwareConcurrency < 4) return false;
+  if (window.innerWidth < 1024) return false; // the hero panel is hidden below lg anyway
+  try {
+    const canvas = document.createElement('canvas');
+    return Boolean(canvas.getContext('webgl2') ?? canvas.getContext('webgl'));
+  } catch {
+    return false;
+  }
 }

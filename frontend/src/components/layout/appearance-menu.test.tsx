@@ -5,27 +5,27 @@ import { AppearanceMenu } from './appearance-menu';
 
 const html = document.documentElement;
 
-describe('appearance menu (ADR-025)', () => {
+describe('appearance menu (ADR-027)', () => {
   afterEach(() => {
     localStorage.clear();
     html.removeAttribute('data-theme');
     html.removeAttribute('data-accent');
   });
 
-  it('offers sixteen colour themes and applies and remembers the picked one', async () => {
+  it('offers twelve colour themes and applies and remembers the picked one', async () => {
     const user = userEvent.setup();
     render(<AppearanceMenu />);
 
     await user.click(screen.getByRole('button', { name: 'Appearance' }));
     const panel = screen.getByRole('dialog', { name: 'Appearance' });
-    expect(within(panel).getAllByRole('radio')).toHaveLength(16);
-    expect(within(panel).getByRole('radio', { name: 'Violet' })).toBeChecked();
+    expect(within(panel).getAllByRole('radio')).toHaveLength(12);
+    expect(within(panel).getByRole('radio', { name: 'Banana' })).toBeChecked();
 
-    await user.click(within(panel).getByRole('radio', { name: 'Emerald' }));
+    await user.click(within(panel).getByRole('radio', { name: 'Mint' }));
 
-    expect(html).toHaveAttribute('data-accent', 'emerald');
-    expect(localStorage.getItem('untangle.accent')).toBe('emerald');
-    expect(within(panel).getByRole('radio', { name: 'Emerald' })).toBeChecked();
+    expect(html).toHaveAttribute('data-accent', 'mint');
+    expect(localStorage.getItem('untangle.accent')).toBe('mint');
+    expect(within(panel).getByRole('radio', { name: 'Mint' })).toBeChecked();
   });
 
   it('switches light and dark mode', async () => {
