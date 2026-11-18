@@ -82,7 +82,7 @@ function SearchBox({ value, onChange }: { value: string; onChange: (q: string) =
       <Input
         type="search"
         aria-label="Search tickets"
-        placeholder="Search number, subject, customer…"
+        placeholder="Search tickets or UNT-…"
         className="pl-9"
         value={draft}
         onChange={(e) => {
@@ -112,10 +112,10 @@ function TicketRow({ ticket, index }: { ticket: TicketSummary; index: number }) 
       </td>
       <td className="max-w-0 py-3 pr-3 align-top">
         <p className="truncate font-semibold">{ticket.subject}</p>
-        <p className="truncate text-sm text-muted">
-          {ticket.customerName} · {humanize(ticket.category)}
-        </p>
-        <div className="mt-1 flex flex-wrap gap-1 empty:hidden">
+        <div className="mt-0.5 flex min-w-0 items-center gap-2 text-sm text-muted">
+          <span className="truncate">
+            {ticket.customerName} · {humanize(ticket.category)}
+          </span>
           <EscalationBadge level={ticket.escalationLevel} />
           <SourceBadge source={ticket.source} />
         </div>
@@ -141,6 +141,41 @@ function TicketRow({ ticket, index }: { ticket: TicketSummary; index: number }) 
         <time dateTime={ticket.createdAt}>{timeAgo(ticket.createdAt)}</time>
       </td>
     </tr>
+  );
+}
+
+/** Phone layout: one tappable card per ticket instead of a squeezed table. */
+function TicketCard({ ticket, index }: { ticket: TicketSummary; index: number }) {
+  return (
+    <li className="relative animate-rise px-4 py-3 hover:bg-paper-2/60" style={stagger(index)}>
+      <div className="flex items-center justify-between gap-2">
+        <Link
+          to={`/tickets/${ticket.id}`}
+          className="font-mono text-sm font-bold text-accent after:absolute after:inset-0"
+        >
+          {ticket.ticketNumber}
+        </Link>
+        <div className="flex gap-1">
+          <PriorityBadge priority={ticket.priority} />
+          <StatusBadge status={ticket.status} />
+        </div>
+      </div>
+      <p className="mt-1 font-semibold">{ticket.subject}</p>
+      <p className="truncate text-sm text-muted">
+        {ticket.customerName} · {ticket.assignee?.fullName ?? 'Unassigned'}
+      </p>
+      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+        <SlaIndicator
+          status={ticket.status}
+          slaDueAt={ticket.slaDueAt}
+          slaBreached={ticket.slaBreached}
+          tick={30_000}
+          className="text-xs"
+        />
+        <EscalationBadge level={ticket.escalationLevel} />
+        <SourceBadge source={ticket.source} />
+      </div>
+    </li>
   );
 }
 
@@ -382,7 +417,12 @@ export function TicketBrowser({
             list.isPlaceholderData && 'opacity-60',
           )}
         >
-          <table className="w-full table-fixed border-collapse text-left">
+          <ul className="divide-y-2 divide-line-soft md:hidden" aria-label={`${title} list`}>
+            {data.content.map((t, i) => (
+              <TicketCard key={t.id} ticket={t} index={i} />
+            ))}
+          </ul>
+          <table className="hidden w-full table-fixed border-collapse text-left md:table">
             <caption className="sr-only">
               {title}: {data.totalElements} tickets, page {data.page + 1} of{' '}
               {Math.max(1, data.totalPages)}

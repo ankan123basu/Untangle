@@ -251,7 +251,7 @@ export default function CreateTicketPage() {
                   <Input {...props} autoComplete="off" {...form.register('customerName')} />
                 )}
               </Field>
-              <Field label="Customer email" error={errors.customerEmail?.message} hint="Optional.">
+              <Field label="Customer email (optional)" error={errors.customerEmail?.message}>
                 {(props) => (
                   <Input
                     {...props}

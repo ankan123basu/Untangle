@@ -13,6 +13,33 @@ function initials(name: string): string {
     .join('');
 }
 
+const STATUS_WORD: Record<string, string> = {
+  OPEN: 'Open',
+  IN_PROGRESS: 'In progress',
+  RESOLVED: 'Resolved',
+  CLOSED: 'Closed',
+};
+
+/**
+ * Human wording for system events. Status changes use their metadata ("Open → In progress", plus
+ * the reason); anything else keeps the server's text with status codes made readable.
+ */
+function describe(entry: TimelineEntry): string {
+  const meta = entry.metadata ?? {};
+  if (
+    meta.event === 'STATUS_CHANGED' &&
+    typeof meta.from === 'string' &&
+    typeof meta.to === 'string'
+  ) {
+    const reason = typeof meta.reason === 'string' ? ` (${meta.reason})` : '';
+    return `Status: ${STATUS_WORD[meta.from] ?? meta.from} → ${STATUS_WORD[meta.to] ?? meta.to}${reason}`;
+  }
+  return entry.body.replace(
+    /\b(OPEN|IN_PROGRESS|RESOLVED|CLOSED)\b/g,
+    (code) => STATUS_WORD[code] ?? code,
+  );
+}
+
 function EntryItem({ entry, index }: { entry: TimelineEntry; index: number }) {
   const pending = entry.id.startsWith('pending-');
   if (entry.type === 'SYSTEM') {
@@ -24,7 +51,7 @@ function EntryItem({ entry, index }: { entry: TimelineEntry; index: number }) {
         <Cog aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
         <p className="min-w-0">
           {/* Plain text only: React escapes it, so stored HTML can never run (§11). */}
-          <span className="break-words">{entry.body}</span>
+          <span className="break-words">{describe(entry)}</span>
           {entry.author && <span> · {entry.author.fullName}</span>}
           {' · '}
           <time dateTime={entry.createdAt} title={formatDateTime(entry.createdAt)}>

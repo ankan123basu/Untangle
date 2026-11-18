@@ -44,7 +44,7 @@ describe('tickets list', () => {
       ['/tickets?priority=HIGH'],
     );
 
-    expect(await screen.findByRole('link', { name: 'UNT-000042' })).toBeInTheDocument();
+    expect(await screen.findAllByRole('link', { name: 'UNT-000042' })).not.toHaveLength(0);
     expect(seen[0]).toContain('priority=HIGH');
 
     await user.click(screen.getByRole('button', { name: 'Open', pressed: false }));

@@ -139,7 +139,7 @@ function BoardCard({
       {/* Keyboard and screen-reader alternative to dragging. */}
       <Select
         aria-label={`Move ${ticket.ticketNumber} to`}
-        className="mt-2 h-8 py-0 text-xs"
+        className="mt-2 h-7 border-line-soft bg-transparent py-0 text-xs text-muted shadow-none hover:border-line"
         value=""
         onChange={(e) => {
           if (e.target.value) move(ticket, e.target.value as TicketStatus);

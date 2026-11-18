@@ -1,7 +1,7 @@
 import { lazy, Suspense, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { AlertOctagon, Flame, Inbox, UserRound } from 'lucide-react';
+import { AlertOctagon, Flame, Inbox, Plus, UserRound } from 'lucide-react';
 import CountUp from '@/components/reactbits/CountUp';
 import SpotlightCard from '@/components/reactbits/SpotlightCard';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { api } from '@/lib/api/client';
 import { PRIORITIES, type DashboardSummary, type Priority } from '@/lib/api/types';
 import { queryKeys } from '@/lib/query-client';
 import { cn, humanize, timeAgo } from '@/lib/utils';
-import { useCan } from '@/features/auth/session-store';
+import { useCan, useSession } from '@/features/auth/session-store';
 import { TicketBrowser } from '@/features/tickets/ticket-browser';
 import { useWorkload } from '@/features/tickets/ticket-api';
 
@@ -241,14 +241,46 @@ function WorkloadCard() {
   );
 }
 
+function greeting(hour = new Date().getHours()): string {
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function today(): string {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date());
+}
+
 /** Screen 2 (§12.5): what needs attention right now. */
 export default function DashboardPage() {
   const summary = useSummary();
   const canSeeWorkload = useCan('AGENT_WORKLOAD_VIEW');
+  const canCreate = useCan('TICKET_CREATE');
+  const firstName = useSession((st) => st.agent?.fullName.split(' ')[0]);
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="sr-only">Dashboard</h1>
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-muted">{today()}</p>
+          <h1 className="font-display text-3xl font-bold tracking-tight">
+            {greeting()}
+            {firstName ? `, ${firstName}` : ''}
+          </h1>
+        </div>
+        {canCreate && (
+          <Link
+            to="/tickets/new"
+            className="inline-flex h-10 items-center gap-2 rounded-md border-2 border-line bg-brand px-4 text-sm font-semibold text-on-brand shadow-hard-sm transition-transform hover:-translate-y-0.5"
+          >
+            <Plus aria-hidden="true" className="size-4" /> New ticket
+          </Link>
+        )}
+      </header>
       {summary.isError ? (
         <section className="solid-panel">
           <ErrorState error={summary.error} onRetry={() => void summary.refetch()} />

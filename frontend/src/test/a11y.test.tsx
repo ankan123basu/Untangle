@@ -166,7 +166,7 @@ const screens: { name: string; route: RouteObject; url: string; ready: () => Pro
       name: 'tickets',
       route: { path: '/tickets', element: <TicketsPage /> },
       url: '/tickets',
-      ready: () => screen.findByRole('link', { name: 'UNT-000043' }),
+      ready: () => screen.findAllByRole('link', { name: 'UNT-000043' }),
     },
     {
       name: 'ticket detail',
