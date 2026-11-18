@@ -91,6 +91,19 @@ describe('login', () => {
   });
 });
 
+describe('demo people', () => {
+  it('lists every demo person and fills the form with the picked one', async () => {
+    const user = userEvent.setup();
+    renderRoutes(routes, ['/login']);
+
+    await user.click(await screen.findByText('All demo people (9)'));
+    await user.click(screen.getByRole('button', { name: /Tanvi Shah/ }));
+
+    expect(screen.getByLabelText(/work email/i)).toHaveValue('tanvi.shah@untangle.local');
+    expect(screen.getByLabelText(/^password/i)).toHaveValue('Untangle@2026');
+  });
+});
+
 describe('route guards', () => {
   it('sends anonymous visitors to the login page', async () => {
     useSession.getState().clear();

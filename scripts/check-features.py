@@ -236,11 +236,18 @@ cases = [
      lambda tok: call("POST", "/tickets/bulk/assign", tok, {"ticketIds": [fresh_ticket(lead)["id"]], "agentId": agent_id})),
     ("See team workload", "❌✅✅", lambda tok: call("GET", "/dashboard/agents-workload", tok)),
     ("List agents (admin view)", "❌❌✅", lambda tok: call("GET", "/admin/agents", tok)),
-    ("Create agent", "❌❌✅",
-     lambda tok: call("POST", "/agents", tok, {"fullName": "Rbac Probe", "email": f"rbac.{uuid.uuid4().hex[:6]}@untangle.local", "password": "Temporary-Pass-1", "role": "AGENT"})),
+    ("Create agent", "❌❌✅", lambda tok: create_probe_agent(tok)),
     ("Manage partners", "❌❌✅", lambda tok: call("GET", "/admin/partners", tok)),
     ("Read webhook logs", "❌❌✅", lambda tok: call("GET", "/admin/webhook-deliveries?size=1", tok)),
 ]
+
+def create_probe_agent(tok):
+    """Tries to create an agent; if it works, deactivates it at once so the demo data stays clean."""
+    s, a = call("POST", "/agents", tok, {"fullName": "Rbac Probe", "email": f"rbac.{uuid.uuid4().hex[:6]}@untangle.local", "password": "Temporary-Pass-1", "role": "AGENT"})
+    if s == 201:
+        call("PATCH", f"/agents/{a['id']}/active", admin, {"active": False})
+    return s, a
+
 
 matrix_rows = []
 for action, expected, request in cases:

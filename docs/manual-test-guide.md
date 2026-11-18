@@ -22,6 +22,23 @@ login page:
 | Lead | `leela.thomas@untangle.local` | assign anyone, close, reopen, see workload |
 | Agent | `riya.sen@untangle.local` | work own tickets, assign self, comment, resolve |
 
+Everyone in the demo team (same password; the login page lists them under **All demo people**):
+
+| Name | Role | Email |
+|---|---|---|
+| Asha Verma | Admin | `admin@untangle.local` |
+| Leela Thomas | Lead | `leela.thomas@untangle.local` |
+| Nikhil Bose | Lead | `nikhil.bose@untangle.local` |
+| Riya Sen | Agent | `riya.sen@untangle.local` |
+| Dev Malhotra | Agent | `dev.malhotra@untangle.local` |
+| Omar Siddiqui | Agent | `omar.siddiqui@untangle.local` |
+| Tanvi Shah | Agent | `tanvi.shah@untangle.local` |
+| Zoya Ali | Agent | `zoya.ali@untangle.local` |
+| Harish Nair | Agent | `harish.nair@untangle.local` |
+
+Notifications are real: each one is a row in the `notifications` table, written when the action
+commits, and read by the bell from the API. Nothing is simulated.
+
 Fresh demo data at any time: `make nuke` then `make up` (deletes the local database).
 
 ### 1. Sign-in and session

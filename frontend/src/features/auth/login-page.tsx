@@ -24,6 +24,19 @@ const DEMO_ACCOUNTS = [
   { role: 'Agent', email: 'riya.sen@untangle.local', hint: 'Own tickets' },
 ] as const;
 
+/** Everyone in the demo team, for trying notifications and permissions between two people. */
+const DEMO_PEOPLE = [
+  { name: 'Asha Verma', role: 'Admin', email: 'admin@untangle.local' },
+  { name: 'Leela Thomas', role: 'Lead', email: 'leela.thomas@untangle.local' },
+  { name: 'Nikhil Bose', role: 'Lead', email: 'nikhil.bose@untangle.local' },
+  { name: 'Riya Sen', role: 'Agent', email: 'riya.sen@untangle.local' },
+  { name: 'Dev Malhotra', role: 'Agent', email: 'dev.malhotra@untangle.local' },
+  { name: 'Omar Siddiqui', role: 'Agent', email: 'omar.siddiqui@untangle.local' },
+  { name: 'Tanvi Shah', role: 'Agent', email: 'tanvi.shah@untangle.local' },
+  { name: 'Zoya Ali', role: 'Agent', email: 'zoya.ali@untangle.local' },
+  { name: 'Harish Nair', role: 'Agent', email: 'harish.nair@untangle.local' },
+] as const;
+
 const schema = z.object({
   email: z
     .string()
@@ -67,6 +80,13 @@ export default function LoginPage() {
       setFailure(toApiError(error));
     }
   });
+
+  const pick = (email: string) => {
+    setValue('email', email, { shouldValidate: true });
+    setValue('password', DEMO_PASSWORD, { shouldValidate: true });
+    setFailure(null);
+    setFocus('password');
+  };
 
   const lockedUntil =
     failure?.code === 'AUTH_ACCOUNT_LOCKED' ? failure.extra.lockedUntil : undefined;
@@ -190,10 +210,7 @@ export default function LoginPage() {
                       type="button"
                       title={`${account.email}: ${account.hint}`}
                       onClick={() => {
-                        setValue('email', account.email, { shouldValidate: true });
-                        setValue('password', DEMO_PASSWORD, { shouldValidate: true });
-                        setFailure(null);
-                        setFocus('password');
+                        pick(account.email);
                       }}
                       className="flex flex-col items-start rounded-md border-2 border-line bg-surface px-3 py-2 text-left shadow-hard-sm transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none"
                     >
@@ -202,6 +219,28 @@ export default function LoginPage() {
                     </button>
                   ))}
                 </div>
+                <details className="mt-3 text-sm">
+                  <summary className="cursor-pointer font-semibold">
+                    All demo people ({DEMO_PEOPLE.length})
+                  </summary>
+                  <ul className="mt-2 grid gap-1 sm:grid-cols-2">
+                    {DEMO_PEOPLE.map((person) => (
+                      <li key={person.email}>
+                        <button
+                          type="button"
+                          title={person.email}
+                          onClick={() => {
+                            pick(person.email);
+                          }}
+                          className="flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1 text-left hover:bg-paper-2"
+                        >
+                          <span className="truncate">{person.name}</span>
+                          <span className="text-xs text-muted">{person.role}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
                 <p className="mt-2 text-xs text-muted">Picks fill the form; press Sign in.</p>
               </section>
             )}
