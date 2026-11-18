@@ -250,6 +250,18 @@ function TicketWorkspace({ ticket }: { ticket: TicketDetail }) {
 
         <StatusStepper status={ticket.status} />
 
+        {!closed && !allowed('EDIT') && (
+          <p
+            role="note"
+            className="flex items-center gap-2 rounded-md border-2 border-line-soft bg-paper-2 px-3 py-2 text-sm"
+          >
+            <Lock aria-hidden="true" className="size-4 shrink-0" />
+            {ticket.assignee
+              ? `View only: this is ${ticket.assignee.fullName}’s ticket. You can comment and escalate; editing and status changes are for the assignee or a lead.`
+              : 'View only: this ticket is unassigned. Assign it to yourself to work on it.'}
+          </p>
+        )}
+
         {!closed && (
           <div
             role="toolbar"
@@ -259,9 +271,15 @@ function TicketWorkspace({ ticket }: { ticket: TicketDetail }) {
             {BAR.map((action) => {
               const can = allowed(action);
               const why = ticket.deniedActions.find((d) => d.action === action);
-              // Hide moves that make no sense from this status at all; show the ones the user's
-              // role can't do (or that need a step first), disabled with the reason.
-              if (!can && (!why || why.reason === 'INVALID_STATUS_TRANSITION')) return null;
+              // Hide what this person may never do here (their role/ownership) and moves that make
+              // no sense from this status. Only "needs a step first" stays, disabled with the reason.
+              if (
+                !can &&
+                (!why ||
+                  why.reason === 'INVALID_STATUS_TRANSITION' ||
+                  why.reason === 'ACCESS_DENIED')
+              )
+                return null;
               const reason = deniedReason(why);
               const meta = TRANSITIONS[action];
               const icon =

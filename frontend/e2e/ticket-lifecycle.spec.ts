@@ -46,10 +46,8 @@ test('a complaint goes from intake to resolved, closed and reopened', async ({ p
   await resolve.getByRole('button', { name: 'Resolve' }).click();
   await expect(page.getByText(`${ticketNumber} → Resolved`)).toBeVisible();
 
-  // Agents can't close (only leads/admins, by default): shown disabled with the reason.
-  const close = actions.getByRole('button', { name: 'Close' });
-  await expect(close).toHaveAttribute('aria-disabled', 'true');
-  await expect(close).toHaveAccessibleDescription(/role can’t do this/i);
+  // Agents can't close (only leads/admins, by default): the button isn't offered at all.
+  await expect(actions.getByRole('button', { name: 'Close' })).toHaveCount(0);
   await signOut(page);
 
   // ---- Lead: close, then reopen -----------------------------------------------------------------

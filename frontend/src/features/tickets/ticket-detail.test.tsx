@@ -48,6 +48,31 @@ describe('ticket detail', () => {
     expect(within(toolbar).queryByRole('button', { name: 'Resolve' })).not.toBeInTheDocument();
   });
 
+  it("hides what an agent may never do on someone else's ticket and says it is view only", async () => {
+    serve(
+      ticketDetail({
+        status: 'IN_PROGRESS',
+        assignee: { id: '01a1eb1f-0000-7000-8000-0000000000d1', fullName: 'Dev Malhotra' },
+        allowedActions: ['COMMENT', 'ESCALATE'],
+        deniedActions: [
+          { action: 'EDIT', reason: 'ACCESS_DENIED' },
+          { action: 'ASSIGN', reason: 'ACCESS_DENIED' },
+          { action: 'RESOLVE', reason: 'ACCESS_DENIED' },
+          { action: 'RELEASE', reason: 'ACCESS_DENIED' },
+          { action: 'CLOSE', reason: 'ACCESS_DENIED' },
+        ],
+      }),
+    );
+    renderDetail();
+
+    const toolbar = await screen.findByRole('toolbar', { name: 'Ticket actions' });
+    for (const name of ['Edit', 'Resolve', 'Close']) {
+      expect(within(toolbar).queryByRole('button', { name })).not.toBeInTheDocument();
+    }
+    expect(within(toolbar).getByRole('button', { name: 'Escalate' })).toBeInTheDocument();
+    expect(screen.getByRole('note')).toHaveTextContent(/View only: this is Dev Malhotra’s ticket/);
+  });
+
   it('renders HTML in comments as plain text (§11)', async () => {
     const evil = '<img src=x onerror="alert(1)"><b>bold</b>';
     serve(ticketDetail(), [comment({ body: evil })]);

@@ -59,6 +59,7 @@ stateDiagram-v2
   ([ADR-020](decisions/ADR-020-sla-scheduler-with-shedlock.md)).
 - Manual `escalate` adds 1 (any role, reason required). Reopen restarts the SLA clock and resets the level.
 
-Reasons the UI shows for disabled actions: `TICKET_CLOSED`, `ACCESS_DENIED`,
-`INVALID_STATUS_TRANSITION`, `ASSIGNEE_REQUIRED`
+Reason codes: `TICKET_CLOSED`, `ACCESS_DENIED`, `INVALID_STATUS_TRANSITION`, `ASSIGNEE_REQUIRED`.
+The UI hides `ACCESS_DENIED` and `INVALID_STATUS_TRANSITION` actions and shows a "View only" note;
+only `ASSIGNEE_REQUIRED` is shown disabled with its reason
 ([ADR-015](decisions/ADR-015-allowed-actions-from-server.md)).

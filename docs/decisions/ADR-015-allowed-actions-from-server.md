@@ -30,8 +30,13 @@ run in a fixed order, so the reason given is the most useful one:
 3. state machine → `INVALID_STATUS_TRANSITION`
 4. preconditions → `ASSIGNEE_REQUIRED`
 
-The UI renders enabled buttons from `allowedActions`. For disabled ones, it shows a tooltip from
-the `deniedActions[].reason` code ("Assign the ticket before starting work").
+The UI renders enabled buttons from `allowedActions`. Actions denied with `ACCESS_DENIED` (the
+person's role or ownership) or `INVALID_STATUS_TRANSITION` are **hidden**, and a ticket the person
+can't edit shows a "View only" note naming the assignee. Only actions that need a step first
+(`ASSIGNEE_REQUIRED`) stay visible, disabled, with a tooltip from the reason code.
+
+*Update (manual testing):* faded-but-visible Edit/Resolve buttons on another agent's ticket looked
+usable to a tester, although the server refused them (403). Hiding them removes that confusion.
 
 ## Consequences
 

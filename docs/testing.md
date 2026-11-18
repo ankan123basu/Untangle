@@ -27,7 +27,7 @@ journeys. Every edge case from the brief gets a named test, listed in
 | Suite | Command | Count | Needs |
 |---|---|---|---|
 | Backend unit + integration (incl. ArchUnit, coverage gate) | `make test-backend` | **404** | Docker (Testcontainers) |
-| Frontend components, logic, accessibility (axe) | `make test-frontend` | **57** | — |
+| Frontend components, logic, accessibility (axe) | `make test-frontend` | **58** | — |
 | Browser end-to-end (Playwright) | `make e2e` | **9** | `make up` |
 | Feature walkthrough + RBAC matrix | `make check-features` | **103** checks | `make up` (demo data) |
 | Partner webhook scenarios | `make simulate` | **13** | `make up` |

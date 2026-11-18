@@ -49,7 +49,7 @@ As **Agent**: New ticket.
 | Do | Expect |
 |---|---|
 | As **Lead**, open an unassigned ticket, pick an agent in Details → Assignee | toast, timeline "Assigned to …"; the picker shows each agent's open count |
-| As **Agent**, open someone else's ticket | no assignee picker; "Assign to me" only if it is unassigned and Open |
+| As **Agent**, open someone else's ticket | "View only: this is …'s ticket" note; only Comment and Escalate; no Edit, status buttons or assignee picker (the API also answers 403 if tried) |
 
 ### 4. Status lifecycle (requirement 3)
 
@@ -60,7 +60,7 @@ On your ticket as **Agent**:
 | Unassigned ticket | "Start progress" disabled, tooltip "Assign someone first." |
 | Start progress | stepper moves to In progress |
 | Resolve | dialog asks for a resolution note (required); SLA shows "SLA stopped" |
-| Close (as agent) | disabled: "Your role can’t do this on this ticket." |
+| Close (as agent) | no Close button (only leads and admins close) |
 | As **Lead**: Close | yellow-grey banner "This ticket is closed and read-only." |
 
 ### 5. Closed tickets can't change (business rule)
