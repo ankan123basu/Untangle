@@ -78,13 +78,23 @@ Both scenes sit in their own boxes; nothing overlaps text or controls.
    - Counts come from `unresolvedByPriority`, capped at 7 slabs; the exact numbers are beside it.
    - It mounts via `WhenVisible`. The fallback is flat CSS stacks.
    - Interactive, added at the owner's request:
-     - Hover lifts a stack and shows "Critical · 2 open" in a single label slot.
-     - Click opens `/tickets?priority=X&status=OPEN&status=IN_PROGRESS`.
+     - **One slab per real ticket.** The stage fetches the 10 most urgent unresolved tickets per
+       priority (`/tickets?priority=X&status=OPEN&status=IN_PROGRESS&sort=slaDueAt,asc&size=10`,
+       live every 20 s, the list's query keys). Anything beyond that is a dark "+N more" cap.
+     - Slabs get thinner as a stack grows (`MAX_HEIGHT / count`), so even a full stack fits the
+       stage and every ticket stays big enough to hover.
+     - Hover a slab: it slides out toward you, and the read-out shows number, subject, assignee
+       and SLA state. The subject shortens first; the who and when always stay visible.
+     - Click a slab: opens that ticket. Click a base or the cap: opens the priority's list.
      - Drag turns the set (±0.75 rad) and it springs back; a drag never counts as a click.
-     - Each stack has an invisible hit box, so even an empty one can be pointed at.
-     - It is pointer-only and `aria-hidden`; the priority chips beside it are the keyboard and
-       screen-reader path to the same lists.
-     - The flat fallback behaves the same way and is unit-tested (`ticket-stacks.test.tsx`).
+     - **No wait.** The scene chunk starts downloading when the dashboard mounts; it used to wait
+       for `WhenVisible` plus an idle delay, which the owner saw as the stage "coming late".
+       Trade-off: three.js now loads in parallel with the dashboard's data on desktop. Re-check
+       with `make lighthouse`.
+     - Pointer-only and `aria-hidden`; the priority chips and the queue table are the keyboard
+       and screen-reader path to the same tickets.
+     - The flat fallback has the same per-ticket behaviour, unit-tested in
+       `ticket-stacks.test.tsx` with 25 low tickets → 10 slabs + "+15".
 8. **Fix.** The header is `relative z-30`, so the Appearance and notification menus open above
    page content. Before, they opened underneath it.
 9. **Removed.**

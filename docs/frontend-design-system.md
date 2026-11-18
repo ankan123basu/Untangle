@@ -114,7 +114,7 @@ A thin brand-coloured bar shows while a lazy route chunk loads.
 | Where | What | Reduced motion / fallback |
 |---|---|---|
 | Login (≥ 1024 px) | `desk-scene.tsx` (ADR-027), toon + ink outlines + hard shadows: a paper ticket slides in, the rubber stamp slams RESOLVED (speed lines, tiny shake), it flies out and the next number comes in; SLA stopwatch ticks; escalation chevrons light L1 → L3; HMAC padlock clicks shut; cursor tilt | static HTML/CSS desk (reduced motion, no WebGL, < 4 cores, Save-Data, or "3D scenes" off) |
-| Dashboard hero (≥ 1024 px) | `ticket-stacks-scene.tsx`: one stack per priority, one slab per unresolved ticket (max 7), dropping in with a bounce; the critical stack's top wobbles. **Interactive:** hover lifts a stack and labels it ("High · 1 open"), click opens that priority's unresolved tickets, drag turns the set (springs back; a drag never counts as a click) | flat CSS stacks with the same hover and click |
+| Dashboard hero (≥ 1024 px) | `ticket-stacks-scene.tsx`: one stack per priority, **one slab per real unresolved ticket** (the 10 most urgent by SLA; the rest are a dark "+N more" cap). Slabs thin out as a stack grows so each stays pointable; new tickets drop in. Hover a slab: it slides out and the read-out shows number, subject, assignee and SLA; click opens that ticket. Base/cap click opens the priority list. Drag turns the set. The chunk starts downloading when the dashboard mounts (no idle wait) | flat CSS stacks with the same per-ticket hover and click |
 | Every page | `.app-backdrop`: the theme wash with a dot grid (static CSS) | n/a |
 | Login | `.marquee` ticker band | frozen |
 | Route change | page fades and rises 6 px (`animate-rise`) | none |

@@ -1,125 +1,210 @@
-import { useEffect, useMemo, useRef, type RefObject } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import type { Group } from 'three';
+import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from 'react';
+import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber';
+import type { BufferGeometry, DataTexture, Group, ShaderMaterial } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { Inked } from '@/components/three/inked';
 import { useOutline, usePageVisible, useToonRamp } from '@/components/three/toon';
 import type { Priority } from '@/lib/api/types';
+import { sameTarget, type StackData, type Target } from './ticket-stacks-model';
 
 /*
- * The unresolved queue as physical stacks of tickets (ADR-027): one column per priority, one slab
- * per open ticket, drawn like the rest of the UI (flat colour, ink outline, hard shadow). New
- * tickets drop in with a bounce; the top of a non-empty critical stack keeps wobbling for
- * attention. Counts are the dashboard summary's, capped so a big queue stays readable (the exact
- * numbers are printed beside the stage).
+ * The unresolved queue as stacks of real tickets (ADR-027): one stack per priority, one slab per
+ * ticket (most urgent first, at the bottom), drawn like the rest of the UI (flat colour, ink
+ * outline, hard shadow). If a priority has more tickets than fit, a dark cap stands for the rest.
+ * Slabs get thinner as a stack grows, so every ticket stays big enough to point at.
  *
- * Interactive: hovering a stack lifts it and jiggles its top ticket (the wrapper shows its label),
- * clicking opens that priority's unresolved tickets, and dragging turns the whole set (the wrapper
- * owns the drag and writes the angle into `yaw`; the scene eases toward it).
+ * Interactive: the slab under the pointer slides out toward you (the wrapper reads it out),
+ * clicking opens it; the base and the cap open the priority's list; dragging turns the set (the
+ * wrapper owns the drag and writes the angle into `yaw`). New tickets drop in with a bounce.
  */
 
-const STACKS: { priority: Priority; color: string }[] = [
-  { priority: 'CRITICAL', color: '#ff5a5f' },
-  { priority: 'HIGH', color: '#ffb547' },
-  { priority: 'MEDIUM', color: '#5cc8ff' },
-  { priority: 'LOW', color: '#d6d3cc' },
-];
-const MAX_SLABS = 7;
-const SLAB_H = 0.26;
+const COLORS: Record<Priority, string> = {
+  CRITICAL: '#ff5a5f',
+  HIGH: '#ffb547',
+  MEDIUM: '#5cc8ff',
+  LOW: '#d6d3cc',
+};
+const ORDER: Priority[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 const GAP = 1.4;
+const MAX_HEIGHT = 2.05; // world units available above the base
+const MAX_SLAB_H = 0.26;
+const SPACING = 0.025;
+
+interface Shared {
+  ramp: DataTexture;
+  outline: ShaderMaterial;
+}
+
+/** One slab: drops in when it first appears, eases when the stack re-flows, slides out on hover. */
+function Slab({
+  geometry,
+  color,
+  y,
+  index,
+  hovered,
+  shared,
+  onOver,
+  onOut,
+  onClick,
+}: {
+  geometry: BufferGeometry;
+  color: string;
+  y: number;
+  index: number;
+  hovered: boolean;
+  shared: Shared;
+  onOver: () => void;
+  onOut: () => void;
+  onClick: () => void;
+}) {
+  const ref = useRef<Group>(null);
+  const born = useRef<number | null>(null);
+  useFrame(({ clock }, delta) => {
+    const g = ref.current;
+    if (!g) return;
+    const t = clock.elapsedTime;
+    born.current ??= t + index * 0.06;
+    const local = Math.min(1, Math.max(0, (t - born.current) / 0.55));
+    const bounce = 1 - Math.abs(Math.cos(local * Math.PI * 1.5)) * (1 - local);
+    const k = Math.min(1, delta * 12);
+    const targetY = y + (1 - bounce) * 3;
+    g.position.y = local < 1 ? targetY : g.position.y + (targetY - g.position.y) * k;
+    g.position.z += ((hovered ? 0.42 : 0) - g.position.z) * k;
+    const sx = g.scale.x + ((hovered ? 1.12 : 1) - g.scale.x) * k;
+    g.scale.set(sx, 1, sx);
+    g.rotation.y = hovered ? Math.sin(t * 9) * 0.05 : index % 2 === 0 ? 0.05 : -0.05;
+  });
+  return (
+    <group
+      ref={ref}
+      onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+        e.stopPropagation();
+        onOver();
+      }}
+      onPointerOut={(e: ThreeEvent<PointerEvent>) => {
+        e.stopPropagation();
+        onOut();
+      }}
+      onClick={(e: ThreeEvent<MouseEvent>) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      <Inked geometry={geometry} color={color} ramp={shared.ramp} outline={shared.outline} />
+    </group>
+  );
+}
 
 function Stack({
+  data,
   x,
-  color,
-  count,
-  wobble,
-  hovered,
+  target,
   onHover,
   onSelect,
 }: {
+  data: StackData;
   x: number;
-  color: string;
-  count: number;
-  wobble: boolean;
-  hovered: boolean;
-  onHover: (on: boolean) => void;
-  onSelect: () => void;
+  target: Target | null;
+  onHover: (t: Target | null) => void;
+  onSelect: (t: Target) => void;
 }) {
   const ramp = useToonRamp();
-  const outline = useOutline(0.022);
-  const slab = useMemo(() => new RoundedBoxGeometry(0.95, SLAB_H, 0.7, 3, 0.05), []);
+  const outline = useOutline(0.02);
+  const shared = useMemo(() => ({ ramp, outline }), [ramp, outline]);
+  const rest = data.total - data.slabs.length;
+  const count = data.slabs.length + (rest > 0 ? 1 : 0);
+  // Thinner slabs for taller stacks, so the stack never leaves the stage.
+  const slabH = Math.min(MAX_SLAB_H, MAX_HEIGHT / Math.max(1, count) - SPACING);
+  const slab = useMemo(
+    () => new RoundedBoxGeometry(0.95, slabH, 0.7, 3, Math.min(0.05, slabH / 3)),
+    [slabH],
+  );
   const base = useMemo(() => new RoundedBoxGeometry(1.1, 0.08, 0.85, 2, 0.03), []);
   useEffect(
     () => () => {
       slab.dispose();
+    },
+    [slab],
+  );
+  useEffect(
+    () => () => {
       base.dispose();
     },
-    [slab, base],
+    [base],
   );
-  const group = useRef<Group>(null);
-  const column = useRef<Group>(null);
-  const born = useRef<number | null>(null);
-  const n = Math.min(count, MAX_SLABS);
-  const height = 0.08 + Math.max(1, n) * (SLAB_H + 0.02) + 0.2;
-
-  useFrame(({ clock }, delta) => {
-    const t = clock.elapsedTime;
-    born.current ??= t;
-    const since = t - born.current;
-    // Hover: the whole column rises and grows a little, easing in and out.
-    const c = column.current;
-    if (c) {
-      const k = Math.min(1, delta * 10);
-      c.position.y += ((hovered ? 0.2 : 0) - c.position.y) * k;
-      const s = c.scale.x + ((hovered ? 1.07 : 1) - c.scale.x) * k;
-      c.scale.setScalar(s);
-    }
-    group.current?.children.forEach((child, i) => {
-      // Each slab drops from above, staggered bottom-up, and lands with a bounce.
-      const local = Math.min(1, Math.max(0, (since - i * 0.09) / 0.55));
-      const bounce = 1 - Math.abs(Math.cos(local * Math.PI * 1.5)) * (1 - local);
-      const restY = 0.08 + SLAB_H / 2 + i * (SLAB_H + 0.02);
-      child.position.y = restY + (1 - bounce) * 3;
-      child.rotation.y =
-        (i % 2 === 0 ? 0.05 : -0.05) +
-        ((wobble || hovered) && i === n - 1 ? Math.sin(t * (hovered ? 9 : 5)) * 0.1 : 0);
-    });
-  });
+  const color = COLORS[data.priority];
+  const yAt = (i: number) => 0.08 + slabH / 2 + i * (slabH + SPACING);
+  const leave = (t: Target) => () => {
+    if (sameTarget(target, t)) onHover(null);
+  };
+  const baseTarget: Target = { kind: 'stack', priority: data.priority };
+  const more: Target = { kind: 'more', priority: data.priority, rest };
 
   return (
     <group position={[x, 0, 0]}>
-      <group ref={column}>
-        <Inked geometry={base} color={hovered ? color : '#ffffff'} ramp={ramp} outline={outline} />
-        <group ref={group}>
-          {Array.from({ length: n }, (_, i) => (
-            <Inked key={i} geometry={slab} color={color} ramp={ramp} outline={outline} />
-          ))}
-        </group>
-      </group>
-      {/* Invisible hit box over the whole column, so even an empty stack is easy to point at. */}
-      <mesh
-        position={[0, height / 2, 0]}
-        onPointerOver={(e) => {
+      <group
+        onPointerOver={(e: ThreeEvent<PointerEvent>) => {
           e.stopPropagation();
-          onHover(true);
+          onHover(baseTarget);
         }}
-        onPointerOut={() => {
-          onHover(false);
-        }}
-        onClick={(e) => {
+        onPointerOut={leave(baseTarget)}
+        onClick={(e: ThreeEvent<MouseEvent>) => {
           e.stopPropagation();
-          onSelect();
+          onSelect(baseTarget);
         }}
       >
-        <boxGeometry args={[1.25, height, 1]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
+        <Inked
+          geometry={base}
+          color={target?.priority === data.priority ? color : '#ffffff'}
+          ramp={ramp}
+          outline={outline}
+        />
+      </group>
+      {data.slabs.map((s, i) => {
+        const t: Target = { kind: 'ticket', priority: data.priority, slab: s };
+        return (
+          <Slab
+            key={s.id}
+            geometry={slab}
+            color={color}
+            y={yAt(i)}
+            index={i}
+            hovered={sameTarget(target, t)}
+            shared={shared}
+            onOver={() => {
+              onHover(t);
+            }}
+            onOut={leave(t)}
+            onClick={() => {
+              onSelect(t);
+            }}
+          />
+        );
+      })}
+      {rest > 0 && (
+        <Slab
+          key="more"
+          geometry={slab}
+          color="#2a2a2a"
+          y={yAt(data.slabs.length)}
+          index={data.slabs.length}
+          hovered={sameTarget(target, more)}
+          shared={shared}
+          onOver={() => {
+            onHover(more);
+          }}
+          onOut={leave(more)}
+          onClick={() => {
+            onSelect(more);
+          }}
+        />
+      )}
     </group>
   );
 }
 
 /** Turns the set toward the angle the wrapper's drag writes into `yaw`. */
-function Turntable({ yaw, children }: { yaw: RefObject<number>; children: React.ReactNode }) {
+function Turntable({ yaw, children }: { yaw: RefObject<number>; children: ReactNode }) {
   const ref = useRef<Group>(null);
   useFrame((_, delta) => {
     const g = ref.current;
@@ -129,18 +214,18 @@ function Turntable({ yaw, children }: { yaw: RefObject<number>; children: React.
 }
 
 export default function TicketStacksScene({
-  counts,
+  stacks,
   shadowColor,
-  hovered,
+  target,
   onHover,
   onSelect,
   yaw,
 }: {
-  counts: Partial<Record<Priority, number>>;
+  stacks: StackData[];
   shadowColor: string;
-  hovered: Priority | null;
-  onHover: (priority: Priority | null) => void;
-  onSelect: (priority: Priority) => void;
+  target: Target | null;
+  onHover: (t: Target | null) => void;
+  onSelect: (t: Target) => void;
   yaw: RefObject<number>;
 }) {
   const visible = usePageVisible();
@@ -150,9 +235,9 @@ export default function TicketStacksScene({
         shadows="basic"
         dpr={[1, 1.75]}
         frameloop={visible ? 'always' : 'never'}
-        camera={{ position: [0, 2.1, 5.3], fov: 34 }}
+        camera={{ position: [0, 1.9, 7.4], fov: 34 }}
         onCreated={({ camera }) => {
-          camera.lookAt(0, 0.55, 0);
+          camera.lookAt(0, 1.05, 0);
         }}
         gl={{ alpha: true, antialias: true }}
       >
@@ -168,26 +253,19 @@ export default function TicketStacksScene({
           shadow-camera-top={4}
           shadow-camera-bottom={-4}
         />
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[20, 20]} />
           <shadowMaterial color={shadowColor} opacity={1} transparent />
         </mesh>
         <Turntable yaw={yaw}>
-          {STACKS.map((s, i) => (
+          {ORDER.map((p, i) => (
             <Stack
-              key={s.priority}
+              key={p}
+              data={stacks.find((s) => s.priority === p) ?? { priority: p, slabs: [], total: 0 }}
               x={(i - 1.5) * GAP}
-              color={s.color}
-              count={counts[s.priority] ?? 0}
-              wobble={s.priority === 'CRITICAL' && (counts.CRITICAL ?? 0) > 0}
-              hovered={hovered === s.priority}
-              onHover={(on) => {
-                if (on) onHover(s.priority);
-                else if (hovered === s.priority) onHover(null);
-              }}
-              onSelect={() => {
-                onSelect(s.priority);
-              }}
+              target={target}
+              onHover={onHover}
+              onSelect={onSelect}
             />
           ))}
         </Turntable>

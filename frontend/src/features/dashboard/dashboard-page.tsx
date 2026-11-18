@@ -110,10 +110,7 @@ function UnresolvedHero({ summary }: { summary: DashboardSummary | undefined }) 
           </ul>
         </div>
       </div>
-      <TicketStacks
-        counts={summary?.unresolvedByPriority}
-        className="hidden min-h-[230px] lg:block"
-      />
+      <TicketStacks className="hidden min-h-[250px] lg:block" />
     </section>
   );
 }
