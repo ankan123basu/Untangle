@@ -107,3 +107,26 @@ ciphertexts no longer decrypt, so their webhooks fail until rotated).
 | Partner gets 401 | wrong secret, clock skew, re-serialised body, inactive partner | Admin → Webhook logs shows the exact reason per attempt |
 | `make simulate` fails at "Admin login failed" | stack not up or demo data missing | `make up`; `SPRING_PROFILES_ACTIVE` must include `demo`, or set `SIM_ADMIN_EMAIL/PASSWORD` |
 | Find the logs for an error | | take `traceId` from the error body: `docker compose logs backend --no-log-prefix \| grep '<traceId>'` |
+
+### Optional profiles and tools
+
+| Want | Do |
+|---|---|
+| Metrics dashboards | `docker compose --profile observability up -d` → Grafana http://localhost:3001 (user `admin`, password `GRAFANA_ADMIN_PASSWORD` in `.env`), Prometheus http://localhost:9090 |
+| Shared cache + cluster-wide rate limits | `SPRING_PROFILES_ACTIVE=prod,demo,redis` in `.env`, then `docker compose --profile redis up -d --build` |
+| AI assistance | `AI_ENABLED=true` and `GROQ_API_KEY=<key from console.groq.com>` in `.env`, then `make up` |
+| Browser end-to-end tests | `make up`, then `make e2e` (first time: `cd frontend && npx playwright install chromium`) |
+| Load test | `make load` (k6 in Docker against the running stack; creates ~500 low-priority demo tickets) |
+| Lighthouse | `make lighthouse` (needs Google Chrome) |
+| Fresh demo data | `make nuke` (deletes the local database, asks first), then `make up` |
+| Open on a phone | same Wi-Fi, `http://<your-computer-ip>:3000`; set `AUTH_COOKIE_SECURE=false` if reloads sign you out (plain HTTP) |
+
+### Health and ports
+
+| Port | What | Published |
+|---|---|---|
+| 3000 | app (nginx: SPA + `/api` proxy) | yes |
+| 8080 | backend API, `/livez`, `/readyz`, Swagger UI | yes (dev convenience) |
+| 8081 | backend actuator incl. `/actuator/prometheus` | **no** (Compose network only) |
+| 5433 | PostgreSQL | yes (dev convenience) |
+| 9090 / 3001 | Prometheus / Grafana | localhost only, `observability` profile |

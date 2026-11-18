@@ -10,22 +10,22 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [problem-statement.md](problem-statement.md) | What are we building, for whom, and how do we know it works? | Done |
 | [assumptions-and-open-questions.md](assumptions-and-open-questions.md) | What wasn't specified, what we chose, what to ask the lead | Done (living) |
 | [tech-stack.md](tech-stack.md) | Exact pinned versions and why | Done (living) |
-| [architecture.md](architecture.md) | How the pieces fit together; request flows | Phase 0 outline, grows each phase |
+| [architecture.md](architecture.md) | How the pieces fit together; request flows | Done (components, layers, flows) |
 | [database.md](database.md) | Tables, constraints, indexes, ER diagram | Done (Phase 1) |
 | [state-machine.md](state-machine.md) | Ticket lifecycle rules and who may do what | Done (Phase 3) |
-| [api.md](api.md) | Endpoints, error codes, pagination | Auth, agents, tickets, dashboard done |
-| [security.md](security.md) | Threat model, auth, RBAC, HMAC, secrets | Done (Phases 2, 4) |
+| [api.md](api.md) | Endpoints, error codes, pagination | Done |
+| [security.md](security.md) | Threat model, auth, RBAC, HMAC, secrets | Done |
 | [webhook-integration-guide.md](webhook-integration-guide.md) | For partners: how to send signed tickets | Done (Phase 4) |
-| [tradeoffs.md](tradeoffs.md) | Options, choice, gained, given up | Living |
+| [tradeoffs.md](tradeoffs.md) | Options, choice, gained, given up | Done (23 entries) |
 | [decisions/](decisions/) | Architecture Decision Records (ADRs) | Living |
-| [edge-cases.md](edge-cases.md) | Case → expected behaviour → test name | Living (DB-level cases done) |
-| [testing.md](testing.md) | Test strategy and how to run tests | Phase 0 baseline |
+| [edge-cases.md](edge-cases.md) | Case → expected behaviour → test name | Done (110+ cases) |
+| [testing.md](testing.md) | Test strategy and how to run tests | Done |
 | [manual-test-guide.md](manual-test-guide.md) | Try every feature and requirement by hand, step by step | Done |
 | [ai-features.md](ai-features.md) | AI helpers, safety, failure modes | Done (Phase 6) |
-| [frontend-design-system.md](frontend-design-system.md) | Tokens, theme, motion, a11y | Phases 7 and 9 |
-| [scalability.md](scalability.md) | Today's scaling choices and the 10x/100x plan | Phases 10–11 |
-| [observability.md](observability.md) | Logs, metrics, health, dashboards | Request id + JSON logs done; metrics Phase 10 |
-| [runbook.md](runbook.md) | Run locally, env vars, common failures | Phase 0 baseline |
+| [frontend-design-system.md](frontend-design-system.md) | Tokens, theme, screens, motion, a11y | Done |
+| [scalability.md](scalability.md) | Scaling built, load-test results, 10x/100x plan | Done |
+| [observability.md](observability.md) | Logs, metrics, health, dashboards | Done |
+| [runbook.md](runbook.md) | Run locally, profiles, ports, common failures | Done |
 | [how-it-works/](how-it-works/) | One "How it works" note per phase | One per phase |
 
 ## Architecture Decision Records
@@ -55,3 +55,5 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [020](decisions/ADR-020-sla-scheduler-with-shedlock.md) | SLA escalation: idempotent scan + ShedLock + row locks |
 | [021](decisions/ADR-021-notifications-polling-over-sse.md) | Notifications by polling the unread count (SSE deferred) |
 | [022](decisions/ADR-022-ai-suggestion-only.md) | AI is optional, suggestion-only and never trusted |
+| [023](decisions/ADR-023-exact-api-contract-and-vendored-react-bits.md) | Exact OpenAPI contract for generated types; vendored React Bits |
+| [024](decisions/ADR-024-motion-and-3d-budget.md) | 3D and motion built cheaply, within a performance budget |

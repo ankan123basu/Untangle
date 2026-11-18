@@ -6,7 +6,8 @@ When something goes wrong, we need to find out what happened quickly. Every requ
 (`X-Request-Id`). It shows up in the response, in every error message the user sees (`traceId`) and
 in every log line the backend writes for that request. A user can quote the id, and we can find
 exactly the right logs. In Docker, logs are written as JSON so log tools can search them by field.
-Metrics and dashboards arrive in Phase 10.
+Numbers about the business (tickets created, webhooks rejected, SLA breaches) go to Prometheus and
+show on a ready-made Grafana dashboard.
 
 ## Technical details
 
@@ -49,9 +50,11 @@ Redaction: emails are masked, and tokens, passwords and secrets are never logged
 docker compose logs backend --no-log-prefix | grep '"requestId":"<id>"'
 ```
 
-### Health (done, Phase 0)
+### Health
 
-`/actuator/health/liveness` and `/readiness` back the Docker healthchecks.
+`/livez` and `/readyz` on the API port (8080) back the Docker healthchecks and CI. In the `prod`
+profile all other actuator endpoints live on the management port **8081**, which Compose never
+publishes.
 
 ### Scheduled jobs (Phase 5)
 
@@ -64,5 +67,29 @@ Who holds a lock right now: `SELECT * FROM shedlock;`
 
 ### Metrics and dashboards (Phase 10)
 
-Micrometer + Prometheus registry, custom counters (`tickets_created_total{source}`,
-`webhook_requests_total{outcome}`, ...), Grafana dashboard under the `observability` profile.
+Micrometer with the Prometheus registry; every series carries `application="untangle"`.
+
+| Metric | Labels | Recorded in |
+|---|---|---|
+| `ticket_creations_total` | `source` (MANUAL, WEBHOOK) | `TicketMetrics`, after commit |
+| `ticket_transitions_total` | `from`, `to` | `TicketMetrics` (reopen counted as CLOSED → OPEN) |
+| `sla_breaches_total` | `level` | `TicketMetrics` (automatic escalations) |
+| `ticket_escalations_total` | `mode` (automatic, manual) | `TicketMetrics` |
+| `webhook_requests_total` | `outcome` (CREATED, DUPLICATE, REJECTED_*, RATE_LIMITED) | `DeliveryRecorder` (every pipeline exit) |
+| `webhook_processing_seconds` | histogram | `WebhookService` |
+| `ai_requests_total` | `feature`, `outcome` (success, invalid, unavailable) | `AiAssistant` |
+| `ai_latency_seconds` | `feature`, histogram | `AiAssistant` |
+| `http_server_requests_seconds` | Spring defaults, histogram | Spring Boot |
+
+`tickets_created_total` from the brief can't be used: the Prometheus client reserves the
+`_created` suffix, so the counter is `ticket_creations_total`.
+
+```bash
+docker compose --profile observability up -d
+# Prometheus http://localhost:9090   Grafana http://localhost:3001 (admin / GRAFANA_ADMIN_PASSWORD)
+```
+
+The provisioned **Untangle overview** dashboard (`infra/grafana/dashboards/untangle.json`) shows
+tickets created and transitions, SLA breaches, webhook outcomes and p95 latency, AI outcomes and
+latency, HTTP status rates and slowest endpoints, JVM heap and DB connections. Both tools bind to
+localhost only.

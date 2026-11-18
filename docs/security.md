@@ -166,4 +166,6 @@ per-IP bucket → size ≤ 64 KB → headers well-formed → partner active → 
 | SQL injection safe by construction (JPA params only) | ✅ |
 | Log redaction | ✅ masking + redacting `toString()` |
 | Request body limits (webhook 64 KB) | ✅ (filter, before buffering; nginx 1 MB overall) |
-| Dependency scanning | ✅ Dependabot + `npm audit` in CI; OWASP dependency-check for Maven in Phase 10 |
+| Dependency scanning | ✅ Dependabot (Maven, npm ×2, Docker, Compose, Actions) + `npm audit --audit-level=high` in CI. OWASP dependency-check was not added: it needs an NVD API key and minutes of download per run, and Dependabot alerts cover the same advisories |
+| Security headers verified on the real stack | ✅ Playwright `security-headers.spec.ts` (CSP, framing, nosniff, referrer, permissions, cache rules, no internals in errors) |
+| Metrics not public | ✅ actuator on unpublished port 8081 in `prod`; CI asserts `/actuator/prometheus` isn't served on 8080 |
