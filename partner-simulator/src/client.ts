@@ -17,6 +17,8 @@ export interface WebhookOptions {
   timestamp?: string;
   /** Secret used to sign; defaults to the partner's own. */
   signWith?: string;
+  /** Timestamp that was signed, if different from the X-Timestamp sent (timestamp swap). */
+  signedTimestamp?: string;
   /** Bytes that were signed, if different from the bytes sent (tampering). */
   signedBody?: Buffer;
   omitHeaders?: string[];
@@ -72,7 +74,11 @@ export class Untangle {
       'X-Partner-Id': partner.code,
       'X-Event-Id': options.eventId ?? `evt_${randomUUID()}`,
       'X-Timestamp': timestamp,
-      'X-Signature': sign(options.signWith ?? partner.secret, timestamp, options.signedBody ?? body),
+      'X-Signature': sign(
+        options.signWith ?? partner.secret,
+        options.signedTimestamp ?? timestamp,
+        options.signedBody ?? body,
+      ),
     };
     for (const name of options.omitHeaders ?? []) delete headers[name];
     // Send the exact bytes that were (or deliberately weren't) signed.

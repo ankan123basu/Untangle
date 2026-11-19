@@ -64,7 +64,7 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
   Notifications are `@TransactionalEventListener` + `REQUIRES_NEW` on ticket events.
 - AI: optional (`AI_ENABLED` + `GROQ_API_KEY`). `AiAssistant` = redact → wrap in `<ticket_data>` →
   `LlmClient` (Groq, timeout + circuit breaker) → validate every field → store insight. Never act on
-  model output, with one bounded exception: the AI teammate "Untangle AI" (ADR-028) may start
+  model output, with one bounded exception: the AI teammate "Unty" (ADR-028) may start
   progress, comment and hand back on tickets assigned to it, acting through `TicketService` with
   AGENT permissions; resolving needs a lead's approval. Tests use a fake HTTP server, never the
   real provider.

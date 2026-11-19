@@ -68,7 +68,7 @@ export const server = setupServer(
   http.get('/api/v1/ai/teammate', () =>
     HttpResponse.json({
       agentId: '01a1f000-0000-7000-8000-0000000000a1',
-      name: 'Untangle AI',
+      name: 'Unty',
       active: true,
       enabled: false,
     }),

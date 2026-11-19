@@ -22,8 +22,8 @@ Content-Type: application/json
 |---|---|---|
 | `X-Partner-Id` | your partner code, e.g. `acme-bank` | lowercase letters, digits, dashes |
 | `X-Event-Id` | your unique id for this complaint, e.g. `evt_01HZX...` | 1–128 chars `[A-Za-z0-9._:-]`. **Reuse it on retries.** Unique per partner |
-| `X-Timestamp` | Unix time in **seconds** when you sign | must be within **±300 s** of our clock |
-| `X-Signature` | `sha256=<lowercase hex>` | see below |
+| `X-Timestamp` | Unix time in **seconds** when you sign (not milliseconds) | must be within **±300 s** of our clock; a 13-digit millisecond value is rejected and logged as "looks like milliseconds" |
+| `X-Signature` | `sha256=<hex>` | lowercase hex recommended; uppercase is accepted. The `sha256=` prefix is exact |
 
 ### Body
 
@@ -160,5 +160,5 @@ them with your `X-Event-Id` and the response's `traceId`.
 
 ```bash
 make up            # demo profile: partner acme-bank, secret acme-demo-secret-change-me
-make simulate      # runs all 13 partner scenarios and prints a pass/fail table
+make simulate      # runs all 17 partner scenarios (incl. replay, timestamp swap, cross-partner, Unicode) and prints a pass/fail table
 ```

@@ -57,12 +57,24 @@ class WebhookCryptoTest {
         "abc",
         "sha256=",
         "sha1=0123456789abcdef0123456789abcdef01234567",
-        "sha256=ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789",
         "sha256=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdeg"
       })
   void rejectsMalformedSignatureHeaders(String header) {
+    // (uppercase hex is accepted: see acceptsUppercaseHex)
     assertThat(HmacSignatures.isWellFormed(header)).isFalse();
     assertThat(HmacSignatures.verify("s", "1", BODY, header)).isFalse();
+  }
+
+  @Test
+  void acceptsUppercaseHex() {
+    String lower = HmacSignatures.sign("s3cret", "1700000000", BODY);
+    String upper =
+        "sha256=" + lower.substring("sha256=".length()).toUpperCase(java.util.Locale.ROOT);
+    assertThat(HmacSignatures.verify("s3cret", "1700000000", BODY, upper)).isTrue();
+    assertThat(
+            HmacSignatures.verify(
+                "s3cret", "1700000000", BODY, upper.replace("sha256=", "SHA256=")))
+        .isFalse(); // the prefix itself is exact
   }
 
   // ---- AES-GCM ----------------------------------------------------------------------------

@@ -118,6 +118,7 @@ class AiTeammateIntegrationTest extends IntegrationTest {
     MvcTestResult teammate = get("/api/v1/ai/teammate", leadBearer);
     assertThat(teammate).hasStatusOk();
     aiId = json(teammate, "$.agentId");
+    assertThat(teammate).bodyJson().extractingPath("$.name").isEqualTo("Unty");
   }
 
   @AfterEach
@@ -204,6 +205,8 @@ class AiTeammateIntegrationTest extends IntegrationTest {
           assertThat(((Map<?, ?>) e.get("author")).get("ai")).isEqualTo(true);
         });
     assertThat(notificationTypes(leadBearer)).contains("AI_PROPOSAL");
+    assertThat(json(get("/api/v1/notifications", leadBearer), "$.content[*].message").toString())
+        .contains("Unty proposed a resolution");
     // The ticket data went to the model wrapped and redacted, like every AI call.
     assertThat(REQUESTS.get(0)).contains("<ticket_data>").doesNotContain("rahul@example.com");
   }
@@ -362,7 +365,7 @@ class AiTeammateIntegrationTest extends IntegrationTest {
 
   @Test
   void theAiTeammateCanNeverSignIn() {
-    MvcTestResult result = login("ai@untangle.local", "!no-login");
+    MvcTestResult result = login("unty@untangle.local", "!no-login");
 
     assertThat(result).hasStatus(401);
     assertThat(result).bodyJson().extractingPath("$.code").isEqualTo("AUTH_INVALID_CREDENTIALS");

@@ -7,6 +7,7 @@ an agent `check.<tag>@untangle.local` that ends deactivated, a partner `check-<t
 disabled), so it can be re-run at any time. Exit code 1 if any check fails.
 """
 import json
+import time
 import os
 import sys
 import urllib.error
@@ -194,6 +195,58 @@ s, sm = call("POST", f"/tickets/{tid}/ai/summary", lead)
 check("AI summary of the test ticket", s == 200 and len(sm.get("summary", "")) > 20, s)
 s, dr = call("POST", f"/tickets/{tid}/ai/reply-draft", lead)
 check("AI resolution-note draft", s == 200 and len(dr.get("draft", "")) > 20, s)
+
+
+# ---- AI teammate "Unty" (ADR-028): it proposes, a lead approves ---------------------------------
+s, mate = call("GET", "/ai/teammate", lead)
+check("AI teammate exists and is named Unty", s == 200 and mate["name"] == "Unty", mate)
+ai_id = mate["agentId"]
+s, people = call("GET", "/agents", lead)
+check("Agents list has humans and exactly one AI agent",
+      s == 200 and sum(a["ai"] for a in people) == 1 and sum(not a["ai"] for a in people) >= 3, s)
+s, b = call("POST", "/auth/login", body={"email": "unty@untangle.local", "password": "anything"})
+check("AI teammate can never sign in (401)", s == 401 and b.get("code") == "AUTH_INVALID_CREDENTIALS", s)
+s, b = call("PATCH", f"/agents/{ai_id}", admin, {"role": "ADMIN"})
+check("AI teammate can't be promoted (409 AI_TEAMMATE_FIXED)", s == 409 and b.get("code") == "AI_TEAMMATE_FIXED", s)
+
+
+def ai_ticket(subject, description, priority):
+    s, t = call("POST", "/tickets", lead, {"subject": f"{subject} {tag}", "description": description,
+                                            "customerName": "Kiran Rao", "customerEmail": "kiran@example.com",
+                                            "category": "GENERAL", "priority": priority})
+    call("PUT", f"/tickets/{t['id']}/assignee", lead, {"agentId": ai_id, "version": t["version"]})
+    return t["id"]
+
+
+def ai_outcome(tid, seconds=60):
+    """Waits until the AI proposes (PENDING) or hands the ticket back."""
+    for _ in range(seconds):
+        _, p = call("GET", f"/tickets/{tid}/ai-proposal", lead)
+        _, t = call("GET", f"/tickets/{tid}", lead)
+        if p and p.get("proposal") and p["proposal"]["status"] == "PENDING":
+            return "PROPOSED", p["proposal"], t
+        if not (t.get("assignee") and t["assignee"]["ai"]):
+            return "HANDED_BACK", None, t
+        time.sleep(1)
+    return "TIMEOUT", None, None
+
+
+crit = ai_ticket("Unauthorised transfer", "Two transfers I did not make left my account this morning.", "CRITICAL")
+outcome, _, t = ai_outcome(crit, 20)
+check("CRITICAL ticket is handed straight back to the lead", outcome == "HANDED_BACK" and t["assignee"] and t["assignee"]["id"] == lead_id, outcome)
+
+if st.get("enabled"):
+    easy = ai_ticket("How do I download my statement",
+                     "I want to download my October statement as a PDF from the app but cannot find where. Please guide me.", "LOW")
+    outcome, prop, t = ai_outcome(easy)
+    check("AI works an assigned ticket (proposes or hands back, never resolves)",
+          outcome in ("PROPOSED", "HANDED_BACK") and t["status"] in ("OPEN", "IN_PROGRESS"), outcome)
+    if outcome == "PROPOSED":
+        s, b = call("POST", f"/tickets/{easy}/ai-proposal/approve", agent, {"version": t["version"]})
+        check("An agent can't approve an AI proposal (403)", s == 403, s)
+        s, b = call("POST", f"/tickets/{easy}/ai-proposal/approve", lead, {"version": t["version"]})
+        _, after = call("GET", f"/tickets/{easy}", lead)
+        check("Lead approves the AI proposal → ticket RESOLVED", s == 200 and after["status"] == "RESOLVED", s)
 
 
 # ---- RBAC matrix: every role against every protected action -----------------------------------

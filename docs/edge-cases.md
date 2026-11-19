@@ -44,6 +44,13 @@ Test classes live in `backend/src/test/java/dev/untangle/`.
 | Secret stored encrypted, shown once | ciphertext `v1:...` only | `PartnerAdminIntegrationTest.secretIsShownOnceAndStoredOnlyEncrypted` | ✅ |
 | Ciphertext copied to another partner / tampered | decryption fails | `WebhookCryptoTest.ciphertextIsBoundToItsPartner`, `tamperingAndWrongKeysAreDetected` | ✅ |
 
+| Exact replay of a signed request (same event id + timestamp) | 201 then 200, one ticket | `anExactReplayCreatesNoSecondTicket`, simulator `replay` | ✅ |
+| Valid signature reused with a different (fresh) timestamp | 401, "signature mismatch" | `theTimestampIsBoundToTheSignature`, simulator `timestamp-swap` | ✅ |
+| Body signed with another partner's secret | 401 | `aSignatureFromAnotherPartnersSecretIsRejected`, simulator `cross-partner` | ✅ |
+| Uppercase hex signature | accepted (prefix stays exact) | `acceptsAnUppercaseHexSignature`, `acceptsUppercaseHex` | ✅ |
+| Non-ASCII body (Hindi, emoji) | signed over exact UTF-8 bytes; stored intact | `nonAsciiTextIsSignedOverTheExactUtf8Bytes`, simulator `unicode` | ✅ |
+| Millisecond timestamp | 401; log says "looks like milliseconds" | `aMillisecondTimestampIsRejectedWithAClearReason` | ✅ |
+
 ### Lifecycle (API behaviour: Phase 3)
 
 | Case | Expected | Test | Status |

@@ -14,7 +14,7 @@ sent it through an **HMAC-signed webhook**.
 | **Backend** | Java 21 · Spring Boot 4.1 · Spring Security (JWT) · PostgreSQL 18 · Flyway · Micrometer |
 | **Frontend** | React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · TanStack Query · React Three Fiber |
 | **Infra** | Docker Compose · nginx · GitHub Actions · Prometheus + Grafana · optional Redis |
-| **Quality** | 418 backend tests · 71 frontend tests · 14 Playwright E2E (incl. layout guard at 4 sizes × 3 roles) · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
+| **Quality** | 424 backend tests · 71 frontend tests · 14 Playwright E2E (incl. layout guard at 4 sizes × 3 roles) · 111 live feature/RBAC/AI checks · 17 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
 
 ---
 
@@ -60,7 +60,7 @@ On the login page, the **Admin / Lead / Agent** buttons fill in a demo account (
 Then try:
 
 ```bash
-make simulate      # a partner sends signed webhooks: 13 scenarios with a pass/fail table
+make simulate      # a partner sends signed webhooks: 17 scenarios with a pass/fail table
 make e2e           # browser end-to-end tests against the running stack
 ```
 
@@ -114,7 +114,7 @@ Local development with hot reload (JDK 21 + Node 26): `make setup`, then `make b
   explain why.
 - Admin screens for agents (deactivation moves their open tickets first) and partners.
 
-**AI teammate + assistance (optional)**: assign a ticket to "Untangle AI" and it replies and proposes a resolution for a lead to approve ([ADR-028](docs/decisions/ADR-028-ai-teammate-proposes-human-approves.md)).
+**AI teammate + assistance (optional)**: assign a ticket to "Unty" and it replies and proposes a resolution for a lead to approve ([ADR-028](docs/decisions/ADR-028-ai-teammate-proposes-human-approves.md)).
 
 **AI assistance (optional)**
 - With a Groq API key: suggested category/priority on intake, ticket summaries and draft resolution notes.
@@ -138,7 +138,7 @@ Local development with hot reload (JDK 21 + Node 26): `make setup`, then `make b
 | Comments and resolution notes | append-only timeline | comment tests, E2E |
 | Filter by priority, assigned agent, status | URL-synced filters, JPA Specifications | `TicketQueryIntegrationTest` |
 | Unresolved count on the dashboard | `GET /dashboard/summary` | `everyCountMatchesTheEquivalentListFilter` |
-| Ticket creation through a signed webhook, HMAC checked first | `WebhookService` pipeline | 13 simulator scenarios, webhook tests, E2E |
+| Ticket creation through a signed webhook, HMAC checked first | `WebhookService` pipeline | 17 simulator scenarios, webhook tests, E2E |
 | Tables tickets, agents, ticket_comments | Flyway `V1__init.sql` (+ partners, deliveries, notifications) | repository tests |
 | React screens: dashboard, detail, create/assign | plus board, admin, login | E2E + component tests |
 | **Rule:** closed tickets can't be modified without reopening | one guard in the service + DB check | `closedTicketsRejectEveryMutation` |
@@ -383,12 +383,12 @@ dashboard cache and cluster-wide rate limits, constant-query list endpoints (N+1
 
 | Layer | Tool | Count |
 |---|---|---|
-| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 418 |
+| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 424 |
 | Architecture rules | ArchUnit | included above |
 | Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 71 |
 | Every feature through the API + live RBAC matrix | `make check-features` | 103 checks |
 | End-to-end in a real browser (incl. layout: no overlap or sideways scroll at phone, tablet, laptop, desktop) | Playwright | 14 |
-| Partner webhook scenarios | Node simulator | 13 |
+| Partner webhook scenarios | Node simulator | 17 |
 | Load | k6 | 2 scripts |
 | Performance + accessibility | Lighthouse | dashboard, mobile + desktop |
 

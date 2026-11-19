@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The AI teammate's account (ADR-028): "Untangle AI", a plain AGENT that can be assigned tickets
- * but can never sign in.
+ * The AI teammate's account (ADR-028): "Unty", a plain AGENT that can be assigned tickets but can
+ * never sign in.
  *
  * <p>Created by the application, not by a migration, so a fresh database or a test reset always
  * gets it back. Admins can deactivate it from the Agents screen (the kill switch); this class never
@@ -24,8 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AiAgentAccount {
 
   private static final Logger log = LoggerFactory.getLogger(AiAgentAccount.class);
-  public static final String NAME = "Untangle AI";
-  public static final String EMAIL = "ai@untangle.local";
+  public static final String NAME = "Unty";
+  public static final String EMAIL = "unty@untangle.local";
 
   private final AgentRepository agents;
 

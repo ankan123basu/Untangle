@@ -120,3 +120,14 @@ now retry once when Groq says the JSON was invalid. Every live scenario then wor
   - The AI handed back a refund ticket on its own, saying the order number was missing.
   - An agent's attempt to approve got 403.
 
+## Addendum: the AI teammate is named "Unty" (2026-11-19)
+
+**Simple explanation:** the AI teammate was first called "Untangle AI". It now has its own
+friendly name, **Unty** (from *untie* + Untangle), with the address `unty@untangle.local`.
+
+**Technical details:**
+
+- The V5 migration renames the default row only, so a name an admin has set is kept.
+- Notifications, timeline notes and the ticket panel read the name from the agent record (no
+  hard-coded name). The `/ai/teammate` endpoint returns it.
+

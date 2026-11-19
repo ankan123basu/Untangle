@@ -10,7 +10,7 @@ import { leadAgent, server } from '@/test/server';
 import TicketDetailPage from './ticket-detail-page';
 
 const ID = ticketDetail().id;
-const AI = { id: '01a1f000-0000-7000-8000-0000000000a1', fullName: 'Untangle AI', ai: true };
+const AI = { id: '01a1f000-0000-7000-8000-0000000000a1', fullName: 'Unty', ai: true };
 
 function proposal(overrides: Partial<AiProposal> = {}): AiProposal {
   return {
@@ -60,7 +60,7 @@ describe('AI teammate panel', () => {
     serve(ticketDetail({ assignee: AI }), null);
     renderDetail();
 
-    expect(await screen.findByRole('heading', { name: 'Untangle AI' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Unty' })).toBeInTheDocument();
     expect(screen.getByText(/reading the ticket and drafting a reply/i)).toBeInTheDocument();
   });
 

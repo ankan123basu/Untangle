@@ -41,7 +41,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * "Untangle AI", the AI teammate (ADR-028). <b>It proposes; a human lead decides.</b>
+ * "Unty", the AI teammate (ADR-028). <b>It proposes; a human lead decides.</b>
  *
  * <p>When a ticket is assigned to it (after that change commits), it works the ticket in the
  * background:
@@ -52,7 +52,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  *   <li>AI switched off → hand back;
  *   <li>ask the model (redact → wrap → call → validate, as every AI call);
  *   <li>the model asks for a human, or confidence &lt; {@value #MIN_CONFIDENCE} → hand back;
- *   <li>otherwise: start progress, post the reply on the timeline as Untangle AI, store a PENDING
+ *   <li>otherwise: start progress, post the reply on the timeline as the AI, store a PENDING
  *       proposal and tell the person who assigned it.
  * </ol>
  *
@@ -87,7 +87,8 @@ public class AiTeammate {
   public record ProposalEnvelope(@Nullable ProposalView proposal) {}
 
   /** Published after a proposal is stored, for the notification feature. */
-  public record AiProposalReady(UUID ticketId, String ticketNumber, @Nullable UUID notifyAgentId) {}
+  public record AiProposalReady(
+      UUID ticketId, String ticketNumber, @Nullable UUID notifyAgentId, String aiName) {}
 
   private final AiAssistant assistant;
   private final AiProperties properties;
@@ -195,7 +196,8 @@ public class AiTeammate {
     }
     tickets.addComment(ticketId, new AddComment(answer.reply(), NewCommentType.COMMENT), me);
     tx.executeWithoutResult(status -> store(ticketId, ai, answer));
-    events.publishEvent(new AiProposalReady(ticketId, fresh.ticketNumber(), assignerId));
+    events.publishEvent(
+        new AiProposalReady(ticketId, fresh.ticketNumber(), assignerId, ai.fullName()));
     log.info(
         "AI teammate proposed a resolution ticket={} confidence={}",
         fresh.ticketNumber(),
@@ -269,7 +271,7 @@ public class AiTeammate {
     tickets.recordNote(
         ticketId,
         me.id(),
-        "Approved the resolution proposed by " + AiAgentAccount.NAME,
+        "Approved the resolution proposed by " + account.snapshot().fullName(),
         Map.of("event", "AI_PROPOSAL_APPROVED", "proposalId", proposal.getId().toString()));
     return view(proposal, me);
   }
@@ -285,7 +287,7 @@ public class AiTeammate {
     tickets.recordNote(
         ticketId,
         me.id(),
-        "Took over from " + AiAgentAccount.NAME + " (proposal not used)",
+        "Took over from " + account.snapshot().fullName() + " (proposal not used)",
         Map.of("event", "AI_PROPOSAL_REJECTED", "proposalId", proposal.getId().toString()));
     return view(proposal, me);
   }

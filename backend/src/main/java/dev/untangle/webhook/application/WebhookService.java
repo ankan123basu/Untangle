@@ -61,6 +61,7 @@ public class WebhookService {
   private static final Pattern EVENT_ID = Pattern.compile("[A-Za-z0-9._:-]{1,128}");
   private static final Pattern PARTNER_CODE = Pattern.compile("[a-z0-9-]{3,64}");
   private static final Pattern EPOCH_SECONDS = Pattern.compile("\\d{1,12}");
+  private static final Pattern EPOCH_MILLIS = Pattern.compile("1\\d{12}");
   static final String GENERIC_401 = "invalid webhook request";
 
   private final PartnerRepository partners;
@@ -130,6 +131,14 @@ public class WebhookService {
     if (h.eventId() == null || !EVENT_ID.matcher(h.eventId()).matches()) {
       throw attempt.reject(
           null, DeliveryOutcome.REJECTED_VALIDATION, "missing or malformed X-Event-Id");
+    }
+    if (h.timestamp() != null && EPOCH_MILLIS.matcher(h.timestamp()).matches()) {
+      // A very common integration mistake; say so in the log (the partner still gets a generic
+      // 401).
+      throw attempt.reject(
+          null,
+          DeliveryOutcome.REJECTED_TIMESTAMP,
+          "X-Timestamp looks like milliseconds; send Unix seconds");
     }
     if (h.timestamp() == null || !EPOCH_SECONDS.matcher(h.timestamp()).matches()) {
       throw attempt.reject(

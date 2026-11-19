@@ -10,7 +10,7 @@ Untangle can optionally ask an AI model (via Groq) for help, in three places:
 | **Thread summary** | a lead picking up an escalated ticket | ticket page | summarises a long timeline into a few sentences, key points and a next step |
 | **Resolution draft** | the agent resolving a ticket | ticket page | drafts a resolution note to edit before saving |
 
-| **AI teammate "Untangle AI"** ([ADR-028](decisions/ADR-028-ai-teammate-proposes-human-approves.md)) | leads assign it tickets | assignee picker; panel on the ticket page | reads the ticket, posts a reply on the timeline and **proposes** a resolution; a lead approves (resolves) or takes over. CRITICAL tickets, low confidence or any failure: handed back with the reason |
+| **AI teammate "Unty"** ([ADR-028](decisions/ADR-028-ai-teammate-proposes-human-approves.md)) | leads assign it tickets | assignee picker; panel on the ticket page | reads the ticket, posts a reply on the timeline and **proposes** a resolution; a lead approves (resolves) or takes over. CRITICAL tickets, low confidence or any failure: handed back with the reason |
 
 Rules we never break:
 

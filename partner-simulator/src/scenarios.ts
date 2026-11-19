@@ -78,6 +78,32 @@ export const SCENARIOS: Record<string, Scenario> = {
   'unknown-partner': single('unknown-partner', 401, async ({ api }) =>
     (await api.sendWebhook({ id: null, code: 'no-such-partner', secret: 'x' }, complaint())).status),
 
+  replay: async ({ api, partner }) => {
+    // The very same signed request (same event id AND timestamp) sent twice, e.g. by an attacker.
+    const eventId = `evt_${randomUUID()}`;
+    const timestamp = nowSeconds();
+    const body = complaint();
+    const first = await api.sendWebhook(partner, body, { eventId, timestamp });
+    const again = await api.sendWebhook(partner, body, { eventId, timestamp });
+    const sameTicket = first.body['ticketId'] === again.body['ticketId'];
+    return result('replay', 'identical request twice → 201 then 200, one ticket',
+      `${first.status} then ${again.status}${sameTicket ? ', one ticket' : ', TWO tickets'}`,
+      first.status === 201 && again.status === 200 && sameTicket);
+  },
+
+  'timestamp-swap': single('timestamp-swap', 401, async ({ api, partner }) =>
+    // Signed for 30 s ago, sent claiming "now": the timestamp is part of the signature.
+    (await api.sendWebhook(partner, complaint(), { signedTimestamp: nowSeconds(-30) })).status),
+
+  'cross-partner': single('cross-partner', 401, async ({ api, partner, newPartner }) => {
+    const other = await newPartner(100);
+    return (await api.sendWebhook(partner, complaint(), { signWith: other.secret })).status;
+  }),
+
+  unicode: single('unicode', 201, async ({ api, partner }) =>
+    (await api.sendWebhook(partner, complaint({ description: 'भुगतान विफल रहा 💳, charged twice' })))
+      .status),
+
   'invalid-priority': single('invalid-priority', 400, async ({ api, partner }) =>
     (await api.sendWebhook(partner, complaint({ priority: 'URGENT' }))).status),
 

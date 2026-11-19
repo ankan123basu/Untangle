@@ -102,7 +102,7 @@ public class NotificationService {
         null,
         NotificationType.AI_PROPOSAL,
         event.ticketId(),
-        "Untangle AI proposed a resolution for " + event.ticketNumber() + ". Review it.");
+        event.aiName() + " proposed a resolution for " + event.ticketNumber() + ". Review it.");
   }
 
   /** The AI teammate handed a ticket back: tell the person it went to (or every lead). */
@@ -118,7 +118,11 @@ public class NotificationService {
         null,
         NotificationType.AI_HANDBACK,
         event.ticketId(),
-        "Untangle AI handed " + event.ticketNumber() + " back: " + event.reason());
+        agentDirectory.findFresh(event.fromAgentId()).map(a -> a.fullName()).orElse("The AI")
+            + " handed "
+            + event.ticketNumber()
+            + " back: "
+            + event.reason());
   }
 
   @TransactionalEventListener

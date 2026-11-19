@@ -265,6 +265,81 @@ class WebhookIntegrationTest extends IntegrationTest {
   }
 
   @Test
+  void anExactReplayCreatesNoSecondTicket() {
+    // An attacker (or a retrying proxy) re-sends the very same signed request within the window.
+    byte[] bytes = BODY.getBytes(StandardCharsets.UTF_8);
+    Map<String, String> headers = signedHeaders(acme, "evt_replay", now(), bytes, acme.secret());
+
+    MvcTestResult first = send(headers, bytes);
+    MvcTestResult replay = send(headers, bytes);
+
+    assertThat(first).hasStatus(201);
+    assertThat(replay).hasStatus(200);
+    assertThat((String) json(replay, "$.ticketId")).isEqualTo(json(first, "$.ticketId"));
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM tickets WHERE external_event_id = 'evt_replay'", Long.class))
+        .isEqualTo(1L);
+  }
+
+  @Test
+  void theTimestampIsBoundToTheSignature() {
+    // A valid signature for one timestamp can't be reused with another, even a fresh one.
+    byte[] bytes = BODY.getBytes(StandardCharsets.UTF_8);
+    long nowSec = Instant.now().getEpochSecond();
+    Map<String, String> headers =
+        signedHeaders(acme, "evt_ts", Long.toString(nowSec - 30), bytes, acme.secret());
+    headers.put("X-Timestamp", Long.toString(nowSec));
+
+    assertGeneric401(send(headers, bytes));
+    assertThat(deliveries("outcome=REJECTED_SIGNATURE").get(0).get("reason"))
+        .isEqualTo("signature mismatch");
+  }
+
+  @Test
+  void aSignatureFromAnotherPartnersSecretIsRejected() {
+    Partner globex = createPartner("globex-" + suffix(), 1000);
+    byte[] bytes = BODY.getBytes(StandardCharsets.UTF_8);
+    // Signed correctly, but with globex's secret while claiming to be acme.
+    assertGeneric401(send(signedHeaders(acme, "evt_x", now(), bytes, globex.secret()), bytes));
+  }
+
+  @Test
+  void acceptsAnUppercaseHexSignature() {
+    byte[] bytes = BODY.getBytes(StandardCharsets.UTF_8);
+    Map<String, String> headers = signedHeaders(acme, "evt_upper", now(), bytes, acme.secret());
+    String sig = headers.get("X-Signature");
+    headers.put(
+        "X-Signature",
+        "sha256=" + sig.substring("sha256=".length()).toUpperCase(java.util.Locale.ROOT));
+
+    assertThat(send(headers, bytes)).hasStatus(201);
+  }
+
+  @Test
+  void nonAsciiTextIsSignedOverTheExactUtf8Bytes() {
+    String unicode =
+        BODY.replace(
+            "I cancelled my order 7 days ago and the refund has not arrived.",
+            "भुगतान विफल रहा 💳 — I was charged twice, refund please.");
+    MvcTestResult result = sendSigned(acme, "evt_utf8", unicode);
+
+    assertThat(result).hasStatus(201);
+    MvcTestResult ticket = get("/api/v1/tickets/" + json(result, "$.ticketId"), adminBearer);
+    assertThat((String) json(ticket, "$.description")).contains("भुगतान विफल रहा 💳");
+  }
+
+  @Test
+  void aMillisecondTimestampIsRejectedWithAClearReason() {
+    byte[] bytes = BODY.getBytes(StandardCharsets.UTF_8);
+    String millis = Long.toString(System.currentTimeMillis());
+
+    assertGeneric401(send(signedHeaders(acme, "evt_ms", millis, bytes, acme.secret()), bytes));
+    assertThat(deliveries("outcome=REJECTED_TIMESTAMP").get(0).get("reason"))
+        .isEqualTo("X-Timestamp looks like milliseconds; send Unix seconds");
+  }
+
+  @Test
   void rejectsUnknownAndInactivePartners() {
     Partner ghost = new Partner(null, "ghost-partner", "whatever");
     assertGeneric401(sendSigned(ghost, "evt_g", BODY));

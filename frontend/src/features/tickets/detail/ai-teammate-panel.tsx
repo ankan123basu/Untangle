@@ -2,7 +2,7 @@ import { Bot, Check, Hand } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { BotBadge } from '@/components/ui/bot-badge';
-import { useAiDecision, useAiProposal } from '@/features/ai/ai-teammate';
+import { useAiDecision, useAiProposal, useAiTeammate } from '@/features/ai/ai-teammate';
 import { ApiError, messageFor } from '@/lib/api/problem';
 import type { TicketDetail } from '@/lib/api/types';
 import { formatDateTime, timeAgo } from '@/lib/utils';
@@ -18,6 +18,9 @@ export function AiTeammatePanel({ ticket }: { ticket: TicketDetail }) {
   const open = ticket.status === 'OPEN' || ticket.status === 'IN_PROGRESS';
   const proposal = useAiProposal(ticket.id, aiAssigned && open);
   const decide = useAiDecision(ticket.id);
+  // The name comes from the AI's agent record ("Unty" by default; admins can rename it).
+  const teammate = useAiTeammate();
+  const name = teammate.data?.name ?? (ticket.assignee?.ai ? ticket.assignee.fullName : 'Unty');
   const p = proposal.data;
   const pending = p?.status === 'PENDING';
   const working = aiAssigned && open && !pending;
@@ -32,7 +35,7 @@ export function AiTeammatePanel({ ticket }: { ticket: TicketDetail }) {
         onSuccess: () => {
           toast.success(
             decision === 'approve'
-              ? `${ticket.ticketNumber} resolved with Untangle AI’s note`
+              ? `${ticket.ticketNumber} resolved with ${name}’s note`
               : `You took over ${ticket.ticketNumber}`,
           );
         },
@@ -54,7 +57,7 @@ export function AiTeammatePanel({ ticket }: { ticket: TicketDetail }) {
           <Bot aria-hidden="true" className="size-5" strokeWidth={2.5} />
         </span>
         <h2 id="ai-teammate-title" className="font-display text-lg font-bold">
-          Untangle AI
+          {name}
         </h2>
         <BotBadge />
         <span className="ml-auto text-xs font-semibold text-[#111]/70">

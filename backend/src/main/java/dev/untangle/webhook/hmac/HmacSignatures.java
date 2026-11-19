@@ -20,6 +20,8 @@ import javax.crypto.spec.SecretKeySpec;
  *       by one space and break verification, or worse, let different bytes pass.
  *   <li>The <b>timestamp is inside the signed message</b>, so an attacker can't replay an old body
  *       with a fresh timestamp.
+ *   <li>Hex digits are accepted in either case (some partner libraries emit uppercase); the prefix
+ *       must be exactly {@code sha256=}.
  *   <li>Comparison is <b>constant-time</b> ({@link MessageDigest#isEqual}), so timing doesn't leak
  *       how many leading bytes matched.
  * </ul>
@@ -27,7 +29,7 @@ import javax.crypto.spec.SecretKeySpec;
 public final class HmacSignatures {
 
   public static final String PREFIX = "sha256=";
-  private static final Pattern FORMAT = Pattern.compile("sha256=[0-9a-f]{64}");
+  private static final Pattern FORMAT = Pattern.compile("sha256=[0-9a-fA-F]{64}");
 
   private HmacSignatures() {}
 
