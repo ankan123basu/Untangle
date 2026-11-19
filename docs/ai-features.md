@@ -10,9 +10,12 @@ Untangle can optionally ask an AI model (via Groq) for help, in three places:
 | **Thread summary** | a lead picking up an escalated ticket | ticket page | summarises a long timeline into a few sentences, key points and a next step |
 | **Resolution draft** | the agent resolving a ticket | ticket page | drafts a resolution note to edit before saving |
 
+| **AI teammate "Untangle AI"** ([ADR-028](decisions/ADR-028-ai-teammate-proposes-human-approves.md)) | leads assign it tickets | assignee picker; panel on the ticket page | reads the ticket, posts a reply on the timeline and **proposes** a resolution; a lead approves (resolves) or takes over. CRITICAL tickets, low confidence or any failure: handed back with the reason |
+
 Rules we never break:
 
-- **Suggestions only.** Nothing is applied automatically; a person always decides.
+- **A person always decides.** Suggestions are never applied automatically. The AI teammate may
+  start work, comment and hand a ticket back, but only a lead can resolve it, by approving.
 - **No personal data leaves.** Emails, phone numbers, card and account numbers are replaced with
   `[EMAIL]`, `[PHONE]`, `[CARD]`, `[NUMBER]` before anything is sent. Customer names and emails
   aren't sent at all.

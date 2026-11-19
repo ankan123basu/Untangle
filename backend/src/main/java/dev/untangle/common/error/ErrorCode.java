@@ -51,6 +51,9 @@ public enum ErrorCode {
   PARTNER_NOT_FOUND(HttpStatus.NOT_FOUND, "Partner not found"),
   PARTNER_CODE_TAKEN(HttpStatus.CONFLICT, "Partner code already in use"),
   AI_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI assistance is unavailable"),
+  AI_PROPOSAL_NOT_FOUND(HttpStatus.NOT_FOUND, "No pending AI proposal for this ticket"),
+  AI_PROPOSAL_STALE(HttpStatus.CONFLICT, "This AI proposal is no longer current"),
+  AI_TEAMMATE_FIXED(HttpStatus.CONFLICT, "The AI teammate's role and sign-in cannot be changed"),
 
   // ---- Capacity ----
   SERVICE_BUSY(HttpStatus.SERVICE_UNAVAILABLE, "Service is busy"),

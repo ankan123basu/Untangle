@@ -50,11 +50,30 @@ public class Agent extends AuditedEntity {
   @Column(name = "last_login_at")
   private Instant lastLoginAt;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "kind", nullable = false, length = 10)
+  private AgentKind kind = AgentKind.HUMAN;
+
   public Agent(String fullName, String email, String passwordHash, Role role) {
     this.fullName = Objects.requireNonNull(fullName, "fullName").strip();
     this.email = Objects.requireNonNull(email, "email").strip();
     this.passwordHash = Objects.requireNonNull(passwordHash, "passwordHash");
     this.role = Objects.requireNonNull(role, "role");
+  }
+
+  /**
+   * The AI teammate (ADR-028): always a plain AGENT, with a password hash no input can match (not a
+   * BCrypt string), and login refuses AI accounts before any password check anyway.
+   */
+  public static Agent aiTeammate(String fullName, String email) {
+    Agent ai = new Agent(fullName, email, "!no-login", Role.AGENT);
+    ai.kind = AgentKind.AI;
+    return ai;
+  }
+
+  /** True for the AI teammate. */
+  public boolean isAi() {
+    return kind == AgentKind.AI;
   }
 
   public void deactivate() {
@@ -70,6 +89,9 @@ public class Agent extends AuditedEntity {
   }
 
   public void changeRole(Role role) {
+    if (isAi() && role != Role.AGENT) {
+      throw new IllegalStateException("The AI teammate is always a plain agent");
+    }
     this.role = Objects.requireNonNull(role, "role");
   }
 

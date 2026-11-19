@@ -37,8 +37,8 @@ export const adminUser: CurrentAgent = {
 };
 
 export const agentOptions: AgentOption[] = [
-  { id: leadAgent.id, fullName: leadAgent.fullName, role: 'LEAD' },
-  { id: agentUser.id, fullName: agentUser.fullName, role: 'AGENT' },
+  { id: leadAgent.id, fullName: leadAgent.fullName, role: 'LEAD', ai: false },
+  { id: agentUser.id, fullName: agentUser.fullName, role: 'AGENT', ai: false },
 ];
 
 const HOUR = 3_600_000;
@@ -59,7 +59,7 @@ export function ticketDetail(overrides: Partial<TicketDetail> = {}): TicketDetai
     partnerCode: null,
     externalEventId: null,
     assignee: null,
-    createdBy: { id: leadAgent.id, fullName: leadAgent.fullName },
+    createdBy: { id: leadAgent.id, fullName: leadAgent.fullName, ai: false },
     escalationLevel: 0,
     reopenedCount: 0,
     slaStartedAt: new Date(now - HOUR).toISOString(),
@@ -108,7 +108,7 @@ export function comment(overrides: Partial<TimelineEntry> = {}): TimelineEntry {
     id: '01a1eb20-0000-7000-8000-000000000001',
     type: 'COMMENT',
     body: 'Checked with payments.',
-    author: { id: leadAgent.id, fullName: leadAgent.fullName },
+    author: { id: leadAgent.id, fullName: leadAgent.fullName, ai: false },
     metadata: null,
     createdAt: new Date().toISOString(),
     ...overrides,

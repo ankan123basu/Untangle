@@ -5,6 +5,8 @@ import dev.untangle.ai.infrastructure.GroqChatClient;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +26,15 @@ class AiConfig {
             .failureRateThreshold(50)
             .waitDurationInOpenState(Duration.ofSeconds(30))
             .build());
+  }
+
+  /**
+   * Where the AI teammate works (ADR-028): one virtual thread per ticket, so a slow model call
+   * never holds up the request that assigned the ticket.
+   */
+  @Bean(name = "aiTeammateExecutor", destroyMethod = "close")
+  ExecutorService aiTeammateExecutor() {
+    return Executors.newVirtualThreadPerTaskExecutor();
   }
 
   @Bean

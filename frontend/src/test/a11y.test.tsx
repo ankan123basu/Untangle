@@ -35,7 +35,9 @@ async function expectAccessible(container: HTMLElement) {
   expect(summary).toEqual([]);
 }
 
-const detail = ticketDetail({ assignee: { id: adminUser.id, fullName: adminUser.fullName } });
+const detail = ticketDetail({
+  assignee: { id: adminUser.id, fullName: adminUser.fullName, ai: false },
+});
 
 beforeEach(() => {
   useSession.getState().setSession('t', adminUser);

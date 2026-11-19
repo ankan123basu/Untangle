@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class Timeline {
 
-  public record AuthorRef(UUID id, String fullName) {}
+  public record AuthorRef(UUID id, String fullName, boolean ai) {}
 
   /** One timeline entry. {@code body} is plain text; the UI must render it as text, never HTML. */
   public record Entry(
@@ -40,7 +40,7 @@ public class Timeline {
           c.getId(),
           c.getType(),
           c.getBody(),
-          a == null ? null : new AuthorRef(a.getId(), a.getFullName()),
+          a == null ? null : new AuthorRef(a.getId(), a.getFullName(), a.isAi()),
           c.getMetadata(),
           c.getCreatedAt());
     }

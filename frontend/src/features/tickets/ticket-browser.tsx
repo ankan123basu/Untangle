@@ -19,6 +19,7 @@ import {
   type TicketQuery,
 } from './filters';
 import { useAgentOptions, useTicketList } from './ticket-api';
+import { BotBadge } from '@/components/ui/bot-badge';
 
 type QueryPatch = { [K in keyof TicketQuery]?: TicketQuery[K] | undefined };
 
@@ -127,7 +128,13 @@ function TicketRow({ ticket, index }: { ticket: TicketSummary; index: number }) 
         <StatusBadge status={ticket.status} />
       </td>
       <td className="hidden py-3 pr-3 align-top text-sm md:table-cell">
-        {ticket.assignee?.fullName ?? <span className="text-muted italic">Unassigned</span>}
+        {ticket.assignee ? (
+          <>
+            {ticket.assignee.fullName} {ticket.assignee.ai && <BotBadge />}
+          </>
+        ) : (
+          <span className="text-muted italic">Unassigned</span>
+        )}
       </td>
       <td className="hidden py-3 pr-3 align-top lg:table-cell">
         <SlaIndicator
@@ -162,7 +169,8 @@ function TicketCard({ ticket, index }: { ticket: TicketSummary; index: number })
       </div>
       <p className="mt-1 font-semibold">{ticket.subject}</p>
       <p className="truncate text-sm text-muted">
-        {ticket.customerName} · {ticket.assignee?.fullName ?? 'Unassigned'}
+        {ticket.customerName} · {ticket.assignee?.fullName ?? 'Unassigned'}{' '}
+        {ticket.assignee?.ai && <BotBadge />}
       </p>
       <div className="mt-1.5 flex flex-wrap items-center gap-2">
         <SlaIndicator

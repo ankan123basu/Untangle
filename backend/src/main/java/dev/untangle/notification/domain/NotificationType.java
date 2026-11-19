@@ -6,5 +6,7 @@ public enum NotificationType {
   ESCALATED,
   SLA_BREACH,
   MENTION,
-  REOPENED
+  REOPENED,
+  AI_PROPOSAL,
+  AI_HANDBACK
 }

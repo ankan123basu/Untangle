@@ -12,9 +12,9 @@ public final class AgentViews {
   private AgentViews() {}
 
   /** Minimal view for everyone: assignment dropdowns, avatars. No email (PII minimisation). */
-  public record AgentOption(UUID id, String fullName, Role role) {
+  public record AgentOption(UUID id, String fullName, Role role, boolean ai) {
     static AgentOption of(Agent a) {
-      return new AgentOption(a.getId(), a.getFullName(), a.getRole());
+      return new AgentOption(a.getId(), a.getFullName(), a.getRole(), a.isAi());
     }
   }
 
@@ -28,7 +28,8 @@ public final class AgentViews {
       boolean locked,
       @Nullable Instant lastLoginAt,
       Instant createdAt,
-      long version) {
+      long version,
+      boolean ai) {
     static AgentAdminView of(Agent a, Instant now) {
       return new AgentAdminView(
           a.getId(),
@@ -39,7 +40,8 @@ public final class AgentViews {
           a.isLockedAt(now),
           a.getLastLoginAt(),
           a.getCreatedAt(),
-          a.getVersion());
+          a.getVersion(),
+          a.isAi());
     }
   }
 }

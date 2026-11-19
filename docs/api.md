@@ -193,6 +193,19 @@ Types: `ASSIGNED` (to the new assignee), `ESCALATED` (manual: leads + assignee),
 | `POST /api/v1/tickets/{id}/ai/reply-draft` | `AI_USE` | — | `{insightId, draft, ...}` |
 | `PATCH /api/v1/ai/insights/{id}/feedback` | `AI_USE` (own insight) | `{accepted}` | 204 |
 
+### AI teammate ([ADR-028](decisions/ADR-028-ai-teammate-proposes-human-approves.md))
+
+Assign a ticket to the AI with the normal `PUT /tickets/{id}/assignee` (leads); it works in the
+background and proposes. Errors: `AI_PROPOSAL_NOT_FOUND` (404), `AI_PROPOSAL_STALE` (409),
+`AI_TEAMMATE_FIXED` (409, changing the AI's role).
+
+| Method & path | Who | Body | Response |
+|---|---|---|---|
+| `GET /api/v1/ai/teammate` | signed in | — | `{agentId, name, active, enabled}` |
+| `GET /api/v1/tickets/{id}/ai-proposal` | can view the ticket | — | `{proposal: {id, reply, resolutionNote, confidence, status, model, promptVersion, createdAt, decidedBy?, decidedAt?, canDecide} \| null}` |
+| `POST /api/v1/tickets/{id}/ai-proposal/approve` | lead/admin | `{version}` | proposal (`APPROVED`); ticket RESOLVED with its note |
+| `POST /api/v1/tickets/{id}/ai-proposal/take-over` | lead/admin | `{version}` | proposal (`REJECTED`); ticket assigned to the caller |
+
 Details and safety: [ai-features.md](ai-features.md).
 
 ### Swagger / OpenAPI

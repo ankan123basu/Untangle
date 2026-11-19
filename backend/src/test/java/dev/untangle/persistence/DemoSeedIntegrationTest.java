@@ -37,7 +37,11 @@ class DemoSeedIntegrationTest {
   void seedsTheTeam() {
     assertThat(count("SELECT count(*) FROM agents WHERE role = 'ADMIN'")).isEqualTo(1);
     assertThat(count("SELECT count(*) FROM agents WHERE role = 'LEAD'")).isEqualTo(2);
-    assertThat(count("SELECT count(*) FROM agents WHERE role = 'AGENT'")).isEqualTo(6);
+    assertThat(count("SELECT count(*) FROM agents WHERE role = 'AGENT' AND kind = 'HUMAN'"))
+        .isEqualTo(6);
+    // Plus the AI teammate (ADR-028), created by the application, always a plain agent.
+    assertThat(count("SELECT count(*) FROM agents WHERE kind = 'AI' AND role = 'AGENT'"))
+        .isEqualTo(1);
     assertThat(count("SELECT count(*) FROM partners")).isEqualTo(1);
   }
 

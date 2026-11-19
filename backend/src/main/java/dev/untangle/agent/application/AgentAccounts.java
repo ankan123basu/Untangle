@@ -30,7 +30,8 @@ public class AgentAccounts {
       Role role,
       String passwordHash,
       boolean active,
-      Instant lockedUntil) {
+      Instant lockedUntil,
+      boolean ai) {
 
     public boolean isLockedAt(Instant now) {
       return lockedUntil != null && lockedUntil.isAfter(now);
@@ -54,7 +55,8 @@ public class AgentAccounts {
                 a.getRole(),
                 a.getPasswordHash(),
                 a.isActive(),
-                a.getLockedUntil()));
+                a.getLockedUntil(),
+                a.isAi()));
   }
 
   /**

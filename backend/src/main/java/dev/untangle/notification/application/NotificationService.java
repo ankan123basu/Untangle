@@ -2,6 +2,7 @@ package dev.untangle.notification.application;
 
 import dev.untangle.agent.application.AgentDirectory;
 import dev.untangle.agent.domain.Agent;
+import dev.untangle.ai.application.AiTeammate.AiProposalReady;
 import dev.untangle.common.api.PageResponse;
 import dev.untangle.common.error.ApiException;
 import dev.untangle.common.error.ErrorCode;
@@ -10,6 +11,7 @@ import dev.untangle.notification.domain.NotificationType;
 import dev.untangle.notification.infrastructure.NotificationRepository;
 import dev.untangle.ticket.application.TicketEvents.TicketAssigned;
 import dev.untangle.ticket.application.TicketEvents.TicketEscalated;
+import dev.untangle.ticket.application.TicketEvents.TicketHandedBack;
 import dev.untangle.ticket.application.TicketEvents.TicketReopened;
 import dev.untangle.ticket.domain.Ticket;
 import jakarta.persistence.EntityManager;
@@ -87,9 +89,44 @@ public class NotificationService {
 
   // ---- event listeners ------------------------------------------------------------------------
 
+  /** The AI teammate proposed a resolution: tell whoever assigned it (or every lead). */
+  @TransactionalEventListener(fallbackExecution = true)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void onAiProposal(AiProposalReady event) {
+    Set<UUID> to =
+        event.notifyAgentId() != null
+            ? Set.of(event.notifyAgentId())
+            : new LinkedHashSet<>(agentDirectory.activeLeadIds());
+    notify(
+        to,
+        null,
+        NotificationType.AI_PROPOSAL,
+        event.ticketId(),
+        "Untangle AI proposed a resolution for " + event.ticketNumber() + ". Review it.");
+  }
+
+  /** The AI teammate handed a ticket back: tell the person it went to (or every lead). */
+  @TransactionalEventListener
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void onHandedBack(TicketHandedBack event) {
+    Set<UUID> to =
+        event.toAgentId() != null
+            ? Set.of(event.toAgentId())
+            : new LinkedHashSet<>(agentDirectory.activeLeadIds());
+    notify(
+        to,
+        null,
+        NotificationType.AI_HANDBACK,
+        event.ticketId(),
+        "Untangle AI handed " + event.ticketNumber() + " back: " + event.reason());
+  }
+
   @TransactionalEventListener
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void onAssigned(TicketAssigned event) {
+    if (agentDirectory.findFresh(event.assigneeId()).map(a -> a.ai()).orElse(false)) {
+      return; // the AI teammate gets to work instead of a notification (ADR-028)
+    }
     notify(
         Set.of(event.assigneeId()),
         event.actorId(),

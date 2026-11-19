@@ -80,6 +80,16 @@ public class AiAssistant {
 
   public record ReplyDraft(UUID insightId, String draft, String model, String promptVersion) {}
 
+  /** What the AI teammate proposes for a ticket (ADR-028); validated, never executed as-is. */
+  public record TeammateAnswer(
+      @Nullable String reply,
+      @Nullable String resolutionNote,
+      double confidence,
+      boolean needsHuman,
+      @Nullable String reason,
+      String model,
+      String promptVersion) {}
+
   private static final List<String> SENTIMENTS =
       List.of("POSITIVE", "NEUTRAL", "NEGATIVE", "ANGRY");
 
@@ -110,7 +120,7 @@ public class AiAssistant {
     this.rateLimiter = rateLimiter;
     this.jsonMapper = jsonMapper;
     this.entityManager = entityManager;
-    for (String name : List.of("triage", "summary", "reply-draft")) {
+    for (String name : List.of("triage", "summary", "reply-draft", "teammate")) {
       prompts.put(name, load("prompts/" + name + "-" + PROMPT_VERSION + ".txt"));
     }
   }
@@ -187,6 +197,31 @@ public class AiAssistant {
     }
     TicketAiInsight insight = save(ticketId, InsightKind.REPLY_DRAFT, Map.of("draft", draft), me);
     return new ReplyDraft(insight.getId(), draft, llm.model(), PROMPT_VERSION);
+  }
+
+  // ---- AI teammate (ADR-028) -----------------------------------------------------------------
+
+  /**
+   * The AI teammate reads a ticket and proposes a customer reply and a resolution note. Same safety
+   * pipeline as every AI call; here every field is validated: text is length-capped, confidence is
+   * clamped to 0..1 (missing or invalid = 0), and an answer without a reply and a note is unusable
+   * unless the model asks for a human. The caller decides what (if anything) to do with it.
+   */
+  public TeammateAnswer workTicket(UUID ticketId, AuthenticatedAgent ai) {
+    Map<String, Object> answer = ask("teammate", ticketData(ticketId, ai), ai);
+    String reply = text(answer.get("reply"), 3000);
+    String note = text(answer.get("resolutionNote"), 3000);
+    boolean needsHuman = Boolean.TRUE.equals(answer.get("needsHuman"));
+    double confidence =
+        answer.get("confidence") instanceof Number n && Double.isFinite(n.doubleValue())
+            ? Math.max(0, Math.min(1, n.doubleValue()))
+            : 0;
+    String reason = text(answer.get("reason"), 300);
+    if (!needsHuman && (reply == null || note == null)) {
+      throw unusable();
+    }
+    return new TeammateAnswer(
+        reply, note, confidence, needsHuman, reason, llm.model(), "teammate-" + PROMPT_VERSION);
   }
 
   /** "Was this useful?" Lets us measure the AI's value per prompt version. Own insights only. */

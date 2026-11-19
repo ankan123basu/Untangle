@@ -21,7 +21,7 @@ function ticket(priority: Priority, i: number): TicketSummary {
     priority,
     status: 'OPEN',
     source: 'MANUAL',
-    assignee: i === 0 ? { id: 'a1', fullName: 'Riya Sen' } : null,
+    assignee: i === 0 ? { id: 'a1', fullName: 'Riya Sen', ai: false } : null,
     escalationLevel: 0,
     slaDueAt: '2099-01-01T00:00:00Z',
     slaBreached: i === 1,

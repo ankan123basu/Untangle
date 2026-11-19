@@ -63,4 +63,14 @@ export function problem(
 export const server = setupServer(
   http.post('/api/v1/auth/refresh', () => problem(401, 'AUTH_REFRESH_INVALID', 'No session')),
   http.get('/api/v1/notifications/unread-count', () => HttpResponse.json({ count: 0 })),
+  // The AI teammate (ADR-028): no proposal and AI off unless a test says otherwise.
+  http.get('/api/v1/tickets/:id/ai-proposal', () => HttpResponse.json({ proposal: null })),
+  http.get('/api/v1/ai/teammate', () =>
+    HttpResponse.json({
+      agentId: '01a1f000-0000-7000-8000-0000000000a1',
+      name: 'Untangle AI',
+      active: true,
+      enabled: false,
+    }),
+  ),
 );

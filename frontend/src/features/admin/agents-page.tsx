@@ -16,6 +16,7 @@ import type { AgentAdminView, BulkAssignResult, Role, TicketPage } from '@/lib/a
 import { queryKeys } from '@/lib/query-client';
 import { formatDateTime, humanize, timeAgo } from '@/lib/utils';
 import { useSession } from '@/features/auth/session-store';
+import { BotBadge } from '@/components/ui/bot-badge';
 
 const ROLES: Role[] = ['AGENT', 'LEAD', 'ADMIN'];
 
@@ -308,14 +309,18 @@ export default function AgentsPage() {
                     <th scope="row" className="px-4 py-3 font-semibold">
                       {a.fullName}{' '}
                       {self && <span className="text-xs font-normal text-muted">(you)</span>}
-                      <span className="block text-xs font-normal text-muted">{a.email}</span>
+                      {a.ai && <BotBadge />}
+                      <span className="block text-xs font-normal text-muted">
+                        {a.ai ? 'AI teammate · cannot sign in · deactivate to switch off' : a.email}
+                      </span>
                     </th>
                     <td data-label="Role" className="py-3 pr-3">
                       <Select
                         aria-label={`Role of ${a.fullName}`}
                         className="h-8 w-auto py-0"
                         value={a.role}
-                        disabled={changeRole.isPending}
+                        disabled={changeRole.isPending || a.ai}
+                        title={a.ai ? 'The AI teammate is always an agent' : undefined}
                         onChange={(e) => {
                           changeRole.mutate({ agent: a, role: e.target.value as Role });
                         }}

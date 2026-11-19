@@ -64,6 +64,9 @@ const MESSAGES: Record<string, string> = {
   AGENT_HAS_OPEN_TICKETS: 'Reassign this agent’s open tickets first.',
   PARTNER_CODE_TAKEN: 'A partner with that code already exists.',
   AI_UNAVAILABLE: 'AI assistance is unavailable right now.',
+  AI_PROPOSAL_NOT_FOUND: 'There is no AI proposal waiting on this ticket.',
+  AI_PROPOSAL_STALE: 'The ticket changed after the AI proposed this. Refresh to see the latest.',
+  AI_TEAMMATE_FIXED: 'The AI teammate is always a plain agent and can’t sign in.',
   SERVICE_BUSY: 'Untangle is very busy right now. Please try again in a few seconds.',
   INTERNAL_ERROR: 'Something went wrong on our side.',
 };

@@ -27,6 +27,7 @@ function agent(overrides: Partial<AgentAdminView>): AgentAdminView {
     fullName: 'Dev Malhotra',
     email: 'dev.malhotra@untangle.local',
     role: 'AGENT',
+    ai: false,
     active: true,
     locked: false,
     lastLoginAt: null,

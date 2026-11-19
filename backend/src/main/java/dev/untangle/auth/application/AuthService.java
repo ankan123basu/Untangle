@@ -112,6 +112,13 @@ public class AuthService {
     }
     LoginAccount account = found.get();
 
+    // The AI teammate (ADR-028) can never sign in. Same answer and timing as an unknown email.
+    if (account.ai()) {
+      passwordEncoder.matches(password, timingEqualizerHash);
+      log.warn("Login refused: AI teammate account agentId={}", account.id());
+      throw new ApiException(ErrorCode.AUTH_INVALID_CREDENTIALS);
+    }
+
     // 2. Locked accounts are rejected without checking the password (and without counting).
     if (account.isLockedAt(now)) {
       throw locked(account.lockedUntil());

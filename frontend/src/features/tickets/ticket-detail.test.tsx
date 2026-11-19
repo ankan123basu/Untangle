@@ -52,7 +52,11 @@ describe('ticket detail', () => {
     serve(
       ticketDetail({
         status: 'IN_PROGRESS',
-        assignee: { id: '01a1eb1f-0000-7000-8000-0000000000d1', fullName: 'Dev Malhotra' },
+        assignee: {
+          id: '01a1eb1f-0000-7000-8000-0000000000d1',
+          fullName: 'Dev Malhotra',
+          ai: false,
+        },
         allowedActions: ['COMMENT', 'ESCALATE'],
         deniedActions: [
           { action: 'EDIT', reason: 'ACCESS_DENIED' },
@@ -86,7 +90,7 @@ describe('ticket detail', () => {
   it('requires a resolution note and sends it with the loaded version', async () => {
     const detail = ticketDetail({
       status: 'IN_PROGRESS',
-      assignee: { id: leadAgent.id, fullName: leadAgent.fullName },
+      assignee: { id: leadAgent.id, fullName: leadAgent.fullName, ai: false },
       allowedActions: ['RESOLVE', 'RELEASE', 'COMMENT', 'EDIT'],
       deniedActions: [],
     });

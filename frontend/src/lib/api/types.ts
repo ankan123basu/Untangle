@@ -31,6 +31,11 @@ export type DayTrend = S['DayTrend'];
 export type Workload = S['Workload'];
 
 export type AgentOption = S['AgentOption'];
+
+/** The AI teammate (ADR-028). */
+export type AiTeammateState = S['TeammateState'];
+export type AiProposal = S['ProposalView'];
+export type AiProposalEnvelope = S['ProposalEnvelope'];
 export type AgentAdminView = S['AgentAdminView'];
 export type CreateAgent = S['CreateAgent'];
 

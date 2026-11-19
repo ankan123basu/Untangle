@@ -16,6 +16,7 @@ import { humanize } from '@/lib/utils';
 import { EscalationBadge, PriorityBadge, SlaIndicator, SourceBadge, StatusBadge } from './badges';
 import { ActionDialog, type ActionRequest } from './detail/action-dialog';
 import { AiPanel } from './detail/ai-panel';
+import { AiTeammatePanel } from './detail/ai-teammate-panel';
 import { Composer } from './detail/composer';
 import { DetailsCard } from './detail/details-card';
 import { EditDialog } from './detail/edit-dialog';
@@ -317,6 +318,7 @@ function TicketWorkspace({ ticket }: { ticket: TicketDetail }) {
 
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="flex min-w-0 flex-col gap-4">
+          <AiTeammatePanel ticket={ticket} />
           <Card>
             <CardHeader>
               <CardTitle>Description</CardTitle>

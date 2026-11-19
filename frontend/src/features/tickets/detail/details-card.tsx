@@ -9,6 +9,8 @@ import { useCan, useSession } from '@/features/auth/session-store';
 import { formatDateTime, humanize } from '@/lib/utils';
 import { deniedReason } from '../ticket-meta';
 import { useAgentOptions, useWorkload } from '../ticket-api';
+import { BotBadge } from '@/components/ui/bot-badge';
+import { useAiTeammate } from '@/features/ai/ai-teammate';
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -36,6 +38,7 @@ export function DetailsCard({
   const canAssign = ticket.allowedActions.includes('ASSIGN');
   const canSelfAssign = ticket.allowedActions.includes('SELF_ASSIGN');
   const agents = useAgentOptions();
+  const teammate = useAiTeammate();
   const workload = useWorkload(useCan('AGENT_WORKLOAD_VIEW') && canAssign);
   const openCount = new Map(workload.data?.map((w) => [w.agentId, w.open + w.inProgress]));
   const assignDenied = deniedReason(ticket.deniedActions.find((d) => d.action === 'ASSIGN'));
@@ -67,10 +70,14 @@ export function DetailsCard({
               )}
               {agents.data?.map((a) => {
                 const count = openCount.get(a.id);
+                // The AI teammate (ADR-028): only when AI is on; it works, a lead approves.
+                const aiOff = a.ai && !teammate.data?.enabled;
                 return (
-                  <option key={a.id} value={a.id}>
-                    {a.fullName} · {humanize(a.role)}
-                    {count !== undefined ? ` · ${String(count)} open` : ''}
+                  <option key={a.id} value={a.id} disabled={aiOff}>
+                    {a.ai
+                      ? `${a.fullName} · AI teammate${aiOff ? ' (switched off)' : ''}`
+                      : `${a.fullName} · ${humanize(a.role)}`}
+                    {count !== undefined && !a.ai ? ` · ${String(count)} open` : ''}
                   </option>
                 );
               })}
@@ -82,7 +89,13 @@ export function DetailsCard({
                 className="flex items-center justify-between gap-2 font-medium"
                 tabIndex={canSelfAssign ? -1 : 0}
               >
-                {ticket.assignee?.fullName ?? <span className="text-muted italic">Unassigned</span>}
+                {ticket.assignee ? (
+                  <span>
+                    {ticket.assignee.fullName} {ticket.assignee.ai && <BotBadge />}
+                  </span>
+                ) : (
+                  <span className="text-muted italic">Unassigned</span>
+                )}
               </p>
             </Tooltip>
           )}
@@ -92,7 +105,7 @@ export function DetailsCard({
               loading={assigning}
               icon={<UserPlus className="size-4" />}
               onClick={() => {
-                if (me) onAssign({ id: me.id, fullName: me.fullName, role: me.role });
+                if (me) onAssign({ id: me.id, fullName: me.fullName, role: me.role, ai: false });
               }}
             >
               Assign to me

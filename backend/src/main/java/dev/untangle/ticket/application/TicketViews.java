@@ -17,7 +17,8 @@ public final class TicketViews {
 
   private TicketViews() {}
 
-  public record AgentRef(UUID id, String fullName) {}
+  /** {@code ai} marks the AI teammate (ADR-028), so the UI can badge it. */
+  public record AgentRef(UUID id, String fullName, boolean ai) {}
 
   /** One row in the ticket list / dashboard table. */
   public record TicketSummary(

@@ -99,6 +99,9 @@ public class AgentService {
   public AgentAdminView update(UUID agentId, UpdateAgent command) {
     Agent agent = load(agentId);
     if (command.role() != null && command.role() != agent.getRole()) {
+      if (agent.isAi()) {
+        throw new ApiException(ErrorCode.AI_TEAMMATE_FIXED, "The AI teammate is always an agent");
+      }
       if (agent.getRole() == Role.ADMIN && agent.isActive()) {
         ensureAnotherActiveAdminExists(agentId);
       }

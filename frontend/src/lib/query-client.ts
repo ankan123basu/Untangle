@@ -47,5 +47,9 @@ export const queryKeys = {
     unread: ['notifications', 'unread'] as const,
     list: ['notifications', 'list'] as const,
   },
-  ai: { status: ['ai', 'status'] as const },
+  ai: {
+    status: ['ai', 'status'] as const,
+    teammate: ['ai', 'teammate'] as const,
+    proposal: (ticketId: string) => ['ai', 'proposal', ticketId] as const,
+  },
 };

@@ -23,6 +23,13 @@ public final class TicketEvents {
   public record TicketTransitioned(
       UUID ticketId, String ticketNumber, String from, String to, UUID actorId) {}
 
+  /**
+   * The AI teammate gave a ticket back to the team (ADR-028). {@code toAgentId} is the person it
+   * went back to, or null when it went back to the unassigned queue.
+   */
+  public record TicketHandedBack(
+      UUID ticketId, String ticketNumber, UUID toAgentId, UUID fromAgentId, String reason) {}
+
   public record TicketReopened(UUID ticketId, String ticketNumber, UUID assigneeId, UUID actorId) {}
 
   public record TicketEscalated(

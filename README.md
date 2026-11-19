@@ -14,7 +14,7 @@ sent it through an **HMAC-signed webhook**.
 | **Backend** | Java 21 · Spring Boot 4.1 · Spring Security (JWT) · PostgreSQL 18 · Flyway · Micrometer |
 | **Frontend** | React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · TanStack Query · React Three Fiber |
 | **Infra** | Docker Compose · nginx · GitHub Actions · Prometheus + Grafana · optional Redis |
-| **Quality** | 407 backend tests · 66 frontend tests · 14 Playwright E2E (incl. layout guard at 4 sizes × 3 roles) · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
+| **Quality** | 417 backend tests · 69 frontend tests · 14 Playwright E2E (incl. layout guard at 4 sizes × 3 roles) · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
 
 ---
 
@@ -113,6 +113,8 @@ Local development with hot reload (JDK 21 + Node 26): `make setup`, then `make b
 - Role-based access via permissions; the UI shows only what the server allows, and disabled buttons
   explain why.
 - Admin screens for agents (deactivation moves their open tickets first) and partners.
+
+**AI teammate + assistance (optional)**: assign a ticket to "Untangle AI" and it replies and proposes a resolution for a lead to approve ([ADR-028](docs/decisions/ADR-028-ai-teammate-proposes-human-approves.md)).
 
 **AI assistance (optional)**
 - With a Groq API key: suggested category/priority on intake, ticket summaries and draft resolution notes.
@@ -279,7 +281,7 @@ HttpOnly cookie; reuse of an old refresh token revokes the whole session family.
 | Input/output | Bean Validation everywhere; JPA parameters only (no SQL strings); comments rendered as text (no HTML execution); RFC 9457 errors without stack traces |
 | Browser | strict CSP (no inline scripts), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`; checked by E2E tests |
 | Operations | metrics on an unpublished port; containers non-root with health checks; tokens, passwords and full emails never logged; correlation id on every request |
-| AI | off by default; PII redacted, ticket text fenced against prompt injection, output validated, never acted on |
+| AI | off by default; PII redacted, ticket text fenced against prompt injection, output validated; the AI teammate only proposes, a lead approves (ADR-028) |
 | Supply chain | Dependabot for Maven, npm, Docker and Actions; `npm audit` in CI |
 
 Threat model, RBAC matrix and checklists: [docs/security.md](docs/security.md).
@@ -313,12 +315,13 @@ Every significant choice has an Architecture Decision Record in [docs/decisions/
 | [019](docs/decisions/ADR-019-partner-simulator-node-typescript.md) | Partner simulator in Node + TypeScript |
 | [020](docs/decisions/ADR-020-sla-scheduler-with-shedlock.md) | SLA scheduler guarded by ShedLock |
 | [021](docs/decisions/ADR-021-notifications-polling-over-sse.md) | Notifications by polling (SSE deferred) |
-| [022](docs/decisions/ADR-022-ai-suggestion-only.md) | AI optional and suggestion-only |
+| [022](docs/decisions/ADR-022-ai-suggestion-only.md) | AI optional and suggestion-only (amended by 028) |
 | [023](docs/decisions/ADR-023-exact-api-contract-and-vendored-react-bits.md) | Exact OpenAPI contract for generated types; vendored React Bits |
 | [024](docs/decisions/ADR-024-motion-and-3d-budget.md) | 3D and motion built cheaply, within a performance budget |
 | [025](docs/decisions/ADR-025-frosted-glass-colour-themes-and-ambient-3d.md) | Frosted glass, ten colour themes and an ambient 3D layer (amended by 026) |
 | [026](docs/decisions/ADR-026-nebula-glass-and-contained-3d-stages.md) | Nebula glass, sixteen colour themes, 3D only in contained stages (superseded) |
 | [027](docs/decisions/ADR-027-loud-neo-brutalism-and-toon-3d.md) | Loud neo-brutalism, twelve palettes, toon 3D about the product |
+| [028](docs/decisions/ADR-028-ai-teammate-proposes-human-approves.md) | An AI teammate that proposes; a lead approves |
 
 Agreed deviations from the original brief are listed at the top of
 [MASTER_PROMPT.md](MASTER_PROMPT.md); open questions and assumptions in
@@ -380,9 +383,9 @@ dashboard cache and cluster-wide rate limits, constant-query list endpoints (N+1
 
 | Layer | Tool | Count |
 |---|---|---|
-| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 407 |
+| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 417 |
 | Architecture rules | ArchUnit | included above |
-| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 66 |
+| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 69 |
 | Every feature through the API + live RBAC matrix | `make check-features` | 103 checks |
 | End-to-end in a real browser (incl. layout: no overlap or sideways scroll at phone, tablet, laptop, desktop) | Playwright | 14 |
 | Partner webhook scenarios | Node simulator | 13 |

@@ -152,7 +152,9 @@ export function useAssign(id: string) {
       if (previous) {
         client.setQueryData<TicketDetail>(key, {
           ...previous,
-          assignee: vars.agent ? { id: vars.agent.id, fullName: vars.agent.fullName } : null,
+          assignee: vars.agent
+            ? { id: vars.agent.id, fullName: vars.agent.fullName, ai: vars.agent.ai }
+            : null,
         });
       }
       return { previous };
@@ -189,7 +191,7 @@ export function useAddComment(id: string) {
         id: `pending-${String(Date.now())}`,
         type: vars.type,
         body: vars.body,
-        author: agent ? { id: agent.id, fullName: agent.fullName } : null,
+        author: agent ? { id: agent.id, fullName: agent.fullName, ai: false } : null,
         metadata: null,
         createdAt: new Date().toISOString(),
       };

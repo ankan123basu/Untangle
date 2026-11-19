@@ -168,3 +168,19 @@ Test classes: `AuthIntegrationTest` (A), `AgentAdminIntegrationTest` (G),
 | Prompt-injection text in a ticket | no effect on system behaviour | `promptInjectionInATicketHasNoEffectOnTheSystem` | ✅ |
 | PII in ticket text | redacted before sending | `piiIsRedactedBeforeLeavingTheSystem`, `PiiRedactorTest` (10) | ✅ |
 | Feedback on someone else's insight | 404 | `summaryAndFeedback` | ✅ |
+
+### AI teammate (ADR-028)
+
+| Case | Expected | Test | Status |
+|---|---|---|---|
+| Ticket assigned to the AI | AI starts progress, posts a reply (author marked `ai`), stores a PENDING proposal, notifies the assigner; **ticket not resolved** | `AiTeammateIntegrationTest.aiWorksAnAssignedTicketAndProposesWithoutResolvingIt` | ✅ |
+| Lead approves | ticket RESOLVED with the proposed note, authored by the lead | `aLeadApprovesAndTheTicketIsResolvedWithTheProposedNote` | ✅ |
+| Lead takes over | assigned to the lead, still IN_PROGRESS, proposal REJECTED | `aLeadCanTakeTheTicketOverInstead` | ✅ |
+| Agent tries to decide | 403; ticket unchanged; `canDecide=false` | `anAgentCannotDecideOnAProposal` | ✅ |
+| Ticket moved on after the proposal | 409 `AI_PROPOSAL_STALE` | `aProposalGoesStaleWhenTheTicketMovesOn` | ✅ |
+| CRITICAL ticket | handed back to the assigner at once, **no model call** | `criticalTicketsGoStraightBackToAHumanWithoutCallingTheModel` | ✅ |
+| Low confidence / model asks for a human | handed back, no proposal | `lowConfidenceOrAskingForAHumanHandsTheTicketBack` | ✅ |
+| Unusable or prompt-injected model answer | handed back, never resolved | `anUnusableModelAnswerHandsTheTicketBack` | ✅ |
+| Sign-in as the AI | 401 `AUTH_INVALID_CREDENTIALS` | `theAiTeammateCanNeverSignIn` | ✅ |
+| Promote the AI to lead/admin | 409 `AI_TEAMMATE_FIXED` | `theAiTeammateStaysAPlainAgent` | ✅ |
+

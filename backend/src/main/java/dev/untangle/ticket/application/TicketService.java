@@ -22,6 +22,7 @@ import dev.untangle.ticket.application.TicketEvents.TicketAssigned;
 import dev.untangle.ticket.application.TicketEvents.TicketChanged;
 import dev.untangle.ticket.application.TicketEvents.TicketCreated;
 import dev.untangle.ticket.application.TicketEvents.TicketEscalated;
+import dev.untangle.ticket.application.TicketEvents.TicketHandedBack;
 import dev.untangle.ticket.application.TicketEvents.TicketReopened;
 import dev.untangle.ticket.application.TicketEvents.TicketTransitioned;
 import dev.untangle.ticket.application.TicketViews.BulkAssignResult;
@@ -37,6 +38,7 @@ import dev.untangle.ticket.domain.TicketStatus;
 import dev.untangle.ticket.infrastructure.AssigneeRepository;
 import dev.untangle.ticket.infrastructure.TicketRepository;
 import dev.untangle.webhook.domain.Partner;
+import jakarta.annotation.Nullable;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -496,6 +498,67 @@ public class TicketService {
             ? CommentType.RESOLUTION_NOTE
             : CommentType.COMMENT;
     return timeline.byAgent(ticket, agents.getReferenceById(me.id()), type, command.body());
+  }
+
+  // ---- AI teammate (ADR-028) -------------------------------------------------------------------
+
+  /**
+   * The AI teammate gives a ticket back: if it is working on it, it goes back to OPEN; then it is
+   * assigned to {@code toAgentId} (the person who handed it to the AI) when that person is still
+   * active, otherwise to the unassigned queue. Does nothing if the ticket is closed or no longer
+   * that agent's. Not reachable from the API: only the AI teammate's worker calls it.
+   *
+   * @return whether the ticket was handed back
+   */
+  @Transactional
+  public boolean handBack(UUID id, UUID fromAgentId, @Nullable UUID toAgentId, String reason) {
+    Ticket ticket = load(id);
+    if (ticket.isClosed() || !ticket.isAssignedTo(fromAgentId)) {
+      return false;
+    }
+    Agent from = ticket.getAssignedAgent();
+    if (ticket.getStatus() == TicketStatus.IN_PROGRESS) {
+      ticket.transitionTo(TicketStatus.OPEN, clock.instant());
+    }
+    Agent to =
+        toAgentId == null
+            ? null
+            : agents
+                .findById(toAgentId)
+                .filter(Agent::isActive)
+                .filter(a -> !a.isAi())
+                .orElse(null);
+    ticket.assignTo(to);
+    tickets.flush();
+    Map<String, Object> metadata = new LinkedHashMap<>();
+    metadata.put("event", "AI_HANDBACK");
+    metadata.put("reason", reason);
+    metadata.put("to", to == null ? null : to.getId().toString());
+    timeline.system(
+        ticket,
+        from,
+        "Handed back by "
+            + from.getFullName()
+            + (to == null ? " to the queue" : " to " + to.getFullName())
+            + ": "
+            + reason,
+        metadata);
+    events.publishEvent(
+        new TicketHandedBack(
+            ticket.getId(),
+            ticket.getTicketNumber(),
+            to == null ? null : to.getId(),
+            from.getId(),
+            reason));
+    events.publishEvent(new TicketChanged(ticket.getId()));
+    log.info("Ticket handed back by AI number={} toQueue={}", ticket.getTicketNumber(), to == null);
+    return true;
+  }
+
+  /** A system line on the timeline on behalf of {@code actorId} (used by the AI teammate flow). */
+  @Transactional
+  public void recordNote(UUID id, UUID actorId, String body, Map<String, Object> metadata) {
+    timeline.system(load(id), agents.getReferenceById(actorId), body, metadata);
   }
 
   // ---- Helpers --------------------------------------------------------------------------------

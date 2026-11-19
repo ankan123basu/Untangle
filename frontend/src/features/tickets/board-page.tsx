@@ -19,6 +19,7 @@ import { ActionDialog, type ActionRequest } from './detail/action-dialog';
 import { actionForMove, deniedReason, inputFor, TRANSITIONS } from './ticket-meta';
 import { useTicketList } from './ticket-api';
 import { celebrate } from './celebrate';
+import { BotBadge } from '@/components/ui/bot-badge';
 
 const MIME = 'application/x-untangle-ticket';
 
@@ -125,7 +126,9 @@ function BoardCard({
         <PriorityBadge priority={ticket.priority} />
       </div>
       <p className="mt-1 line-clamp-2 text-sm font-semibold">{ticket.subject}</p>
-      <p className="mt-1 text-xs text-muted">{ticket.assignee?.fullName ?? 'Unassigned'}</p>
+      <p className="mt-1 text-xs text-muted">
+        {ticket.assignee?.fullName ?? 'Unassigned'} {ticket.assignee?.ai && <BotBadge />}
+      </p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <SlaIndicator
           status={ticket.status}

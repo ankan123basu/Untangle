@@ -1,6 +1,6 @@
 # ADR-022: AI is optional, suggestion-only, and never trusted
 
-- **Status:** Accepted
+- **Status:** Accepted, amended by [ADR-028](ADR-028-ai-teammate-proposes-human-approves.md) (the AI teammate may start work, comment and hand back; resolving still needs a human)
 - **Date:** 2026-11-18
 - **Phase:** 6
 

@@ -162,6 +162,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tickets/{id}/ai-proposal/take-over": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Take the ticket over instead (leads): assigned to you, proposal not used */
+        post: operations["takeOver"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets/{id}/ai-proposal/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve the proposal: the ticket is resolved with its note (leads) */
+        post: operations["approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tickets/bulk/assign": {
         parameters: {
             query?: never;
@@ -425,6 +459,23 @@ export interface paths {
         patch: operations["setActive_1"];
         trace?: never;
     };
+    "/api/v1/tickets/{id}/ai-proposal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The AI teammate's latest proposal for this ticket (null when none) */
+        get: operations["proposal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tickets/by-number/{ticketNumber}": {
         parameters: {
             query?: never;
@@ -541,6 +592,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ai/teammate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who the AI teammate is and whether it can work right now */
+        get: operations["state"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/ai/status": {
         parameters: {
             query?: never;
@@ -605,12 +673,13 @@ export interface components {
             /** Format: uuid */
             id: string;
             fullName: string;
+            ai: boolean;
         };
         DeniedAction: {
             /** @enum {string} */
             action: "EDIT" | "ASSIGN" | "SELF_ASSIGN" | "START_PROGRESS" | "RELEASE" | "RESOLVE" | "RETURN_TO_PROGRESS" | "CLOSE" | "REOPEN" | "COMMENT" | "ESCALATE";
             /** @enum {string} */
-            reason: "VALIDATION_FAILED" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "PAYLOAD_TOO_LARGE" | "RATE_LIMITED" | "AUTH_UNAUTHENTICATED" | "AUTH_INVALID_CREDENTIALS" | "AUTH_ACCOUNT_LOCKED" | "AUTH_ACCOUNT_DISABLED" | "AUTH_TOKEN_EXPIRED" | "AUTH_REFRESH_INVALID" | "AUTH_REFRESH_REUSED" | "ACCESS_DENIED" | "AGENT_NOT_FOUND" | "AGENT_INACTIVE" | "EMAIL_TAKEN" | "LAST_ADMIN" | "CANNOT_DEACTIVATE_SELF" | "AGENT_HAS_OPEN_TICKETS" | "TICKET_NOT_FOUND" | "TICKET_CLOSED" | "INVALID_STATUS_TRANSITION" | "RESOLUTION_NOTE_REQUIRED" | "ASSIGNEE_REQUIRED" | "VERSION_CONFLICT" | "WEBHOOK_REJECTED" | "PARTNER_NOT_FOUND" | "PARTNER_CODE_TAKEN" | "AI_UNAVAILABLE" | "SERVICE_BUSY" | "INTERNAL_ERROR";
+            reason: "VALIDATION_FAILED" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "PAYLOAD_TOO_LARGE" | "RATE_LIMITED" | "AUTH_UNAUTHENTICATED" | "AUTH_INVALID_CREDENTIALS" | "AUTH_ACCOUNT_LOCKED" | "AUTH_ACCOUNT_DISABLED" | "AUTH_TOKEN_EXPIRED" | "AUTH_REFRESH_INVALID" | "AUTH_REFRESH_REUSED" | "ACCESS_DENIED" | "AGENT_NOT_FOUND" | "AGENT_INACTIVE" | "EMAIL_TAKEN" | "LAST_ADMIN" | "CANNOT_DEACTIVATE_SELF" | "AGENT_HAS_OPEN_TICKETS" | "TICKET_NOT_FOUND" | "TICKET_CLOSED" | "INVALID_STATUS_TRANSITION" | "RESOLUTION_NOTE_REQUIRED" | "ASSIGNEE_REQUIRED" | "VERSION_CONFLICT" | "WEBHOOK_REJECTED" | "PARTNER_NOT_FOUND" | "PARTNER_CODE_TAKEN" | "AI_UNAVAILABLE" | "AI_PROPOSAL_NOT_FOUND" | "AI_PROPOSAL_STALE" | "AI_TEAMMATE_FIXED" | "SERVICE_BUSY" | "INTERNAL_ERROR";
         };
         TicketDetail: {
             /** Format: uuid */
@@ -702,6 +771,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             fullName: string;
+            ai: boolean;
         };
         Entry: {
             /** Format: uuid */
@@ -732,6 +802,27 @@ export interface components {
             model: string;
             promptVersion: string;
         };
+        Decision: {
+            /** Format: int64 */
+            version: number;
+        };
+        ProposalView: {
+            /** Format: uuid */
+            id: string;
+            reply: string;
+            resolutionNote: string;
+            confidence: number;
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED" | "SUPERSEDED";
+            model: string;
+            promptVersion: string;
+            /** Format: date-time */
+            createdAt: string;
+            decidedBy: string | null;
+            /** Format: date-time */
+            decidedAt: string | null;
+            canDecide: boolean;
+        };
         BulkAssign: {
             ticketIds: string[];
             /** Format: uuid */
@@ -745,7 +836,7 @@ export interface components {
             /** Format: uuid */
             ticketId: string;
             /** @enum {string} */
-            reason: "VALIDATION_FAILED" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "PAYLOAD_TOO_LARGE" | "RATE_LIMITED" | "AUTH_UNAUTHENTICATED" | "AUTH_INVALID_CREDENTIALS" | "AUTH_ACCOUNT_LOCKED" | "AUTH_ACCOUNT_DISABLED" | "AUTH_TOKEN_EXPIRED" | "AUTH_REFRESH_INVALID" | "AUTH_REFRESH_REUSED" | "ACCESS_DENIED" | "AGENT_NOT_FOUND" | "AGENT_INACTIVE" | "EMAIL_TAKEN" | "LAST_ADMIN" | "CANNOT_DEACTIVATE_SELF" | "AGENT_HAS_OPEN_TICKETS" | "TICKET_NOT_FOUND" | "TICKET_CLOSED" | "INVALID_STATUS_TRANSITION" | "RESOLUTION_NOTE_REQUIRED" | "ASSIGNEE_REQUIRED" | "VERSION_CONFLICT" | "WEBHOOK_REJECTED" | "PARTNER_NOT_FOUND" | "PARTNER_CODE_TAKEN" | "AI_UNAVAILABLE" | "SERVICE_BUSY" | "INTERNAL_ERROR";
+            reason: "VALIDATION_FAILED" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "PAYLOAD_TOO_LARGE" | "RATE_LIMITED" | "AUTH_UNAUTHENTICATED" | "AUTH_INVALID_CREDENTIALS" | "AUTH_ACCOUNT_LOCKED" | "AUTH_ACCOUNT_DISABLED" | "AUTH_TOKEN_EXPIRED" | "AUTH_REFRESH_INVALID" | "AUTH_REFRESH_REUSED" | "ACCESS_DENIED" | "AGENT_NOT_FOUND" | "AGENT_INACTIVE" | "EMAIL_TAKEN" | "LAST_ADMIN" | "CANNOT_DEACTIVATE_SELF" | "AGENT_HAS_OPEN_TICKETS" | "TICKET_NOT_FOUND" | "TICKET_CLOSED" | "INVALID_STATUS_TRANSITION" | "RESOLUTION_NOTE_REQUIRED" | "ASSIGNEE_REQUIRED" | "VERSION_CONFLICT" | "WEBHOOK_REJECTED" | "PARTNER_NOT_FOUND" | "PARTNER_CODE_TAKEN" | "AI_UNAVAILABLE" | "AI_PROPOSAL_NOT_FOUND" | "AI_PROPOSAL_STALE" | "AI_TEAMMATE_FIXED" | "SERVICE_BUSY" | "INTERNAL_ERROR";
         };
         UnreadCount: {
             /** Format: int64 */
@@ -813,6 +904,7 @@ export interface components {
             createdAt: string;
             /** Format: int64 */
             version: number;
+            ai: boolean;
         };
         CreatePartner: {
             code: string;
@@ -854,7 +946,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             /** @enum {string} */
-            type: "ASSIGNED" | "ESCALATED" | "SLA_BREACH" | "MENTION" | "REOPENED";
+            type: "ASSIGNED" | "ESCALATED" | "SLA_BREACH" | "MENTION" | "REOPENED" | "AI_PROPOSAL" | "AI_HANDBACK";
             /** Format: uuid */
             ticketId: string;
             ticketNumber: string;
@@ -915,6 +1007,9 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        ProposalEnvelope: {
+            proposal: components["schemas"]["ProposalView"] | null;
+        };
         PageResponseNotificationView: {
             content: components["schemas"]["NotificationView"][];
             /** Format: int32 */
@@ -967,6 +1062,13 @@ export interface components {
             /** Format: int64 */
             breached: number;
         };
+        TeammateState: {
+            /** Format: uuid */
+            agentId: string;
+            name: string;
+            active: boolean;
+            enabled: boolean;
+        };
         Status: {
             enabled: boolean;
             model: string | null;
@@ -977,6 +1079,7 @@ export interface components {
             fullName: string;
             /** @enum {string} */
             role: "ADMIN" | "LEAD" | "AGENT";
+            ai: boolean;
         };
         DeliveryView: {
             /** Format: uuid */
@@ -1294,6 +1397,58 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ReplyDraft"];
+                };
+            };
+        };
+    };
+    takeOver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Decision"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProposalView"];
+                };
+            };
+        };
+    };
+    approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Decision"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProposalView"];
                 };
             };
         };
@@ -1740,6 +1895,28 @@ export interface operations {
             };
         };
     };
+    proposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProposalEnvelope"];
+                };
+            };
+        };
+    };
     getByNumber: {
         parameters: {
             query?: never;
@@ -1884,6 +2061,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CurrentAgent"];
+                };
+            };
+        };
+    };
+    state: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TeammateState"];
                 };
             };
         };

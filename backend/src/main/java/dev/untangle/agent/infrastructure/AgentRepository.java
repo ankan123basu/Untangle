@@ -20,6 +20,8 @@ public interface AgentRepository extends JpaRepository<Agent, UUID> {
    */
   Optional<Agent> findByEmailIgnoreCase(String email);
 
+  Optional<Agent> findFirstByKind(dev.untangle.agent.domain.AgentKind kind);
+
   boolean existsByEmailIgnoreCase(String email);
 
   /** "Last active admin" safety rule: never deactivate or demote the final one. */

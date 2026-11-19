@@ -1,7 +1,8 @@
-import { CheckCircle2, Cog, MessageSquare } from 'lucide-react';
+import { Bot, CheckCircle2, Cog, MessageSquare } from 'lucide-react';
 import { Skeleton, ErrorState } from '@/components/ui/feedback';
 import type { TimelineEntry } from '@/lib/api/types';
 import { stagger } from '@/lib/motion';
+import { BotBadge } from '@/components/ui/bot-badge';
 import { cn, formatDateTime, timeAgo } from '@/lib/utils';
 import { useTimeline } from '../ticket-api';
 
@@ -52,7 +53,12 @@ function EntryItem({ entry, index }: { entry: TimelineEntry; index: number }) {
         <p className="min-w-0">
           {/* Plain text only: React escapes it, so stored HTML can never run (§11). */}
           <span className="break-words">{describe(entry)}</span>
-          {entry.author && <span> · {entry.author.fullName}</span>}
+          {entry.author && (
+            <span>
+              {' '}
+              · {entry.author.fullName} {entry.author.ai && <BotBadge />}
+            </span>
+          )}
           {' · '}
           <time dateTime={entry.createdAt} title={formatDateTime(entry.createdAt)}>
             {timeAgo(entry.createdAt)}
@@ -68,7 +74,13 @@ function EntryItem({ entry, index }: { entry: TimelineEntry; index: number }) {
         aria-hidden="true"
         className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-line bg-paper-2 text-xs font-bold"
       >
-        {entry.author ? initials(entry.author.fullName) : '?'}
+        {entry.author?.ai ? (
+          <Bot className="size-4" strokeWidth={2.5} />
+        ) : entry.author ? (
+          initials(entry.author.fullName)
+        ) : (
+          '?'
+        )}
       </span>
       <article
         className={cn(
@@ -78,6 +90,7 @@ function EntryItem({ entry, index }: { entry: TimelineEntry; index: number }) {
       >
         <header className="mb-1 flex flex-wrap items-center gap-x-2 text-sm">
           <span className="font-semibold">{entry.author?.fullName ?? 'Unknown'}</span>
+          {entry.author?.ai && <BotBadge />}
           {note ? (
             <span className="inline-flex items-center gap-1 text-xs font-bold uppercase">
               <CheckCircle2 aria-hidden="true" className="size-3.5" /> Resolution note
