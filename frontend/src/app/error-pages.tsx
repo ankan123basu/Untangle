@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { isRouteErrorResponse, Link, useRouteError } from 'react-router';
 import { LogoMark } from '@/components/brand/LogoMark';
 import { ApiError } from '@/lib/api/problem';
+import { isStaleBuildError, reloadedRecently, reloadForNewVersion } from '@/lib/stale-build';
 
 function ErrorLayout({
   code,
@@ -55,6 +57,27 @@ export function RouteErrorPage() {
   if (isRouteErrorResponse(error) && error.status === 404) return <NotFoundPage />;
   if (error instanceof ApiError && error.status === 404) return <NotFoundPage />;
   if (error instanceof ApiError && error.status === 403) return <ForbiddenPage />;
+  // A tab opened before the last deploy asked for code that no longer exists: load the new
+  // version instead of showing an error.
+  if (isStaleBuildError(error)) return <NewVersionPage />;
+  return <UnexpectedErrorPage error={error} />;
+}
+
+/** Reloads into the new version; if we just did that and it still fails, show the real error. */
+function NewVersionPage() {
+  const [reloading] = useState(() => !reloadedRecently());
+  useEffect(() => {
+    if (reloading) reloadForNewVersion();
+  }, [reloading]);
+  if (!reloading) return <UnexpectedErrorPage error={null} />;
+  return (
+    <ErrorLayout code="↻" title="Updating Untangle">
+      <p>A new version is available. Loading it now…</p>
+    </ErrorLayout>
+  );
+}
+
+function UnexpectedErrorPage({ error }: { error: unknown }) {
   const traceId = error instanceof ApiError ? error.traceId : undefined;
   return (
     <ErrorLayout code="500" title="Something went wrong">

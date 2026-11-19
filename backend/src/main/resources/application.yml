@@ -168,7 +168,7 @@ app:
     # Check https://console.groq.com/docs/models (or GET {base-url}/models) for current production models.
     model: ${GROQ_MODEL:openai/gpt-oss-20b}
     timeout: 8s
-    max-tokens: 800
+    max-tokens: 2000 # room for a reasoning model's thinking plus the teammate's reply + note
     per-user-limit:
       capacity: 20
       period: 1m

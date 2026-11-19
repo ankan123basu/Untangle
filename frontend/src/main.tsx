@@ -6,6 +6,9 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/jetbrains-mono';
 import '@/styles/globals.css';
 import { App } from '@/app/App';
+import { installStaleBuildRecovery } from '@/lib/stale-build';
+
+installStaleBuildRecovery();
 
 const container = document.getElementById('root');
 if (!container) {

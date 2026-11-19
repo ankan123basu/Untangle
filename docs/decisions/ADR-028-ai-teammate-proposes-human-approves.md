@@ -98,3 +98,25 @@ autonomy, and the owner chose the middle one:
   - its role is fixed
 
   The frontend has `ai-teammate.test.tsx` with 3 tests.
+
+## Addendum: first live run on real Groq (2026-11-19)
+
+**Simple explanation:** in the first live test, some AI calls failed with "Bad Request". The model
+(`openai/gpt-oss-20b`) thinks before it answers, and its thinking used up the token budget, so its
+JSON answer was cut off and Groq rejected it. We gave it more room, asked it to think briefly, and
+now retry once when Groq says the JSON was invalid. Every live scenario then worked.
+
+**Technical details:**
+
+- `max-tokens` went from 800 to 2000.
+- `reasoning_effort: low` is sent for gpt-oss models.
+- `GroqChatClient` retries once on 400 `json_validate_failed`, and logs the provider's error code
+  only, never the content.
+- Live results:
+  - A human-assigned ticket was started and resolved by the agent.
+  - The AI proposed at 95–98% confidence and the lead approved: RESOLVED.
+  - The lead took over a proposal: assigned to the lead, still IN_PROGRESS.
+  - A CRITICAL ticket was handed back without a model call.
+  - The AI handed back a refund ticket on its own, saying the order number was missing.
+  - An agent's attempt to approve got 403.
+

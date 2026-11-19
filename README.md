@@ -14,7 +14,7 @@ sent it through an **HMAC-signed webhook**.
 | **Backend** | Java 21 · Spring Boot 4.1 · Spring Security (JWT) · PostgreSQL 18 · Flyway · Micrometer |
 | **Frontend** | React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · TanStack Query · React Three Fiber |
 | **Infra** | Docker Compose · nginx · GitHub Actions · Prometheus + Grafana · optional Redis |
-| **Quality** | 417 backend tests · 69 frontend tests · 14 Playwright E2E (incl. layout guard at 4 sizes × 3 roles) · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
+| **Quality** | 418 backend tests · 71 frontend tests · 14 Playwright E2E (incl. layout guard at 4 sizes × 3 roles) · 103 live feature/RBAC checks · 13 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
 
 ---
 
@@ -383,9 +383,9 @@ dashboard cache and cluster-wide rate limits, constant-query list endpoints (N+1
 
 | Layer | Tool | Count |
 |---|---|---|
-| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 417 |
+| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 418 |
 | Architecture rules | ArchUnit | included above |
-| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 69 |
+| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 71 |
 | Every feature through the API + live RBAC matrix | `make check-features` | 103 checks |
 | End-to-end in a real browser (incl. layout: no overlap or sideways scroll at phone, tablet, laptop, desktop) | Playwright | 14 |
 | Partner webhook scenarios | Node simulator | 13 |

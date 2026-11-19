@@ -34,6 +34,9 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
  */
 class AiTeammateIntegrationTest extends IntegrationTest {
 
+  /** Queue this to make the fake Groq answer 400 json_validate_failed, like the real one does. */
+  static final String JSON_REJECTED = "<json_validate_failed>";
+
   static final ConcurrentLinkedQueue<String> REPLIES = new ConcurrentLinkedQueue<>();
   static final List<String> REQUESTS = new CopyOnWriteArrayList<>();
   static final HttpServer FAKE_GROQ = startFakeGroq();
@@ -47,13 +50,16 @@ class AiTeammateIntegrationTest extends IntegrationTest {
             REQUESTS.add(
                 new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
             String content = REPLIES.poll();
-            int status = content == null ? 500 : 200;
+            int status = content == null ? 500 : JSON_REJECTED.equals(content) ? 400 : 200;
             String body =
                 content == null
                     ? "{\"error\":{\"message\":\"no reply queued\"}}"
-                    : "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":"
-                        + quote(content)
-                        + "}}]}";
+                    : status == 400
+                        ? "{\"error\":{\"message\":\"Failed to generate JSON\","
+                            + "\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\"}}"
+                        : "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":"
+                            + quote(content)
+                            + "}}]}";
             byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().add("Content-Type", "application/json");
             exchange.sendResponseHeaders(status, bytes.length);
@@ -293,6 +299,19 @@ class AiTeammateIntegrationTest extends IntegrationTest {
 
     assertThat(approved).hasStatus(409);
     assertThat(approved).bodyJson().extractingPath("$.code").isEqualTo("AI_PROPOSAL_STALE");
+    assertThat(ticket(id)).bodyJson().extractingPath("$.status").isEqualTo("IN_PROGRESS");
+  }
+
+  @Test
+  void aRejectedJsonAnswerIsRetriedOnceAndTheAiStillProposes() {
+    REPLIES.add(JSON_REJECTED); // Groq: 400 json_validate_failed (the model wrote invalid JSON)
+    REPLIES.add(CONFIDENT);
+    String id = ticketWith("HIGH", "My card was blocked while travelling abroad.");
+
+    assignToAi(id);
+    await("a pending proposal", () -> "PENDING".equals(proposalStatus(id)));
+
+    assertThat(REQUESTS).hasSize(2);
     assertThat(ticket(id)).bodyJson().extractingPath("$.status").isEqualTo("IN_PROGRESS");
   }
 

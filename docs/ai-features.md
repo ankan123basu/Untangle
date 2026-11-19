@@ -40,7 +40,7 @@ AI_ENABLED && key?            no → 503 AI_UNAVAILABLE (UI hides the panel via 
 per-user token bucket 20/min  → 429
 PiiRedactor                   emails, cards (13–19 digits), Indian mobiles, phones, 9+ digit runs
 wrap in <ticket_data>…</ticket_data>, and neutralise any delimiter inside the data
-GroqChatClient                temperature 0.2, response_format json_object, max_tokens 800
+GroqChatClient                temperature 0.2, response_format json_object, max_tokens 2000, reasoning_effort low (gpt-oss), one retry on json_validate_failed
                               connect 3 s / read 8 s timeout, Resilience4j circuit breaker
                               (≥5 calls, 50% failures → open 30 s)
 parse                         first {…} block → JSON object, else "unusable" → 503

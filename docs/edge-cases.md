@@ -183,4 +183,5 @@ Test classes: `AuthIntegrationTest` (A), `AgentAdminIntegrationTest` (G),
 | Unusable or prompt-injected model answer | handed back, never resolved | `anUnusableModelAnswerHandsTheTicketBack` | ✅ |
 | Sign-in as the AI | 401 `AUTH_INVALID_CREDENTIALS` | `theAiTeammateCanNeverSignIn` | ✅ |
 | Promote the AI to lead/admin | 409 `AI_TEAMMATE_FIXED` | `theAiTeammateStaysAPlainAgent` | ✅ |
-
+| Groq rejects the model's JSON (400 `json_validate_failed`) | retried once; the AI still proposes | `aRejectedJsonAnswerIsRetriedOnceAndTheAiStillProposes` | ✅ |
+| Tab opened before a deploy loads a lazy page | reloads once into the new version instead of the 500 page (loop-guarded) | `stale-build.test.ts` | ✅ |

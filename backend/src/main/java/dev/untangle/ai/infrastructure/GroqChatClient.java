@@ -5,12 +5,16 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 /**
@@ -64,22 +68,23 @@ public class GroqChatClient implements LlmClient {
 
   @Override
   public String completeJson(String systemPrompt, String userContent) {
-    Map<String, Object> request =
-        Map.of(
-            "model",
-            model,
-            "temperature",
-            0.2,
-            "max_tokens",
-            maxTokens,
-            "response_format",
-            Map.of("type", "json_object"),
-            "messages",
-            List.of(
-                Map.of("role", "system", "content", systemPrompt),
-                Map.of("role", "user", "content", userContent)));
+    Map<String, Object> request = new LinkedHashMap<>();
+    request.put("model", model);
+    request.put("temperature", 0.2);
+    request.put("max_tokens", maxTokens);
+    request.put("response_format", Map.of("type", "json_object"));
+    // Reasoning models (gpt-oss) spend part of max_tokens thinking; keep that short so the JSON
+    // answer always fits. Other models don't accept the parameter.
+    if (model.contains("gpt-oss")) {
+      request.put("reasoning_effort", "low");
+    }
+    request.put(
+        "messages",
+        List.of(
+            Map.of("role", "system", "content", systemPrompt),
+            Map.of("role", "user", "content", userContent)));
     try {
-      return breaker.executeSupplier(() -> call(request));
+      return breaker.executeSupplier(() -> callWithJsonRetry(request));
     } catch (CallNotPermittedException open) {
       throw new AiUnavailableException("AI circuit is open (provider failing recently)", open);
     } catch (AiUnavailableException e) {
@@ -89,6 +94,32 @@ public class GroqChatClient implements LlmClient {
       throw new AiUnavailableException("AI provider call failed", e);
     }
   }
+
+  /**
+   * Groq answers 400 {@code json_validate_failed} when the model's text wasn't valid JSON in JSON
+   * mode. That's the model, not us: one more try usually succeeds. Other 4xx errors are logged by
+   * their error code only (never the content) and not retried.
+   */
+  private String callWithJsonRetry(Map<String, Object> request) {
+    try {
+      return call(request);
+    } catch (HttpClientErrorException e) {
+      String code = errorCode(e);
+      log.warn("AI provider rejected the call status={} code={}", e.getStatusCode().value(), code);
+      if ("json_validate_failed".equals(code)) {
+        return call(request);
+      }
+      throw e;
+    }
+  }
+
+  /** The provider's error code (e.g. {@code json_validate_failed}), or "unknown". */
+  private static String errorCode(HttpClientErrorException e) {
+    Matcher m = ERROR_CODE.matcher(e.getResponseBodyAsString());
+    return m.find() ? m.group(1) : "unknown";
+  }
+
+  private static final Pattern ERROR_CODE = Pattern.compile("\"code\"\\s*:\\s*\"([a-z_]{1,64})\"");
 
   @SuppressWarnings("unchecked")
   private String call(Map<String, Object> request) {
