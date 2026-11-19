@@ -31,7 +31,7 @@ TypeScript **6.0.3** (not 7: typescript-eslint), Tailwind v4 (`@theme` in CSS, n
 ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
 
 ## Architecture
-- Modular monolith, **package-by-feature** under `dev.untangle`: `auth agent ticket comment webhook
+- Modular monolith, **package-by-feature** under `dev.untangle`: `auth agent ticket comment webhook assignment
   escalation notification dashboard ai` + shared `common config security`.
   Every feature uses the same sub-packages: `api` (controllers, DTOs) → `application` (services)
   → `domain` (entities, enums, rules; no Spring) / `infrastructure` (repositories, private to the
@@ -72,6 +72,10 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
   repositories; keep feature dependencies one-way (auth → agent, agent → ticket).
 - Two entry doors, one brain: JWT REST and HMAC webhook both call `TicketService`.
 - Success = plain DTOs (`PageResponse` for lists); errors = RFC 9457 with `code`, `traceId`, `errors[]`.
+- Auto-assign (ADR-029, feature `assignment`): pure `AssignmentPlanner` (weighted least-loaded,
+  per-category tree sets, cap, no straight hand-back, AI LOW/MEDIUM only) fed by
+  `TicketQueue` (`FOR UPDATE SKIP LOCKED`, MANDATORY tx); assigns via `TicketService.autoAssign`.
+  Triggers: after-commit `TicketCreated`, 30 s ShedLock sweep, `POST /auto-assign/run`.
 - Business rules live server-side; the UI renders `allowedActions` from the server.
 - Frontend data: access token in memory only (zustand `useSession`), refresh via HttpOnly cookie;
   `lib/api/client.ts` = axios + single-flight refresh + `ApiError` (`messageFor(code)`). Types are

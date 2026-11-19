@@ -14,7 +14,7 @@ sent it through an **HMAC-signed webhook**.
 | **Backend** | Java 21 · Spring Boot 4.1 · Spring Security (JWT) · PostgreSQL 18 · Flyway · Micrometer |
 | **Frontend** | React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · TanStack Query · React Three Fiber |
 | **Infra** | Docker Compose · nginx · GitHub Actions · Prometheus + Grafana · optional Redis |
-| **Quality** | 424 backend tests · 71 frontend tests · 14 Playwright E2E (incl. layout guard at 4 sizes × 3 roles) · 111 live feature/RBAC/AI checks · 17 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
+| **Quality** | 443 backend tests · 74 frontend tests · 14 Playwright E2E (incl. layout guard at 4 sizes × 3 roles) · 111 live feature/RBAC/AI checks · 17 webhook scenarios · coverage ≥ 80 % · Lighthouse 91–100 |
 
 ---
 
@@ -113,6 +113,8 @@ Local development with hot reload (JDK 21 + Node 26): `make setup`, then `make b
 - Role-based access via permissions; the UI shows only what the server allows, and disabled buttons
   explain why.
 - Admin screens for agents (deactivation moves their open tickets first) and partners.
+
+**Auto-assign**: switch it on and every waiting ticket goes to the least busy agent who handles its category, most urgent first, with a cap per agent and a reason on the timeline ([ADR-029](docs/decisions/ADR-029-automatic-assignment-least-loaded.md)).
 
 **AI teammate + assistance (optional)**: assign a ticket to "Unty" and it replies and proposes a resolution for a lead to approve ([ADR-028](docs/decisions/ADR-028-ai-teammate-proposes-human-approves.md)).
 
@@ -322,6 +324,7 @@ Every significant choice has an Architecture Decision Record in [docs/decisions/
 | [026](docs/decisions/ADR-026-nebula-glass-and-contained-3d-stages.md) | Nebula glass, sixteen colour themes, 3D only in contained stages (superseded) |
 | [027](docs/decisions/ADR-027-loud-neo-brutalism-and-toon-3d.md) | Loud neo-brutalism, twelve palettes, toon 3D about the product |
 | [028](docs/decisions/ADR-028-ai-teammate-proposes-human-approves.md) | An AI teammate that proposes; a lead approves |
+| [029](docs/decisions/ADR-029-automatic-assignment-least-loaded.md) | Automatic assignment to the least busy agent who handles the ticket |
 
 Agreed deviations from the original brief are listed at the top of
 [MASTER_PROMPT.md](MASTER_PROMPT.md); open questions and assumptions in
@@ -383,9 +386,9 @@ dashboard cache and cluster-wide rate limits, constant-query list endpoints (N+1
 
 | Layer | Tool | Count |
 |---|---|---|
-| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 424 |
+| Unit + integration (real PostgreSQL in Testcontainers, never H2) | JUnit 6, AssertJ, MockMvcTester | 443 |
 | Architecture rules | ArchUnit | included above |
-| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 71 |
+| Frontend components, accessibility (axe) | Vitest, Testing Library, MSW | 74 |
 | Every feature through the API + live RBAC matrix | `make check-features` | 103 checks |
 | End-to-end in a real browser (incl. layout: no overlap or sideways scroll at phone, tablet, laptop, desktop) | Playwright | 14 |
 | Partner webhook scenarios | Node simulator | 17 |

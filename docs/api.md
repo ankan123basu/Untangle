@@ -208,6 +208,20 @@ background and proposes. Errors: `AI_PROPOSAL_NOT_FOUND` (404), `AI_PROPOSAL_STA
 
 Details and safety: [ai-features.md](ai-features.md).
 
+### Auto-assign ([ADR-029](decisions/ADR-029-automatic-assignment-least-loaded.md))
+
+Leads and admins only (`TICKET_ASSIGN_ANY`). Each waiting ticket goes to the least busy eligible
+agent (weighted load CRITICAL 4 · HIGH 3 · MEDIUM 2 · LOW 1), most urgent SLA first. New tickets
+are assigned right after they are created, so a `POST /tickets` response may still show no
+assignee; the detail fetched afterwards shows it.
+
+| Method & path | Body | Response |
+|---|---|---|
+| `GET /api/v1/auto-assign` | — | `{enabled, maxOpenPerAgent, waiting, agents: [{agentId, fullName, role, ai, autoAssign, skills[], openTickets, load, lastAutoAssignedAt?}]}` |
+| `PUT /api/v1/auto-assign/settings` | `{enabled, maxOpenPerAgent: 1..100}` | the overview |
+| `PUT /api/v1/auto-assign/agents/{agentId}` | `{autoAssign, skills: Category[]}` (empty = all) | the overview; 404 `AGENT_NOT_FOUND` for an unknown or inactive agent |
+| `POST /api/v1/auto-assign/run` | — | `{assigned, waiting}`; works even while the switch is off |
+
 ### Swagger / OpenAPI
 
 Interactive docs: <http://localhost:8080/swagger-ui> · machine-readable spec:

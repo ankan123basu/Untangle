@@ -192,3 +192,19 @@ Test classes: `AuthIntegrationTest` (A), `AgentAdminIntegrationTest` (G),
 | Promote the AI to lead/admin | 409 `AI_TEAMMATE_FIXED` | `theAiTeammateStaysAPlainAgent` | ✅ |
 | Groq rejects the model's JSON (400 `json_validate_failed`) | retried once; the AI still proposes | `aRejectedJsonAnswerIsRetriedOnceAndTheAiStillProposes` | ✅ |
 | Tab opened before a deploy loads a lazy page | reloads once into the new version instead of the 500 page (loop-guarded) | `stale-build.test.ts` | ✅ |
+
+### Auto-assign (ADR-029)
+
+| Case | Expected | Test | Status |
+|---|---|---|---|
+| Switch never turned on | new tickets wait unassigned | `AutoAssignIntegrationTest.isOffUntilALeadSwitchesItOn` | ✅ |
+| New ticket while on | goes to the least busy agent; timeline "Auto-assigned to … (reason)"; ASSIGNED notification | `aNewTicketGoesToTheLeastBusyAgentWithATimelineLineAndANotification` | ✅ |
+| Queue larger than capacity | most urgent SLA first; stops at the cap; the rest wait | `theSweepTakesTheMostUrgentFirstAndStopsAtTheCap` | ✅ |
+| No agent eligible (only leads/admins/AI by default) | ticket waits; SLA escalation still applies | `leadsAdminsAndTheAiDoNotTakeAutomaticWorkByDefault` | ✅ |
+| Category nobody handles | waits; specialists only get their categories | `categoriesRouteTicketsToSpecialists` | ✅ |
+| Agent releases a ticket | never handed straight back to them | `anAgentWhoReleasesATicketIsNotHandedItStraightBack` | ✅ |
+| Deactivated agent | gets nothing | `aDeactivatedAgentGetsNothing` | ✅ |
+| Two instances / runs at once | `FOR UPDATE SKIP LOCKED`: each ticket assigned exactly once | `concurrentRunsNeverAssignATicketTwice` | ✅ |
+| Agent calls the endpoints / bad input | 403; cap 0 → 400; unknown agent → 404; unknown category → 400 | `onlyLeadsAndAdminsMayConfigureAndInputIsValidated` | ✅ |
+| Fairness and speed at 10K tickets × 50 agents | < 2 s; loads within one CRITICAL ticket | `AssignmentPlannerTest.tenThousandTicketsAcrossFiftyAgentsIsFastAndFair` | ✅ |
+| AI opted in | gets LOW/MEDIUM only; HIGH/CRITICAL go to people | `AssignmentPlannerTest.theAiOnlyGetsLowAndMediumWork` | ✅ |

@@ -116,6 +116,14 @@ public class Ticket extends AuditedEntity {
   @Column(name = "reopened_count", nullable = false)
   private int reopenedCount;
 
+  /**
+   * Who last gave this ticket back (released it, or the AI handed it back), so auto-assignment
+   * never hands it straight back to them (ADR-029).
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "released_by_agent_id")
+  private Agent releasedBy;
+
   private Ticket(
       String subject,
       String description,
@@ -263,6 +271,16 @@ public class Ticket extends AuditedEntity {
   }
 
   /**
+   * The current assignee gives the ticket back, to {@code to} or (when null) to the queue. They are
+   * remembered as {@link #releasedBy} so auto-assignment skips them for this ticket (ADR-029).
+   */
+  public void giveBack(Agent to) {
+    Agent from = assignedAgent;
+    assignTo(to);
+    releasedBy = from;
+  }
+
+  /**
    * Moves the ticket to {@code target} and maintains the lifecycle timestamps. Reopening goes
    * through {@link #reopen} instead.
    *
@@ -288,7 +306,10 @@ public class Ticket extends AuditedEntity {
           firstResponseAt = now;
         }
       }
-      case RELEASE -> assignedAgent = null;
+      case RELEASE -> {
+        releasedBy = assignedAgent;
+        assignedAgent = null;
+      }
       case RESOLVE -> resolvedAt = now;
       case RETURN_TO_PROGRESS -> resolvedAt = null;
       case CLOSE -> closedAt = now;

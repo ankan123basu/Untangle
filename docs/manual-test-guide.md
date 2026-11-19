@@ -68,6 +68,17 @@ As **Agent**: New ticket.
 | As **Lead**, open an unassigned ticket, pick an agent in Details → Assignee | toast, timeline "Assigned to …"; the picker shows each agent's open count |
 | As **Agent**, open someone else's ticket | "View only: this is …'s ticket" note; only Comment and Escalate; no Edit, status buttons or assignee picker (the API also answers 403 if tried) |
 
+### 3b. Auto-assign (ADR-029)
+
+| Do | Expect |
+|---|---|
+| As **Lead**, open **Auto-assign** in the sidebar | the switch (off), the cap, "Waiting for an agent" count, and every active agent with their workload |
+| Pick **Billing** for one agent; switch auto-assign **on** | "Auto-assign is on"; that agent now only gets BILLING tickets |
+| Press **Assign waiting now** | toast "Assigned N tickets · M still waiting"; the queue count drops; workload bars grow |
+| Create a new ticket (or send a partner webhook) | it opens already assigned; timeline "Auto-assigned to … (least busy …, workload N)"; the agent gets a notification |
+| As that agent, start progress then release the ticket | the next sweep (≤ 30 s) gives it to someone else, never straight back |
+| As **Agent**, visit `/auto-assign` | the 403 page; no sidebar link |
+
 ### 4. Status lifecycle (requirement 3)
 
 On your ticket as **Agent**:

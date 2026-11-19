@@ -52,6 +52,17 @@ export const router = createBrowserRouter([
           import('@/features/tickets/ticket-detail-page').then((m) => ({ Component: m.default })),
       },
       {
+        path: 'auto-assign',
+        lazy: () =>
+          import('@/features/assignment/auto-assign-page').then((m) => ({
+            Component: () => (
+              <RequirePermission permission="TICKET_ASSIGN_ANY">
+                <m.default />
+              </RequirePermission>
+            ),
+          })),
+      },
+      {
         path: 'admin/agents',
         lazy: () =>
           import('@/features/admin/agents-page').then((m) => ({

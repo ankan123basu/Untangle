@@ -177,6 +177,11 @@ app:
     scheduler-enabled: true
     cron: "0 * * * * *"
     max-level: 3
+  assignment:
+    # Auto-assign (ADR-029) is switched on/off at runtime on the Auto-assign screen. This only runs
+    # the background sweep of the waiting queue (one instance, ShedLock).
+    scheduler-enabled: true
+    cron: "*/30 * * * * *"
   bootstrap-admin:
     email: ${BOOTSTRAP_ADMIN_EMAIL:}
     password: ${BOOTSTRAP_ADMIN_PASSWORD:}

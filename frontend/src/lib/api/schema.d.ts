@@ -21,6 +21,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auto-assign/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Switch auto-assign on or off and set the per-agent cap */
+        put: operations["updateSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auto-assign/agents/{agentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Whether an agent takes automatic work, and which categories they handle */
+        put: operations["updateAgent"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/webhooks/partners/tickets": {
         parameters: {
             query?: never;
@@ -223,6 +257,23 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["markAllRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auto-assign/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign the waiting queue now (works even while the switch is off) */
+        post: operations["runNow"];
         delete?: never;
         options?: never;
         head?: never;
@@ -576,6 +627,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auto-assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The switch, the cap, the waiting queue and each agent's routing and load */
+        get: operations["overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/me": {
         parameters: {
             query?: never;
@@ -727,6 +795,39 @@ export interface components {
             allowedActions: ("EDIT" | "ASSIGN" | "SELF_ASSIGN" | "START_PROGRESS" | "RELEASE" | "RESOLVE" | "RETURN_TO_PROGRESS" | "CLOSE" | "REOPEN" | "COMMENT" | "ESCALATE")[];
             deniedActions: components["schemas"]["DeniedAction"][];
         };
+        UpdateSettings: {
+            enabled: boolean;
+            /** Format: int32 */
+            maxOpenPerAgent: number;
+        };
+        AgentRoutingView: {
+            /** Format: uuid */
+            agentId: string;
+            fullName: string;
+            /** @enum {string} */
+            role: "ADMIN" | "LEAD" | "AGENT";
+            ai: boolean;
+            autoAssign: boolean;
+            skills: ("BILLING" | "TECHNICAL" | "ACCOUNT" | "REFUND" | "GENERAL" | "OTHER")[];
+            /** Format: int32 */
+            openTickets: number;
+            /** Format: int32 */
+            load: number;
+            /** Format: date-time */
+            lastAutoAssignedAt: string | null;
+        };
+        AutoAssignOverview: {
+            enabled: boolean;
+            /** Format: int32 */
+            maxOpenPerAgent: number;
+            /** Format: int64 */
+            waiting: number;
+            agents: components["schemas"]["AgentRoutingView"][];
+        };
+        UpdateAgentRouting: {
+            autoAssign: boolean;
+            skills: ("BILLING" | "TECHNICAL" | "ACCOUNT" | "REFUND" | "GENERAL" | "OTHER")[];
+        };
         WebhookResponse: {
             /** Format: uuid */
             ticketId: string;
@@ -841,6 +942,12 @@ export interface components {
         UnreadCount: {
             /** Format: int64 */
             count: number;
+        };
+        AutoAssignRun: {
+            /** Format: int32 */
+            assigned: number;
+            /** Format: int64 */
+            waiting: number;
         };
         CurrentAgent: {
             /** Format: uuid */
@@ -1139,6 +1246,56 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TicketDetail"];
+                };
+            };
+        };
+    };
+    updateSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSettings"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AutoAssignOverview"];
+                };
+            };
+        };
+    };
+    updateAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAgentRouting"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AutoAssignOverview"];
                 };
             };
         };
@@ -1493,6 +1650,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UnreadCount"];
+                };
+            };
+        };
+    };
+    runNow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AutoAssignRun"];
                 };
             };
         };
@@ -2041,6 +2218,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Workload"][];
+                };
+            };
+        };
+    };
+    overview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AutoAssignOverview"];
                 };
             };
         };

@@ -58,6 +58,9 @@ erDiagram
     TICKETS ||--o{ NOTIFICATIONS : "about"
     TICKETS ||--o{ TICKET_AI_INSIGHTS : "suggestions"
     AGENTS ||--o{ TICKET_AI_INSIGHTS : "requested"
+    AGENTS ||--o| AGENT_ROUTING : "auto-assign routing"
+    AGENT_ROUTING ||--o{ AGENT_ROUTING_SKILLS : "handles"
+    AGENTS ||--o{ TICKETS : "released"
 
     AGENTS {
         uuid id PK
@@ -223,7 +226,19 @@ Who uses it: agents and leads (AI panel); we use it to measure AI usefulness. `t
 NULL only for `TRIAGE` (run on the create form before the ticket exists).
 
 #### `shedlock`
-ShedLock's lock table (Phase 5), so only one backend instance runs the SLA scheduler at a time.
+ShedLock's lock table (Phase 5), so only one backend instance runs the SLA scheduler (and the
+auto-assign sweep) at a time.
+
+#### `auto_assign_settings`, `agent_routing`, `agent_routing_skills` (V6, ADR-029)
+Who uses them: leads and admins on the Auto-assign screen; the auto-assign planner.
+- `auto_assign_settings`: one row (unique index on `(true)`) with the switch and the per-agent cap
+  (`ck_auto_assign_settings_cap`, 1–100). No row = off.
+- `agent_routing`: whether an agent takes automatic work, and when they last got a ticket that
+  way (round-robin tie-break). No row = defaults.
+- `agent_routing_skills`: the categories an agent handles; none = all.
+- `tickets.released_by_agent_id`: who last gave the ticket back, so they aren't handed it again.
+- `ix_tickets_unassigned_queue (sla_due_at, id) WHERE status = 'OPEN' AND assigned_agent_id IS
+  NULL`: the queue the planner walks with keyset paging and `FOR UPDATE SKIP LOCKED`.
 
 ### Index rationale
 

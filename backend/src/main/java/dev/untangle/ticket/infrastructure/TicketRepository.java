@@ -60,6 +60,54 @@ public interface TicketRepository
           + " order by t.slaDueAt")
   List<Ticket> lockBreachCandidates(Collection<TicketStatus> statuses, Instant now, Pageable page);
 
+  // ---- Auto-assignment queue (ADR-029) -------------------------------------------------------
+
+  /**
+   * The waiting queue, most urgent SLA first: OPEN and unassigned, rows locked {@code FOR UPDATE
+   * SKIP LOCKED} so two runs (or a run and a new-ticket trigger) never pick the same ticket. Uses
+   * {@code ix_tickets_unassigned_queue}.
+   */
+  @Query(
+      value =
+          "select * from tickets where status = 'OPEN' and assigned_agent_id is null"
+              + " order by sla_due_at, id limit :limit for update skip locked",
+      nativeQuery = true)
+  List<Ticket> lockQueueHead(int limit);
+
+  /** The next page of the queue after {@code (afterDue, afterId)} (keyset paging). */
+  @Query(
+      value =
+          "select * from tickets where status = 'OPEN' and assigned_agent_id is null"
+              + " and (sla_due_at, id) > (:afterDue, :afterId)"
+              + " order by sla_due_at, id limit :limit for update skip locked",
+      nativeQuery = true)
+  List<Ticket> lockQueueAfter(Instant afterDue, UUID afterId, int limit);
+
+  /** One waiting ticket, if it is still waiting and nobody else holds it. */
+  @Query(
+      value =
+          "select * from tickets where id = :id and status = 'OPEN' and assigned_agent_id is null"
+              + " for update skip locked",
+      nativeQuery = true)
+  Optional<Ticket> lockIfWaiting(UUID id);
+
+  long countByStatusAndAssignedAgentIsNull(TicketStatus status);
+
+  interface AgentPriorityCount {
+    UUID getAgentId();
+
+    Priority getPriority();
+
+    long getCount();
+  }
+
+  /** Unresolved tickets per agent and priority: the planner's current workload. */
+  @Query(
+      "select t.assignedAgent.id as agentId, t.priority as priority, count(t) as count"
+          + " from Ticket t where t.assignedAgent is not null and t.status in :statuses"
+          + " group by t.assignedAgent.id, t.priority")
+  List<AgentPriorityCount> countOpenByAgentAndPriority(Collection<TicketStatus> statuses);
+
   // ---- Dashboard aggregates -----------------------------------------------------------------
 
   interface StatusCount {

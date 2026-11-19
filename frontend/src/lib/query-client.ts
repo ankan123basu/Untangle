@@ -40,6 +40,7 @@ export const queryKeys = {
     options: ['agents', 'options'] as const,
     admin: ['agents', 'admin'] as const,
   },
+  autoAssign: ['auto-assign'] as const,
   partners: ['partners'] as const,
   deliveries: (params: Record<string, unknown>) => ['deliveries', params] as const,
   notifications: {

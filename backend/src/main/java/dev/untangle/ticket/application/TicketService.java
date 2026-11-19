@@ -342,6 +342,36 @@ public class TicketService {
   }
 
   /**
+   * Automatic assignment (ADR-029): gives a waiting ticket to the agent the planner picked. The
+   * caller has locked the row ({@code FOR UPDATE SKIP LOCKED}). Re-checks that the ticket is still
+   * OPEN and unassigned and that the agent is active; otherwise does nothing.
+   *
+   * @return whether the ticket was assigned
+   */
+  @Transactional
+  public boolean autoAssign(UUID id, UUID agentId, String why) {
+    Ticket ticket = load(id);
+    if (ticket.getStatus() != TicketStatus.OPEN || ticket.getAssignedAgent() != null) {
+      return false;
+    }
+    Agent next = agents.findById(agentId).filter(Agent::isActive).orElse(null);
+    if (next == null) {
+      return false;
+    }
+    ticket.assignTo(next);
+    tickets.flush();
+    recordAssignment(
+        ticket,
+        null,
+        next,
+        null,
+        "Auto-assigned to " + next.getFullName() + " (" + why + ")",
+        Map.of("automatic", true));
+    log.info("Ticket auto-assigned number={} agent={}", ticket.getTicketNumber(), agentId);
+    return true;
+  }
+
+  /**
    * Reassigns many tickets at once (leads; used before deactivating an agent). Closed and unknown
    * tickets are skipped and reported, instead of failing the whole batch.
    */
@@ -528,7 +558,7 @@ public class TicketService {
                 .filter(Agent::isActive)
                 .filter(a -> !a.isAi())
                 .orElse(null);
-    ticket.assignTo(to);
+    ticket.giveBack(to);
     tickets.flush();
     Map<String, Object> metadata = new LinkedHashMap<>();
     metadata.put("event", "AI_HANDBACK");
@@ -593,16 +623,31 @@ public class TicketService {
   }
 
   private void recordAssignment(Ticket ticket, Agent previous, Agent next, Agent actor) {
+    String body = next == null ? "Unassigned" : "Assigned to " + next.getFullName();
+    recordAssignment(ticket, previous, next, actor, body, Map.of());
+  }
+
+  /** {@code actor} is null for automatic assignment. */
+  private void recordAssignment(
+      Ticket ticket,
+      Agent previous,
+      Agent next,
+      @Nullable Agent actor,
+      String body,
+      Map<String, Object> extra) {
     Map<String, Object> metadata = new LinkedHashMap<>();
     metadata.put("event", "ASSIGNED");
     metadata.put("from", previous == null ? null : previous.getId().toString());
     metadata.put("to", next == null ? null : next.getId().toString());
-    String body = next == null ? "Unassigned" : "Assigned to " + next.getFullName();
+    metadata.putAll(extra);
     timeline.system(ticket, actor, body, metadata);
     if (next != null) {
       events.publishEvent(
           new TicketAssigned(
-              ticket.getId(), ticket.getTicketNumber(), next.getId(), actor.getId()));
+              ticket.getId(),
+              ticket.getTicketNumber(),
+              next.getId(),
+              actor == null ? null : actor.getId()));
     }
     events.publishEvent(new TicketChanged(ticket.getId()));
   }

@@ -72,3 +72,7 @@ export const CATEGORIES = [
   'GENERAL',
   'OTHER',
 ] as const satisfies readonly Category[];
+
+export type AutoAssignOverview = S['AutoAssignOverview'];
+export type AgentRoutingView = S['AgentRoutingView'];
+export type AutoAssignRun = S['AutoAssignRun'];

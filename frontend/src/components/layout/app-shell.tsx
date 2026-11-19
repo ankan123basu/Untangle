@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate, useNavigation } from 'react-router';
 import {
+  Shuffle,
   Building2,
   Columns3,
   Menu,
@@ -65,6 +66,7 @@ export function AppShell() {
   const agent = useSession((s) => s.agent);
   const canManageAgents = useCan('AGENT_MANAGE');
   const canManagePartners = useCan('PARTNER_MANAGE');
+  const canAssignAny = useCan('TICKET_ASSIGN_ANY');
   const navigate = useNavigate();
   const [paletteOpen, setPaletteOpenState] = useState(false);
   // The palette's code (cmdk) is fetched the first time it opens, then stays mounted.
@@ -151,6 +153,11 @@ export function AppShell() {
             <NavItem to="/tickets/new" icon={<PlusCircle className="size-4" />}>
               New ticket
             </NavItem>
+            {canAssignAny && (
+              <NavItem to="/auto-assign" icon={<Shuffle className="size-4" />}>
+                Auto-assign
+              </NavItem>
+            )}
             {(canManageAgents || canManagePartners) && (
               <p className="mt-4 px-3 text-xs font-bold tracking-wider text-muted uppercase">
                 Admin
