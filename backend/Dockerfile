@@ -5,7 +5,7 @@
 #   Stage 2 (runtime): a slim JRE image, a non-root user and only the files needed to run.
 
 # ---------- Stage 1: build ----------
-FROM eclipse-temurin:21.0.13_9-jdk-noble AS build
+FROM eclipse-temurin:24.0.2_12-jdk-noble AS build
 WORKDIR /workspace
 
 # Copy the build definition first so dependency downloads are cached between code changes.
@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/root/.m2 \
  && java -Djarmode=tools -jar app.jar extract --layers --launcher --destination extracted
 
 # ---------- Stage 2: runtime ----------
-FROM eclipse-temurin:21.0.13_9-jre-noble AS runtime
+FROM eclipse-temurin:24.0.2_12-jre-noble AS runtime
 
 # curl is only used by the container HEALTHCHECK below.
 RUN apt-get update \
