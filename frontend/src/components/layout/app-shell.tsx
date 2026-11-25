@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useState, type ReactNode } from
 import { NavLink, Outlet, useLocation, useNavigate, useNavigation } from 'react-router';
 import {
   Shuffle,
+  Trophy,
   Building2,
   Columns3,
   Menu,
@@ -67,6 +68,7 @@ export function AppShell() {
   const canManageAgents = useCan('AGENT_MANAGE');
   const canManagePartners = useCan('PARTNER_MANAGE');
   const canAssignAny = useCan('TICKET_ASSIGN_ANY');
+  const canViewPerformance = useCan('AGENT_WORKLOAD_VIEW');
   const navigate = useNavigate();
   const [paletteOpen, setPaletteOpenState] = useState(false);
   // The palette's code (cmdk) is fetched the first time it opens, then stays mounted.
@@ -156,6 +158,11 @@ export function AppShell() {
             {canAssignAny && (
               <NavItem to="/auto-assign" icon={<Shuffle className="size-4" />}>
                 Auto-assign
+              </NavItem>
+            )}
+            {canViewPerformance && (
+              <NavItem to="/performance" icon={<Trophy className="size-4" />}>
+                Performance
               </NavItem>
             )}
             {(canManageAgents || canManagePartners) && (

@@ -120,7 +120,7 @@ final AS (
     FROM with_times t
 )
 INSERT INTO tickets (id, ticket_number, subject, description, customer_name, customer_email,
-                     category, priority, status, assigned_agent_id, created_by_agent_id, source,
+                     category, priority, status, assigned_agent_id, assigned_at, created_by_agent_id, source,
                      partner_id, external_event_id, escalation_level, sla_started_at, sla_due_at,
                      first_response_at, resolved_at, closed_at, reopened_count, created_at, updated_at)
 SELECT md5('ticket:' || f.n)::uuid,
@@ -133,6 +133,8 @@ SELECT md5('ticket:' || f.n)::uuid,
        f.priority,
        f.status,
        CASE WHEN f.status = 'OPEN' AND f.n % 2 = 1 THEN NULL ELSE assignee.id END,
+       CASE WHEN f.status = 'OPEN' AND f.n % 2 = 1 THEN NULL
+            ELSE least(f.created_at + interval '4 minutes', now()) END,
        CASE WHEN f.from_webhook THEN NULL ELSE creator.id END,
        CASE WHEN f.from_webhook THEN 'WEBHOOK' ELSE 'MANUAL' END,
        CASE WHEN f.from_webhook THEN md5('partner:acme-bank')::uuid END,
@@ -152,6 +154,28 @@ JOIN templates tpl ON tpl.i = ((f.n - 1) % 20) + 1
 JOIN customers c   ON c.i   = ((f.n * 7) % 20) + 1
 JOIN staff assignee ON assignee.i = (f.n % 6) + 1
 JOIN staff creator  ON creator.i  = ((f.n + 2) % 6) + 1
+ON CONFLICT DO NOTHING;
+
+-- Resolutions (ADR-030): one standing row per RESOLVED/CLOSED ticket, credited to the assignee,
+-- plus an earlier resolution that didn't stick for the two reopened tickets (n = 41, 52).
+-- Agents resolve at different speeds (n % 3 drives both the assignee and the resolve time), so
+-- the performance screen shows real differences.
+INSERT INTO ticket_resolutions (id, ticket_id, agent_id, resolved_by_agent_id, priority, category,
+                                opened_at, assigned_at, resolved_at, sla_due_at, reopened_at, created_at)
+SELECT md5('resolution:' || n || ':' || k)::uuid, t.id, t.assigned_agent_id, t.assigned_agent_id,
+       t.priority, t.category, t.sla_started_at,
+       least(t.assigned_at, r.resolved_at),
+       r.resolved_at, t.sla_due_at, r.reopened_at, r.resolved_at
+FROM generate_series(1, 60) AS n
+JOIN tickets t ON t.id = md5('ticket:' || n)::uuid
+CROSS JOIN LATERAL (VALUES
+    (2, t.resolved_at, NULL::timestamptz),
+    (1, t.sla_started_at + (t.resolved_at - t.sla_started_at) * 0.4,
+        t.sla_started_at + (t.resolved_at - t.sla_started_at) * 0.6)
+) AS r (k, resolved_at, reopened_at)
+WHERE t.status IN ('RESOLVED', 'CLOSED') AND t.resolved_at IS NOT NULL
+  AND t.assigned_agent_id IS NOT NULL AND t.assigned_at IS NOT NULL
+  AND (r.k = 2 OR n IN (41, 52))
 ON CONFLICT DO NOTHING;
 
 -- Keep the sequence ahead of seeded numbers so new tickets continue at UNT-000061.

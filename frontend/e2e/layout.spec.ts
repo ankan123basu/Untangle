@@ -163,7 +163,7 @@ test.describe('layout: nothing overlaps or spills sideways, at every size', () =
         ['/tickets/new', /new ticket/i],
       ];
       if (role !== 'agent') {
-        screens.push(['/auto-assign', /auto-assign/i]);
+        screens.push(['/auto-assign', /auto-assign/i], ['/performance', /performance/i]);
       }
       if (role === 'admin') {
         screens.push(['/admin/agents', /agents/i], ['/admin/partners', /partners/i]);

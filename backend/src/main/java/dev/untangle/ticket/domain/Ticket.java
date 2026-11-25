@@ -72,6 +72,10 @@ public class Ticket extends AuditedEntity {
   @JoinColumn(name = "assigned_agent_id")
   private Agent assignedAgent;
 
+  /** When the current assignee got the ticket; null while unassigned (ADR-030). */
+  @Column(name = "assigned_at")
+  private Instant assignedAt;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "created_by_agent_id", updatable = false)
   private Agent createdBy;
@@ -258,7 +262,7 @@ public class Ticket extends AuditedEntity {
    * Sets or clears the assignee. Only an OPEN ticket can be left unassigned, because work in
    * progress or resolved work must always have an owner.
    */
-  public void assignTo(Agent agent) {
+  public void assignTo(Agent agent, Instant now) {
     ensureNotClosed();
     if (agent == null) {
       if (status != TicketStatus.OPEN) {
@@ -268,15 +272,16 @@ public class Ticket extends AuditedEntity {
       throw new ApiException(ErrorCode.AGENT_INACTIVE, "Cannot assign to a deactivated agent");
     }
     this.assignedAgent = agent;
+    this.assignedAt = agent == null ? null : now;
   }
 
   /**
    * The current assignee gives the ticket back, to {@code to} or (when null) to the queue. They are
    * remembered as {@link #releasedBy} so auto-assignment skips them for this ticket (ADR-029).
    */
-  public void giveBack(Agent to) {
+  public void giveBack(Agent to, Instant now) {
     Agent from = assignedAgent;
-    assignTo(to);
+    assignTo(to, now);
     releasedBy = from;
   }
 
@@ -309,6 +314,7 @@ public class Ticket extends AuditedEntity {
       case RELEASE -> {
         releasedBy = assignedAgent;
         assignedAgent = null;
+        assignedAt = null;
       }
       case RESOLVE -> resolvedAt = now;
       case RETURN_TO_PROGRESS -> resolvedAt = null;
@@ -335,6 +341,8 @@ public class Ticket extends AuditedEntity {
     if (assignedAgent != null && !assignedAgent.isActive()) {
       this.assignedAgent = null;
     }
+    // A new work period starts: handle time for the next resolution counts from now.
+    this.assignedAt = assignedAgent == null ? null : now;
     this.slaStartedAt = now;
     this.slaDueAt = sla.dueAt(now, priority);
     this.escalationLevel = 0;

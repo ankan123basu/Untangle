@@ -79,6 +79,17 @@ As **Agent**: New ticket.
 | As that agent, start progress then release the ticket | the next sweep (≤ 30 s) gives it to someone else, never straight back |
 | As **Agent**, visit `/auto-assign` | the 403 page; no sidebar link |
 
+### 3c. Agent performance (ADR-030)
+
+| Do | Expect |
+|---|---|
+| As **Lead**, open **Performance** in the sidebar | team tiles (resolved, median handle, median wait, SLA met, reopen rate), top-performer stickers and a row per agent |
+| Click **Median handle** in the table header | fastest first; agents without resolutions stay at the bottom |
+| Switch between **7 / 30 / 90 days** | the numbers change to that period |
+| As an agent, start and resolve a ticket; reload Performance as the lead | their **Resolved** goes up by one |
+| Reopen that ticket (lead) | their **Reopened** share goes up |
+| As **Agent**, visit `/performance` | the 403 page; no sidebar link |
+
 ### 4. Status lifecycle (requirement 3)
 
 On your ticket as **Agent**:

@@ -63,6 +63,17 @@ export const router = createBrowserRouter([
           })),
       },
       {
+        path: 'performance',
+        lazy: () =>
+          import('@/features/performance/performance-page').then((m) => ({
+            Component: () => (
+              <RequirePermission permission="AGENT_WORKLOAD_VIEW">
+                <m.default />
+              </RequirePermission>
+            ),
+          })),
+      },
+      {
         path: 'admin/agents',
         lazy: () =>
           import('@/features/admin/agents-page').then((m) => ({

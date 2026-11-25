@@ -26,8 +26,8 @@ journeys. Every edge case from the brief gets a named test, listed in
 
 | Suite | Command | Count | Needs |
 |---|---|---|---|
-| Backend unit + integration (incl. ArchUnit, coverage gate) | `make test-backend` | **443** | Docker (Testcontainers) |
-| Frontend components, logic, accessibility (axe) | `make test-frontend` | **74** | — |
+| Backend unit + integration (incl. ArchUnit, coverage gate) | `make test-backend` | **451** | Docker (Testcontainers) |
+| Frontend components, logic, accessibility (axe) | `make test-frontend` | **78** | — |
 | Browser end-to-end (Playwright) | `make e2e` | **9** | `make up` |
 | Feature walkthrough + RBAC matrix | `make check-features` | **103** checks | `make up` (demo data) |
 | Partner webhook scenarios | `make simulate` | **17** | `make up` |
@@ -125,7 +125,7 @@ docker compose -p untangle-verify down -v
 
 Run the simulator before the checker on a fresh stack: the checker's "webhook log readable" check
 needs at least one delivery. Last run (2026-11-19): 111/111 checks (incl. the live AI teammate on
-real Groq), 17/17 webhook scenarios, 14/14 Playwright, 443 backend + 74 frontend tests.
+real Groq), 17/17 webhook scenarios, 14/14 Playwright, 451 backend + 78 frontend tests.
 - `scripts/check-features.py` (103 checks): every feature by API plus the live RBAC matrix.
 
 ### Phase 9 additions (frontend total: 55 tests)

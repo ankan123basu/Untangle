@@ -222,6 +222,15 @@ assignee; the detail fetched afterwards shows it.
 | `PUT /api/v1/auto-assign/agents/{agentId}` | `{autoAssign, skills: Category[]}` (empty = all) | the overview; 404 `AGENT_NOT_FOUND` for an unknown or inactive agent |
 | `POST /api/v1/auto-assign/run` | — | `{assigned, waiting}`; works even while the switch is off |
 
+### Agent performance ([ADR-030](decisions/ADR-030-agent-performance-from-resolution-facts.md))
+
+Leads and admins only (`AGENT_WORKLOAD_VIEW`; agents get 403). Durations are whole seconds;
+metrics are `null` when nothing was resolved.
+
+| Method & path | Response |
+|---|---|
+| `GET /api/v1/dashboard/agent-performance?days=30` (1..365) | `{days, from, to, minResolvedToRank, team: Metrics, agents: [{agentId, fullName, role, ai, active, openNow, ranked, metrics: Metrics}]}` with `Metrics = {resolved, avgHandleSeconds, medianHandleSeconds, medianResolutionSeconds, slaMetPercent, reopenPercent}` |
+
 ### Swagger / OpenAPI
 
 Interactive docs: <http://localhost:8080/swagger-ui> · machine-readable spec:

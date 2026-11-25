@@ -35,6 +35,7 @@ export const queryKeys = {
     summary: ['dashboard', 'summary'] as const,
     trends: (days: number) => ['dashboard', 'trends', days] as const,
     workload: ['dashboard', 'workload'] as const,
+    performance: (days: number) => ['dashboard', 'performance', days] as const,
   },
   agents: {
     options: ['agents', 'options'] as const,

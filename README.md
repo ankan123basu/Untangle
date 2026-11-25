@@ -116,6 +116,8 @@ Local development with hot reload (JDK 21 + Node 26): `make setup`, then `make b
 
 **Auto-assign**: switch it on and every waiting ticket goes to the least busy agent who handles its category, most urgent first, with a cap per agent and a reason on the timeline ([ADR-029](docs/decisions/ADR-029-automatic-assignment-least-loaded.md)).
 
+**Agent performance**: leads and admins see each agent's resolved count, average and median handle time, customer wait, SLA met and reopen rate, with top performers for 7, 30 or 90 days ([ADR-030](docs/decisions/ADR-030-agent-performance-from-resolution-facts.md)).
+
 **AI teammate + assistance (optional)**: assign a ticket to "Unty" and it replies and proposes a resolution for a lead to approve ([ADR-028](docs/decisions/ADR-028-ai-teammate-proposes-human-approves.md)).
 
 **AI assistance (optional)**

@@ -76,3 +76,6 @@ export const CATEGORIES = [
 export type AutoAssignOverview = S['AutoAssignOverview'];
 export type AgentRoutingView = S['AgentRoutingView'];
 export type AutoAssignRun = S['AutoAssignRun'];
+export type PerformanceReport = S['PerformanceReport'];
+export type AgentPerformance = S['AgentPerformance'];
+export type PerformanceMetrics = S['Metrics'];

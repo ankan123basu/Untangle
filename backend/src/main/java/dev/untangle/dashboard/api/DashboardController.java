@@ -1,6 +1,8 @@
 package dev.untangle.dashboard.api;
 
 import dev.untangle.security.AuthenticatedAgent;
+import dev.untangle.ticket.application.AgentPerformanceStats;
+import dev.untangle.ticket.application.AgentPerformanceStats.PerformanceReport;
 import dev.untangle.ticket.application.TicketStatistics;
 import dev.untangle.ticket.application.TicketStatistics.DayTrend;
 import dev.untangle.ticket.application.TicketStatistics.Summary;
@@ -19,8 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Dashboard (who: everyone on sign-in; leads for workload. Why: "what needs attention right now").
- * Requirement 6: {@code unresolved} is the number of OPEN + IN_PROGRESS tickets (A5).
+ * Dashboard (who: everyone on sign-in; leads for workload and agent performance. Why: "what needs
+ * attention right now"). Requirement 6: {@code unresolved} is the number of OPEN + IN_PROGRESS
+ * tickets (A5).
  */
 @Tag(name = "Dashboard")
 @Validated
@@ -29,9 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class DashboardController {
 
   private final TicketStatistics statistics;
+  private final AgentPerformanceStats performance;
 
-  public DashboardController(TicketStatistics statistics) {
+  public DashboardController(TicketStatistics statistics, AgentPerformanceStats performance) {
     this.statistics = statistics;
+    this.performance = performance;
   }
 
   @Operation(summary = "Unresolved count and breakdowns")
@@ -53,5 +58,16 @@ public class DashboardController {
   @PreAuthorize("hasAuthority('AGENT_WORKLOAD_VIEW')")
   public List<Workload> workload() {
     return statistics.workload();
+  }
+
+  @Operation(
+      summary = "Resolution speed, SLA met and reopen rate per agent (ADR-030)",
+      description =
+          "Leads and admins. Resolutions in the last `days` days, credited to the assignee.")
+  @GetMapping("/agent-performance")
+  @PreAuthorize("hasAuthority('AGENT_WORKLOAD_VIEW')")
+  public PerformanceReport agentPerformance(
+      @RequestParam(defaultValue = "30") @Min(1) @Max(365) int days) {
+    return performance.report(days);
   }
 }

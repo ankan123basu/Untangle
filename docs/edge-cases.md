@@ -208,3 +208,17 @@ Test classes: `AuthIntegrationTest` (A), `AgentAdminIntegrationTest` (G),
 | Agent calls the endpoints / bad input | 403; cap 0 → 400; unknown agent → 404; unknown category → 400 | `onlyLeadsAndAdminsMayConfigureAndInputIsValidated` | ✅ |
 | Fairness and speed at 10K tickets × 50 agents | < 2 s; loads within one CRITICAL ticket | `AssignmentPlannerTest.tenThousandTicketsAcrossFiftyAgentsIsFastAndFair` | ✅ |
 | AI opted in | gets LOW/MEDIUM only; HIGH/CRITICAL go to people | `AssignmentPlannerTest.theAiOnlyGetsLowAndMediumWork` | ✅ |
+
+### Agent performance (ADR-030)
+
+| Case | Expected | Test | Status |
+|---|---|---|---|
+| Agent resolves their ticket | one fact row credited to them, with when they got it | `AgentPerformanceIntegrationTest.resolvingRecordsOneFactCreditedToTheAssignee` | ✅ |
+| Lead resolves on someone's behalf (incl. approving Unty) | credit to the assignee; the lead recorded as resolver | `aLeadResolvingOnSomeonesBehalfCreditsTheAssignee` | ✅ |
+| Resolved → sent back to work, or closed → reopened | the old resolution is marked reopened; the next resolve adds a new row | `aResolutionThatDoesNotStickIsMarkedAndANewOneIsRecorded` | ✅ |
+| One very slow ticket | median unaffected; average shown too; old resolutions outside the period ignored | `reportsMediansAverageSlaAndOnlyCountsThePeriod` | ✅ |
+| Agent with nothing resolved | listed with `null` metrics (not 0), never ranked | `reportsMediansAverageSlaAndOnlyCountsThePeriod` | ✅ |
+| Lead/admin who never resolves | not listed; appears once they resolve | `leadsWithoutResolutionsAreLeftOutButAppearOnceTheyResolve` | ✅ |
+| Agent asks for colleagues' stats / bad period | 403; `days` 0 or 366 → 400; no token → 401 | `onlyLeadsAndAdminsSeeItAndThePeriodIsValidated` | ✅ |
+| Corrupt timeline (assigned after resolved) | the database refuses it (`ck_resolutions_order`) | `theDatabaseRejectsAnImpossibleTimeline` | ✅ |
+| Fewer than 3 resolutions | numbers shown, but not named a top performer | `performance.test.tsx` | ✅ |

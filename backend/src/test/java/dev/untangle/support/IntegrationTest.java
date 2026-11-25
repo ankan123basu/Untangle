@@ -43,6 +43,7 @@ public abstract class IntegrationTest {
   private static final List<String> APP_TABLES =
       List.of(
           "ai_proposals",
+          "ticket_resolutions",
           "agent_routing_skills",
           "agent_routing",
           "auto_assign_settings",

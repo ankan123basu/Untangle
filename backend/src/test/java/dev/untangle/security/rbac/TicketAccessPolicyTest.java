@@ -75,7 +75,7 @@ class TicketAccessPolicyTest {
     if (state.equals("OPEN_UNASSIGNED")) {
       return t;
     }
-    t.assignTo(owner);
+    t.assignTo(owner, Instant.now());
     switch (TicketStatus.valueOf(state)) {
       case OPEN -> {}
       case IN_PROGRESS -> t.transitionTo(TicketStatus.IN_PROGRESS, now);

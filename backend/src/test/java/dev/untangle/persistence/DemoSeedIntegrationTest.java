@@ -75,6 +75,17 @@ class DemoSeedIntegrationTest {
   }
 
   @Test
+  void seedsOneStandingResolutionPerResolvedTicketPlusTwoReopened() {
+    assertThat(count("SELECT count(*) FROM ticket_resolutions WHERE reopened_at IS NULL"))
+        .isEqualTo(count("SELECT count(*) FROM tickets WHERE status IN ('RESOLVED','CLOSED')"));
+    assertThat(count("SELECT count(*) FROM ticket_resolutions WHERE reopened_at IS NOT NULL"))
+        .isEqualTo(2);
+    assertThat(count("SELECT count(DISTINCT agent_id) FROM ticket_resolutions"))
+        .as("every demo agent has numbers")
+        .isEqualTo(6);
+  }
+
+  @Test
   void everyResolvedOrClosedTicketHasAResolutionNote() {
     assertThat(
             count(

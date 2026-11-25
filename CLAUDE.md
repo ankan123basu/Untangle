@@ -76,6 +76,10 @@ ESLint 10 flat config `strictTypeChecked`, Vitest 5. Node 26.
   per-category tree sets, cap, no straight hand-back, AI LOW/MEDIUM only) fed by
   `TicketQueue` (`FOR UPDATE SKIP LOCKED`, MANDATORY tx); assigns via `TicketService.autoAssign`.
   Triggers: after-commit `TicketCreated`, 30 s ShedLock sweep, `POST /auto-assign/run`.
+- Agent performance (ADR-030): `ticket_resolutions` = one fact row per RESOLVE, credited to the
+  assignee (`TicketResolution.of`), marked `reopened_at` on reopen/return-to-progress, written in
+  `TicketService`'s transaction. `AgentPerformanceStats` + `GET /dashboard/agent-performance`
+  (`AGENT_WORKLOAD_VIEW`), page `/performance`. `Ticket.assignTo(agent, now)` keeps `assigned_at`.
 - Business rules live server-side; the UI renders `allowedActions` from the server.
 - Frontend data: access token in memory only (zustand `useSession`), refresh via HttpOnly cookie;
   `lib/api/client.ts` = axios + single-flight refresh + `ApiError` (`messageFor(code)`). Types are

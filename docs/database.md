@@ -61,6 +61,8 @@ erDiagram
     AGENTS ||--o| AGENT_ROUTING : "auto-assign routing"
     AGENT_ROUTING ||--o{ AGENT_ROUTING_SKILLS : "handles"
     AGENTS ||--o{ TICKETS : "released"
+    TICKETS ||--o{ TICKET_RESOLUTIONS : "resolved as"
+    AGENTS ||--o{ TICKET_RESOLUTIONS : "credited with"
 
     AGENTS {
         uuid id PK
@@ -83,6 +85,7 @@ erDiagram
         varchar priority "LOW..CRITICAL"
         varchar status "OPEN..CLOSED"
         uuid assigned_agent_id FK
+        timestamptz assigned_at "when the assignee got it"
         uuid created_by_agent_id FK "NULL for webhook"
         varchar source "MANUAL|WEBHOOK"
         uuid partner_id FK
@@ -90,6 +93,17 @@ erDiagram
         smallint escalation_level
         timestamptz sla_due_at
         bigint version
+    }
+    TICKET_RESOLUTIONS {
+        uuid id PK
+        uuid ticket_id FK
+        uuid agent_id FK "credited assignee"
+        uuid resolved_by_agent_id FK
+        timestamptz opened_at
+        timestamptz assigned_at
+        timestamptz resolved_at
+        timestamptz sla_due_at
+        timestamptz reopened_at "NULL = still stands"
     }
     TICKET_COMMENTS {
         uuid id PK
@@ -169,6 +183,7 @@ Who uses it: everyone; it's the product.
 | `customer_name` / `customer_email` | varchar(120) / varchar(254) | email optional |
 | `category`, `priority`, `status`, `source` | varchar + CHECK | case-sensitive enum values |
 | `assigned_agent_id` | FK agents, `ON DELETE RESTRICT` | NULL = unassigned queue |
+| `assigned_at` | timestamptz | when the current assignee got it; NULL while unassigned (V7, ADR-030) |
 | `created_by_agent_id` | FK agents | **NULL iff webhook** (`ck_tickets_creator`) |
 | `partner_id`, `external_event_id` | FK partners, varchar(128) | **set iff webhook** (`ck_tickets_source_consistency`) |
 | `escalation_level`, `reopened_count` | smallint, int | ≥ 0 |
@@ -240,6 +255,15 @@ Who uses them: leads and admins on the Auto-assign screen; the auto-assign plann
 - `ix_tickets_unassigned_queue (sla_due_at, id) WHERE status = 'OPEN' AND assigned_agent_id IS
   NULL`: the queue the planner walks with keyset paging and `FOR UPDATE SKIP LOCKED`.
 
+#### `ticket_resolutions` (V7, ADR-030)
+Who uses it: leads and admins on the Performance screen. One row per RESOLVE, credited to the
+assignee at that moment (`resolved_by_agent_id` = who pressed the button). Written once; only
+`reopened_at` is set later, when the ticket is reopened or sent back to work.
+- `ck_resolutions_order`: `opened_at ≤ assigned_at ≤ resolved_at`.
+- `ux_ticket_resolutions_standing (ticket_id) WHERE reopened_at IS NULL`: one standing resolution
+  per ticket.
+- `ix_ticket_resolutions_resolved_agent (resolved_at, agent_id)`: the period filter.
+
 ### Index rationale
 
 | Index | Serves | Why this shape |
@@ -303,6 +327,8 @@ includes `demo`.
   escalated.
 - About 200 timeline entries (comments, resolution notes, status changes, SLA breaches) and unread
   SLA notifications for the leads.
+- 37 resolution facts (ADR-030): one per RESOLVED/CLOSED ticket plus two that were reopened. The
+  agents work at three different speeds, so the Performance screen shows real differences.
 
 It's idempotent: ids are `md5(stable key)::uuid` and every insert is `ON CONFLICT DO NOTHING`.
 `DemoSeedIntegrationTest` proves it loads and covers every state.

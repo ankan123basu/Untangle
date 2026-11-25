@@ -65,3 +65,4 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 | [027](decisions/ADR-027-loud-neo-brutalism-and-toon-3d.md) | Loud neo-brutalism, twelve palettes, toon 3D about the product |
 | [028](decisions/ADR-028-ai-teammate-proposes-human-approves.md) | An AI teammate that proposes; a lead approves |
 | [029](decisions/ADR-029-automatic-assignment-least-loaded.md) | Automatic assignment to the least busy agent who handles the ticket |
+| [030](decisions/ADR-030-agent-performance-from-resolution-facts.md) | Agent performance stats from one fact row per resolution |

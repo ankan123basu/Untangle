@@ -33,10 +33,12 @@ import dev.untangle.ticket.domain.Priority;
 import dev.untangle.ticket.domain.SlaPolicy;
 import dev.untangle.ticket.domain.Ticket;
 import dev.untangle.ticket.domain.TicketAction;
+import dev.untangle.ticket.domain.TicketResolution;
 import dev.untangle.ticket.domain.TicketStateMachine;
 import dev.untangle.ticket.domain.TicketStatus;
 import dev.untangle.ticket.infrastructure.AssigneeRepository;
 import dev.untangle.ticket.infrastructure.TicketRepository;
+import dev.untangle.ticket.infrastructure.TicketResolutionRepository;
 import dev.untangle.webhook.domain.Partner;
 import jakarta.annotation.Nullable;
 import java.time.Clock;
@@ -82,6 +84,7 @@ public class TicketService {
   private static final Logger log = LoggerFactory.getLogger(TicketService.class);
 
   private final TicketRepository tickets;
+  private final TicketResolutionRepository resolutions;
   private final AssigneeRepository agents;
   private final TicketAccessPolicy policy;
   private final Timeline timeline;
@@ -94,6 +97,7 @@ public class TicketService {
 
   public TicketService(
       TicketRepository tickets,
+      TicketResolutionRepository resolutions,
       AssigneeRepository agents,
       TicketAccessPolicy policy,
       Timeline timeline,
@@ -103,6 +107,7 @@ public class TicketService {
       Clock clock,
       PlatformTransactionManager transactionManager) {
     this.tickets = tickets;
+    this.resolutions = resolutions;
     this.agents = agents;
     this.policy = policy;
     this.timeline = timeline;
@@ -165,7 +170,7 @@ public class TicketService {
             now,
             slaPolicy.dueAt(now, command.priority()));
     if (assignee != null) {
-      ticket.assignTo(assignee);
+      ticket.assignTo(assignee, now);
     }
     tickets.saveAndFlush(ticket); // flush: the database assigns ticket_number
 
@@ -335,7 +340,7 @@ public class TicketService {
       return detail(ticket, me); // already the case: nothing to do
     }
     Agent next = command.agentId() == null ? null : activeAgent(command.agentId());
-    ticket.assignTo(next);
+    ticket.assignTo(next, clock.instant());
     tickets.flush();
     recordAssignment(ticket, previous, next, agents.getReferenceById(me.id()));
     return detail(ticket, me);
@@ -358,7 +363,7 @@ public class TicketService {
     if (next == null) {
       return false;
     }
-    ticket.assignTo(next);
+    ticket.assignTo(next, clock.instant());
     tickets.flush();
     recordAssignment(
         ticket,
@@ -399,7 +404,7 @@ public class TicketService {
         assigned.add(ticketId);
         continue;
       }
-      ticket.assignTo(target);
+      ticket.assignTo(target, clock.instant());
       recordAssignment(ticket, previous, target, actor);
       assigned.add(ticketId);
     }
@@ -440,6 +445,9 @@ public class TicketService {
 
     if (action == TicketAction.RESOLVE) {
       timeline.byAgent(ticket, actor, CommentType.RESOLUTION_NOTE, command.note());
+      resolutions.save(TicketResolution.of(ticket, actor)); // performance stats (ADR-030)
+    } else if (action == TicketAction.RETURN_TO_PROGRESS) {
+      resolutions.markReopened(ticket.getId(), now);
     }
     Map<String, Object> metadata = new LinkedHashMap<>();
     metadata.put("event", "STATUS_CHANGED");
@@ -465,8 +473,10 @@ public class TicketService {
 
     UUID previousAssignee =
         ticket.getAssignedAgent() == null ? null : ticket.getAssignedAgent().getId();
-    ticket.reopen(clock.instant(), slaPolicy);
+    Instant now = clock.instant();
+    ticket.reopen(now, slaPolicy);
     tickets.flush();
+    resolutions.markReopened(ticket.getId(), now); // the resolution didn't stick (ADR-030)
     UUID keptAssignee =
         ticket.getAssignedAgent() == null ? null : ticket.getAssignedAgent().getId();
 
@@ -558,7 +568,7 @@ public class TicketService {
                 .filter(Agent::isActive)
                 .filter(a -> !a.isAi())
                 .orElse(null);
-    ticket.giveBack(to);
+    ticket.giveBack(to, clock.instant());
     tickets.flush();
     Map<String, Object> metadata = new LinkedHashMap<>();
     metadata.put("event", "AI_HANDBACK");

@@ -627,6 +627,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/dashboard/agent-performance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resolution speed, SLA met and reopen rate per agent (ADR-030)
+         * @description Leads and admins. Resolutions in the last `days` days, credited to the assignee.
+         */
+        get: operations["agentPerformance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auto-assign": {
         parameters: {
             query?: never;
@@ -1168,6 +1188,45 @@ export interface components {
             inProgress: number;
             /** Format: int64 */
             breached: number;
+        };
+        AgentPerformance: {
+            /** Format: uuid */
+            agentId: string;
+            fullName: string;
+            /** @enum {string} */
+            role: "ADMIN" | "LEAD" | "AGENT";
+            ai: boolean;
+            active: boolean;
+            /** Format: int64 */
+            openNow: number;
+            ranked: boolean;
+            metrics: components["schemas"]["Metrics"];
+        };
+        Metrics: {
+            /** Format: int64 */
+            resolved: number;
+            /** Format: int64 */
+            avgHandleSeconds: null | number;
+            /** Format: int64 */
+            medianHandleSeconds: null | number;
+            /** Format: int64 */
+            medianResolutionSeconds: null | number;
+            /** Format: int32 */
+            slaMetPercent: null | number;
+            /** Format: int32 */
+            reopenPercent: null | number;
+        };
+        PerformanceReport: {
+            /** Format: int32 */
+            days: number;
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+            /** Format: int32 */
+            minResolvedToRank: number;
+            team: components["schemas"]["Metrics"];
+            agents: components["schemas"]["AgentPerformance"][];
         };
         TeammateState: {
             /** Format: uuid */
@@ -2218,6 +2277,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Workload"][];
+                };
+            };
+        };
+    };
+    agentPerformance: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PerformanceReport"];
                 };
             };
         };
