@@ -110,7 +110,7 @@ services:
   # ---- Observability (§16): Prometheus scrapes the backend's internal port 8081; Grafana ships a
   # provisioned "Untangle overview" dashboard. Both are bound to localhost only.
   prometheus:
-    image: prom/prometheus:v3.15.1
+    image: prom/prometheus:v3.16.0
     profiles: ["observability"]
     restart: unless-stopped
     depends_on:
