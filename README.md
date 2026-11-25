@@ -443,6 +443,7 @@ MASTER_PROMPT.md    the full specification and agreed deviations
 |---|---|
 | [manual-test-guide.md](docs/manual-test-guide.md) | trying every feature by hand |
 | [demo-script.md](docs/demo-script.md) | presenting the project in 10 minutes |
+| [project-overview.md](docs/project-overview.md) | **start here**: summary, features, key decisions, edge cases, ER + sequence diagrams |
 | [architecture.md](docs/architecture.md) | components, layers, request flows |
 | [database.md](docs/database.md) | schema, constraints, indexes, query plans |
 | [api.md](docs/api.md) | every endpoint, filters, errors |

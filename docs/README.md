@@ -7,6 +7,7 @@ Start with **problem-statement.md**, then **architecture.md**. Each document has
 
 | Document | What it answers | Status |
 |---|---|---|
+| [project-overview.md](project-overview.md) | **Start here:** summary, features, key decisions and edge cases, ER diagram, data-flow and sequence diagrams | Done |
 | [problem-statement.md](problem-statement.md) | What are we building, for whom, and how do we know it works? | Done |
 | [assumptions-and-open-questions.md](assumptions-and-open-questions.md) | What wasn't specified, what we chose, what to ask the lead | Done (living) |
 | [tech-stack.md](tech-stack.md) | Exact pinned versions and why | Done (living) |
